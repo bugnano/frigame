@@ -116,16 +116,17 @@ if (typeof Object.create !== 'function') {
 			}
 		},
 
-		Animation: function (options) {
+		Animation: function () {
 			var
+				args = Array.prototype.slice.call(arguments),
 				animation = Object.create(friGame.PrototypeAnimation);
 
-			animation.init(options);
+			animation.init.apply(animation, args);
 
 			return animation;
 		},
 
-		PrototypeSprite: {
+		PrototypeBaseSprite: {
 			defaults: {
 				posx: 0,
 				posy: 0,
@@ -174,14 +175,21 @@ if (typeof Object.create !== 'function') {
 			setAnimation: function (animation, callback) {
 				var
 					options = this.options,
-					animation_options = animation.options;
+					animation_options;
 
 				options.animation = animation;
 				options.callback = callback;
 				options.idleCounter = 0;
 				options.currentFrame = 0;
-				options.frameWidth = animation_options.frameWidth * options.factor;
-				options.frameHeight = animation_options.frameHeight * options.factor;
+
+				if (animation) {
+					animation_options = animation.options;
+					options.frameWidth = animation_options.frameWidth * options.factor;
+					options.frameHeight = animation_options.frameHeight * options.factor;
+				} else {
+					options.frameWidth = 0;
+					options.frameHeight = 0;
+				}
 
 				return this;
 			},
@@ -234,16 +242,34 @@ if (typeof Object.create !== 'function') {
 						if (currentFrame >= animation_options.numberOfFrame) {
 							currentFrame = 0;
 							if (options.callback) {
-								options.callback();
+								options.callback(this);
 							}
 						}
 						options.currentFrame = currentFrame;
 					}
 				}
+			},
+
+			width: function () {
+				return this.options.frameWidth;
+			},
+
+			height: function () {
+				return this.options.frameHeight;
 			}
 		},
 
-		PrototypeSpriteGroup: {
+		Sprite: function () {
+			var
+				args = Array.prototype.slice.call(arguments),
+				sprite = Object.create(friGame.PrototypeSprite);
+
+			sprite.init.apply(sprite, args);
+
+			return sprite;
+		},
+
+		PrototypeBaseSpriteGroup: {
 			init: function (name, parent) {
 				friGame.groups[name] = this;
 
@@ -311,7 +337,9 @@ if (typeof Object.create !== 'function') {
 					i;
 
 				for (i = 0; i < len_layers; i += 1) {
-					layers[i].obj.update();
+					if (layers[i]) {
+						layers[i].obj.update();
+					}
 				}
 			},
 
@@ -324,7 +352,39 @@ if (typeof Object.create !== 'function') {
 				for (i = 0; i < len_layers; i += 1) {
 					layers[i].obj.draw();
 				}
+			},
+
+			show: function () {
+				var
+					layers = this.layers,
+					len_layers = layers.length,
+					i;
+
+				for (i = 0; i < len_layers; i += 1) {
+					layers[i].obj.show();
+				}
+			},
+
+			hide: function () {
+				var
+					layers = this.layers,
+					len_layers = layers.length,
+					i;
+
+				for (i = 0; i < len_layers; i += 1) {
+					layers[i].obj.hide();
+				}
 			}
+		},
+
+		SpriteGroup: function () {
+			var
+				args = Array.prototype.slice.call(arguments),
+				group = Object.create(friGame.PrototypeSpriteGroup);
+
+			group.init.apply(group, args);
+
+			return group;
 		},
 
 		preload: function () {
@@ -353,7 +413,7 @@ if (typeof Object.create !== 'function') {
 
 				$.each(friGame.sprites, function () {
 					var
-					options = this.options;
+						options = this.options;
 
 					this.setAnimation(options.animation, options.callback);
 				});

@@ -28,8 +28,8 @@
 	var
 		friGame = $.friGame;
 
-	friGame.PrototypeDomSprite = Object.create(friGame.PrototypeSprite);
-	$.extend(friGame.PrototypeDomSprite, {
+	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
+	$.extend(friGame.PrototypeSprite, {
 		init: function (name, options, parent) {
 			var
 				args = Array.prototype.slice.call(arguments),
@@ -38,7 +38,7 @@
 			this.dom = dom;
 			dom.css('position', 'absolute');
 
-			friGame.PrototypeSprite.init.apply(this, args);
+			friGame.PrototypeBaseSprite.init.apply(this, args);
 		},
 
 		remove: function () {
@@ -47,7 +47,7 @@
 
 			this.dom.remove();
 
-			friGame.PrototypeSprite.remove.apply(this, args);
+			friGame.PrototypeBaseSprite.remove.apply(this, args);
 		},
 
 		setAnimation: function (animation, callback) {
@@ -56,17 +56,22 @@
 				options,
 				animation_options;
 
-			friGame.PrototypeSprite.setAnimation.apply(this, args);
+			friGame.PrototypeBaseSprite.setAnimation.apply(this, args);
 
 			options = this.options;
-			animation_options = animation.options;
+			if (animation) {
+				animation_options = animation.options;
 
-			this.dom.css({
-				'width': options.frameWidth,
-				'height': options.frameHeight,
-				'background-image': ['url("', animation_options.imageURL, '")'].join(''),
-				'background-position': '0 0'
-			});
+				this.dom.css({
+					'width': options.frameWidth,
+					'height': options.frameHeight,
+					'background-image': ['url("', animation_options.imageURL, '")'].join(''),
+					'background-position': '0 0'
+				});
+				this.dom.show();
+			} else {
+				this.dom.hide();
+			}
 
 			return this;
 		},
@@ -125,8 +130,7 @@
 				// For opera from 10.50
 				dom.css('-o-transform', transform);
 			} else if (
-				(dom.css('-webkit-transform') !== null) &&
-				(dom.css('-webkit-transform') !== undefined)
+				(dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)
 			) {
 				// For safari from 3.1 (and chrome)
 				dom.css('-webkit-transform', transform);
@@ -157,32 +161,34 @@
 		draw: function () {
 			var
 				options = this.options,
-				animation_options = options.animation.options;
+				animation_options;
 
-			if (options.idleCounter === 0) {
-				if (animation_options.type === friGame.ANIMATION_HORIZONTAL) {
-					this.dom.css('background-position', [String(-(animation_options.frameWidth * options.currentFrame)), 'px 0'].join(''));
-				} else if (options.type === friGame.ANIMATION_VERTICAL) {
-					this.dom.css('background-position', ['0 ', String(-(animation_options.frameHeight * options.currentFrame)), 'px'].join(''));
-				} else {
-					// No animation
-					$.noop();
+			if (options.animation) {
+				animation_options = options.animation.options;
+				if (options.idleCounter === 0) {
+					if (animation_options.type === friGame.ANIMATION_HORIZONTAL) {
+						this.dom.css('background-position', [String(-(animation_options.frameWidth * options.currentFrame)), 'px 0'].join(''));
+					} else if (options.type === friGame.ANIMATION_VERTICAL) {
+						this.dom.css('background-position', ['0 ', String(-(animation_options.frameHeight * options.currentFrame)), 'px'].join(''));
+					} else {
+						// No animation
+						$.noop();
+					}
 				}
 			}
+		},
+
+		show: function () {
+			this.dom.show();
+		},
+
+		hide: function () {
+			this.dom.hide();
 		}
 	});
 
-	friGame.Sprite = function (name, options, parent) {
-		var
-			sprite = Object.create(friGame.PrototypeDomSprite);
-
-		sprite.init(name, options, parent);
-
-		return sprite;
-	};
-
-	friGame.PrototypeDomSpriteGroup = Object.create(friGame.PrototypeSpriteGroup);
-	$.extend(friGame.PrototypeDomSpriteGroup, {
+	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
+	$.extend(friGame.PrototypeSpriteGroup, {
 		init: function (name, parent) {
 			var
 				args = Array.prototype.slice.call(arguments),
@@ -199,11 +205,12 @@
 			this.dom = dom;
 			dom.css({
 				'position': 'absolute',
+				'overflow': 'hidden',
 				'width': parent_dom.css('width'),
 				'height': parent_dom.css('height')
 			});
 
-			friGame.PrototypeSpriteGroup.init.apply(this, args);
+			friGame.PrototypeBaseSpriteGroup.init.apply(this, args);
 		},
 
 		remove: function () {
@@ -212,17 +219,8 @@
 
 			this.dom.remove();
 
-			friGame.PrototypeSpriteGroup.remove.apply(this, args);
+			friGame.PrototypeBaseSpriteGroup.remove.apply(this, args);
 		}
 	});
-
-	friGame.SpriteGroup = function (name, parent) {
-		var
-			group = Object.create(friGame.PrototypeDomSpriteGroup);
-
-		group.init(name, parent);
-
-		return group;
-	};
 }(jQuery));
 

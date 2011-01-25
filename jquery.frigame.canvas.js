@@ -30,8 +30,8 @@
 	var
 		friGame = $.friGame;
 
-	friGame.PrototypeCanvasSprite = Object.create(friGame.PrototypeSprite);
-	$.extend(friGame.PrototypeCanvasSprite, {
+	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
+	$.extend(friGame.PrototypeSprite, {
 		posx: function (x) {
 			var
 				options = this.options;
@@ -68,46 +68,48 @@
 				options = this.options,
 				animation = options.animation,
 				angle = options.angle,
-				animation_options = animation.options,
+				animation_options,
 				currentFrame = options.currentFrame,
 				ctx = friGame.ctx;
 
-			if (angle) {
-				// TO DO -- Currently broken
-				ctx.save();
-				ctx.rotate(angle);
-			}
+			if (animation && !options.hidden) {
+				animation_options = animation.options;
+				if (angle) {
+					// TO DO -- Currently broken
+					ctx.save();
+					ctx.rotate(angle);
+				}
 
-			friGame.safeDrawImage(
-				ctx,
-				animation.img,
-				currentFrame * animation_options.deltax,
-				currentFrame * animation_options.deltay,
-				animation_options.frameWidth,
-				animation_options.frameHeight,
-				options.posx,
-				options.posy,
-				options.frameWidth,
-				options.frameHeight
-			);
+				friGame.safeDrawImage(
+					ctx,
+					animation.img,
+					currentFrame * animation_options.deltax,
+					currentFrame * animation_options.deltay,
+					animation_options.frameWidth,
+					animation_options.frameHeight,
+					options.posx,
+					options.posy,
+					options.frameWidth,
+					options.frameHeight
+				);
 
-			if (angle) {
-				ctx.restore();
+				if (angle) {
+					ctx.restore();
+				}
 			}
+		},
+
+		show: function () {
+			this.options.hidden = false;
+		},
+
+		hide: function () {
+			this.options.hidden = true;
 		}
 	});
 
-	friGame.Sprite = function (name, options, parent) {
-		var
-			sprite = Object.create(friGame.PrototypeCanvasSprite);
-
-		sprite.init(name, options, parent);
-
-		return sprite;
-	};
-
-	friGame.PrototypeCanvasSpriteGroup = Object.create(friGame.PrototypeSpriteGroup);
-	$.extend(friGame.PrototypeCanvasSpriteGroup, {
+	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
+	$.extend(friGame.PrototypeSpriteGroup, {
 		init: function (name, parent) {
 			var
 				args = Array.prototype.slice.call(arguments),
@@ -120,18 +122,9 @@
 				friGame.ctx = document.getElementById(name).getContext('2d');
 			}
 
-			friGame.PrototypeSpriteGroup.init.apply(this, args);
+			friGame.PrototypeBaseSpriteGroup.init.apply(this, args);
 		}
 	});
-
-	friGame.SpriteGroup = function (name, parent) {
-		var
-			group = Object.create(friGame.PrototypeCanvasSpriteGroup);
-
-		group.init(name, parent);
-
-		return group;
-	};
 
 	friGame.safeDrawImage = function (tox, img, sx, sy, sw, sh, dx, dy, dw, dh) {
 		if ((!img) || (!tox)) {
