@@ -148,30 +148,23 @@ if (typeof Object.create !== 'function') {
 		},
 
 		explode: function () {
-			this.node.hide();
-			this.nodeBooster.hide();
-			this.nodeBoostUp.hide();
-			this.nodeBoostDown.hide();
+			this.parentNode.children().hide();
 			this.parentNode.addSprite('explosion', {animation: playerAnimation.explode, width: 100, height: 26});
 			this.hit = true;
 		},
 
 		endExplosion: function () {
 			$('#explosion').remove();
-			this.node.show();
-			this.nodeBooster.show();
-			this.nodeBoostUp.show();
-			this.nodeBoostDown.show();
+			this.parentNode.children().show();
 			this.hit = false;
 		}
 	};
 
 	_.Player = function () {
 		var
-			args = Array.prototype.slice.call(arguments),
 			player = Object.create(_.PrototypePlayer);
 
-		player.init.apply(player, args);
+		player.init.apply(player, arguments);
 
 		return player;
 	};
@@ -231,10 +224,9 @@ if (typeof Object.create !== 'function') {
 
 	_.Minion = function () {
 		var
-			args = Array.prototype.slice.call(arguments),
 			minion = Object.create(_.PrototypeMinion);
 
-		minion.init.apply(minion, args);
+		minion.init.apply(minion, arguments);
 
 		return minion;
 	};
@@ -269,10 +261,9 @@ if (typeof Object.create !== 'function') {
 
 	_.Brainy = function () {
 		var
-			args = Array.prototype.slice.call(arguments),
 			brainy = Object.create(_.PrototypeBrainy);
 
-		brainy.init.apply(brainy, args);
+		brainy.init.apply(brainy, arguments);
 
 		return brainy;
 	};
@@ -303,10 +294,9 @@ if (typeof Object.create !== 'function') {
 
 	_.Bossy = function () {
 		var
-			args = Array.prototype.slice.call(arguments),
 			bossy = Object.create(_.PrototypeBossy);
 
-		bossy.init.apply(bossy, args);
+		bossy.init.apply(bossy, arguments);
 
 		return bossy;
 	};

@@ -140,30 +140,23 @@
 		},
 
 		explode: function () {
-			this.node.hide();
-			this.nodeBooster.hide();
-			this.nodeBoostUp.hide();
-			this.nodeBoostDown.hide();
+			this.parentNode.hide();
 			this.parentNode.addSprite('explosion', {animation: playerAnimation.explode});
 			this.hit = true;
 		},
 
 		endExplosion: function () {
 			$.friGame.sprites.explosion.remove();
-			this.node.show();
-			this.nodeBooster.show();
-			this.nodeBoostUp.show();
-			this.nodeBoostDown.show();
+			this.parentNode.show();
 			this.hit = false;
 		}
 	};
 
 	_.Player = function () {
 		var
-			args = Array.prototype.slice.call(arguments),
 			player = Object.create(_.PrototypePlayer);
 
-		player.init.apply(player, args);
+		player.init.apply(player, arguments);
 
 		return player;
 	};
@@ -223,10 +216,9 @@
 
 	_.Minion = function () {
 		var
-			args = Array.prototype.slice.call(arguments),
 			minion = Object.create(_.PrototypeMinion);
 
-		minion.init.apply(minion, args);
+		minion.init.apply(minion, arguments);
 
 		return minion;
 	};
@@ -261,10 +253,9 @@
 
 	_.Brainy = function () {
 		var
-			args = Array.prototype.slice.call(arguments),
 			brainy = Object.create(_.PrototypeBrainy);
 
-		brainy.init.apply(brainy, args);
+		brainy.init.apply(brainy, arguments);
 
 		return brainy;
 	};
@@ -295,10 +286,9 @@
 
 	_.Bossy = function () {
 		var
-			args = Array.prototype.slice.call(arguments),
 			bossy = Object.create(_.PrototypeBossy);
 
-		bossy.init.apply(bossy, args);
+		bossy.init.apply(bossy, arguments);
 
 		return bossy;
 	};

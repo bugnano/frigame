@@ -97,12 +97,12 @@ if (typeof Object.create !== 'function') {
 					img = this.img,
 					delta = options.delta;
 
-				if (options.type === friGame.ANIMATION_HORIZONTAL) {
+				if (options.type & friGame.ANIMATION_HORIZONTAL) {
 					options.deltax = delta;
 					options.deltay = 0;
 					options.frameWidth = delta;
 					options.frameHeight = img.height;
-				} else if (options.type === friGame.ANIMATION_VERTICAL) {
+				} else if (options.type & friGame.ANIMATION_VERTICAL) {
 					options.deltax = 0;
 					options.deltay = delta;
 					options.frameWidth = img.width;
@@ -118,10 +118,9 @@ if (typeof Object.create !== 'function') {
 
 		Animation: function () {
 			var
-				args = Array.prototype.slice.call(arguments),
 				animation = Object.create(friGame.PrototypeAnimation);
 
-			animation.init.apply(animation, args);
+			animation.init.apply(animation, arguments);
 
 			return animation;
 		},
@@ -261,10 +260,9 @@ if (typeof Object.create !== 'function') {
 
 		Sprite: function () {
 			var
-				args = Array.prototype.slice.call(arguments),
 				sprite = Object.create(friGame.PrototypeSprite);
 
-			sprite.init.apply(sprite, args);
+			sprite.init.apply(sprite, arguments);
 
 			return sprite;
 		},
@@ -379,10 +377,9 @@ if (typeof Object.create !== 'function') {
 
 		SpriteGroup: function () {
 			var
-				args = Array.prototype.slice.call(arguments),
 				group = Object.create(friGame.PrototypeSpriteGroup);
 
-			group.init.apply(group, args);
+			group.init.apply(group, arguments);
 
 			return group;
 		},

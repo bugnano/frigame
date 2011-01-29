@@ -112,7 +112,6 @@
 	$.extend(friGame.PrototypeSpriteGroup, {
 		init: function (name, parent) {
 			var
-				args = Array.prototype.slice.call(arguments),
 				dom,
 				parent_dom;
 
@@ -122,7 +121,7 @@
 				friGame.ctx = document.getElementById(name).getContext('2d');
 			}
 
-			friGame.PrototypeBaseSpriteGroup.init.apply(this, args);
+			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 		}
 	});
 
