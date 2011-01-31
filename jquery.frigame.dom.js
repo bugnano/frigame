@@ -58,8 +58,8 @@
 				animation_options = animation.options;
 
 				this.dom.css({
-					'width': options.frameWidth,
-					'height': options.frameHeight,
+					'width': animation_options.frameWidth,
+					'height': animation_options.frameHeight,
 					'background-image': ['url("', animation_options.imageURL, '")'].join(''),
 					'background-position': '0 0'
 				});
@@ -106,18 +106,14 @@
 			var
 				dom = this.dom,
 				options = this.options,
-				angle_rad = ((angle % 360) * Math.PI) / 180,
+				animation_options = options.animation.options,
+				angle_rad = angle,
 				transform = ['rotate(', String(angle_rad), 'rad) scale(', String(factor), ')'].join(''),
 				filter,
 				cos,
 				sin,
 				newWidth,
 				newHeight;
-
-			dom.css({
-				'width': [String(options.frameWidth), 'px'].join(''),
-				'height': [String(options.frameHeight), 'px'].join('')
-			});
 
 			if (dom.css('-moz-transform')) {
 				// For firefox from 3.5
@@ -142,8 +138,8 @@
 				dom.css('filter', filter);
 				newWidth = dom.width();
 				newHeight = dom.height();
-				options.posOffsetX = (newWidth - options.frameWidth) / 2;
-				options.posOffsetY = (newHeight - options.frameHeight) / 2;
+				options.posOffsetX = (newWidth - animation_options.frameWidth) / 2;
+				options.posOffsetY = (newHeight - animation_options.frameHeight) / 2;
 
 				dom.css({
 					'left': [String(options.posx - options.posOffsetX), 'px'].join(''),

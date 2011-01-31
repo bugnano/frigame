@@ -131,12 +131,12 @@ if (typeof Object.create !== 'function') {
 				posy: 0,
 				posOffsetX: 0,
 				posOffsetY: 0,
+				translateX: 0,
+				translateY: 0,
 				idleCounter: 0,
 				currentFrame: 0,
 				angle: 0,
-				factor: 1,
-				frameWidth: 0,
-				frameHeight: 0
+				factor: 1
 			},
 
 			init: function (name, options, parent) {
@@ -173,22 +173,12 @@ if (typeof Object.create !== 'function') {
 
 			setAnimation: function (animation, callback) {
 				var
-					options = this.options,
-					animation_options;
+					options = this.options;
 
 				options.animation = animation;
 				options.callback = callback;
 				options.idleCounter = 0;
 				options.currentFrame = 0;
-
-				if (animation) {
-					animation_options = animation.options;
-					options.frameWidth = animation_options.frameWidth * options.factor;
-					options.frameHeight = animation_options.frameHeight * options.factor;
-				} else {
-					options.frameWidth = 0;
-					options.frameHeight = 0;
-				}
 
 				return this;
 			},
@@ -197,10 +187,11 @@ if (typeof Object.create !== 'function') {
 				var
 					options = this.options;
 
-				options.angle = angle;
+				options.angle = ((angle % 360) * Math.PI) / 180;
 
 				if (options.animation) {
-					this.transform(angle, options.factor);
+					//this.transform(angle, options.factor);
+					this.transform(options.angle, options.factor);
 				}
 
 				return this;
@@ -208,16 +199,11 @@ if (typeof Object.create !== 'function') {
 
 			scale: function (factor) {
 				var
-					options = this.options,
-					animation_options;
+					options = this.options;
 
 				options.factor = factor;
 
 				if (options.animation) {
-					animation_options = options.animation.options;
-					options.frameWidth = animation_options.frameWidth * factor;
-					options.frameHeight = animation_options.frameHeight * factor;
-
 					this.transform(options.angle, factor);
 				}
 
@@ -250,11 +236,25 @@ if (typeof Object.create !== 'function') {
 			},
 
 			width: function () {
-				return this.options.frameWidth;
+				var
+					animation = this.options.animation;
+
+				if (animation) {
+					return animation.options.frameWidth;
+				} else {
+					return 0;
+				}
 			},
 
 			height: function () {
-				return this.options.frameHeight;
+				var
+					animation = this.options.animation;
+
+				if (animation) {
+					return animation.options.frameHeight;
+				} else {
+					return 0;
+				}
 			}
 		},
 

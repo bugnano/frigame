@@ -32,12 +32,32 @@
 
 	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
 	$.extend(friGame.PrototypeSprite, {
+		setAnimation: function (animation, callback) {
+			var
+				options,
+				animation_options;
+
+			friGame.PrototypeBaseSprite.setAnimation.apply(this, arguments);
+
+			options = this.options;
+			if (animation) {
+				animation_options = animation.options;
+				options.posOffsetX = -(animation_options.frameWidth / 2);
+				options.posOffsetY = -(animation_options.frameHeight / 2);
+				options.translateX = options.posx - options.posOffsetX;
+				options.translateY = options.posy - options.posOffsetY;
+			}
+
+			return this;
+		},
+
 		posx: function (x) {
 			var
 				options = this.options;
 
 			if (x !== undefined) {
 				options.posx = x;
+				options.translateX = x - options.posOffsetX;
 
 				return this;
 			} else {
@@ -51,6 +71,7 @@
 
 			if (y !== undefined) {
 				options.posy = y;
+				options.translateY = y - options.posOffsetY;
 
 				return this;
 			} else {
@@ -59,8 +80,8 @@
 		},
 
 		transform: function () {
-			// TO DO -- Maybe something should be done here to rotate the sprite
-			return;
+			// The transformations are applied in the draw() function
+			return this;
 		},
 
 		draw: function () {
@@ -68,16 +89,20 @@
 				options = this.options,
 				animation = options.animation,
 				angle = options.angle,
+				factor = options.factor,
 				animation_options,
 				currentFrame = options.currentFrame,
 				ctx = friGame.ctx;
 
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
+				ctx.save();
+				ctx.translate(options.translateX, options.translateY);
 				if (angle) {
-					// TO DO -- Currently broken
-					ctx.save();
 					ctx.rotate(angle);
+				}
+				if (factor !== 1) {
+					ctx.scale(factor, factor);
 				}
 
 				friGame.safeDrawImage(
@@ -87,15 +112,13 @@
 					currentFrame * animation_options.deltay,
 					animation_options.frameWidth,
 					animation_options.frameHeight,
-					options.posx,
-					options.posy,
-					options.frameWidth,
-					options.frameHeight
+					options.posOffsetX,
+					options.posOffsetY,
+					animation_options.frameWidth,
+					animation_options.frameHeight
 				);
 
-				if (angle) {
-					ctx.restore();
-				}
+				ctx.restore();
 			}
 		},
 
