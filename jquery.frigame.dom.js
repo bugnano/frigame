@@ -68,8 +68,8 @@
 				animation_options = animation.options;
 
 				this.dom.css({
-					'width': animation_options.frameWidth,
-					'height': animation_options.frameHeight,
+					'width': [String(animation_options.frameWidth), 'px'].join(''),
+					'height': [String(animation_options.frameHeight), 'px'].join(''),
 					'background-image': ['url("', animation_options.imageURL, '")'].join(''),
 					'background-position': [
 						String(-animation_options.offsetx),

@@ -49,7 +49,7 @@ if (typeof Object.create !== 'function') {
 		// basic values
 		refreshRate: 30,
 
-		images: [],
+		animations: [],
 		sprites: {},
 		groups: {},
 		callbacks: [],
@@ -91,9 +91,10 @@ if (typeof Object.create !== 'function') {
 				};
 				img.src = options.imageURL;
 
-				friGame.images.push(img);
+				friGame.animations.push(this);
 
 				this.img = img;
+				this.complete = false;
 			},
 
 			onLoad: function () {
@@ -147,6 +148,8 @@ if (typeof Object.create !== 'function') {
 				if (options.type & friGame.ANIMATION_ONCE) {
 					options.once = true;
 				}
+
+				this.complete = true;
 			}
 		},
 
@@ -443,26 +446,26 @@ if (typeof Object.create !== 'function') {
 
 		preload: function () {
 			var
-				images = friGame.images,
-				len_images = images.length,
+				animations = friGame.animations,
+				len_animations = animations.length,
 				completed = 0,
 				i;
 
-			for (i = 0; i < len_images; i += 1) {
-				if (images[i].complete) {
+			for (i = 0; i < len_animations; i += 1) {
+				if (animations[i].complete) {
 					completed += 1;
 				}
 			}
 
 			if (friGame.loadCallback) {
-				if (len_images !== 0) {
-					friGame.loadCallback(completed / len_images);
+				if (len_animations !== 0) {
+					friGame.loadCallback(completed / len_animations);
 				} else {
 					friGame.loadCallback(1);
 				}
 			}
 
-			if (completed === len_images) {
+			if (completed === len_animations) {
 				clearInterval(friGame.idPreload);
 
 				$.each(friGame.sprites, function () {
