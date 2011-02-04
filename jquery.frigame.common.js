@@ -75,8 +75,7 @@ if (typeof Object.create !== 'function') {
 
 			init: function (options) {
 				var
-					img = new Image(),
-					animation = this;
+					img = new Image();
 
 				this.options = Object.create(this.defaults);
 				options = $.extend(this.options, options);
@@ -86,15 +85,11 @@ if (typeof Object.create !== 'function') {
 					options.rate = 1;
 				}
 
-				img.onload = function () {
-					animation.onLoad();
-				};
 				img.src = options.imageURL;
 
 				friGame.animations.push(this);
 
 				this.img = img;
-				this.complete = false;
 			},
 
 			onLoad: function () {
@@ -148,8 +143,6 @@ if (typeof Object.create !== 'function') {
 				if (options.type & friGame.ANIMATION_ONCE) {
 					options.once = true;
 				}
-
-				this.complete = true;
 			}
 		},
 
@@ -452,7 +445,7 @@ if (typeof Object.create !== 'function') {
 				i;
 
 			for (i = 0; i < len_animations; i += 1) {
-				if (animations[i].complete) {
+				if (animations[i].img.complete) {
 					completed += 1;
 				}
 			}
@@ -467,6 +460,10 @@ if (typeof Object.create !== 'function') {
 
 			if (completed === len_animations) {
 				clearInterval(friGame.idPreload);
+
+				for (i = 0; i < len_animations; i += 1) {
+					animations[i].onLoad();
+				}
 
 				$.each(friGame.sprites, function () {
 					var
