@@ -48,25 +48,38 @@
 
 		setAnimation: function (animation, callback) {
 			var
-				options,
+				options = this.options,
 				animation_options;
 
 			friGame.PrototypeBaseSprite.setAnimation.apply(this, arguments);
 
-			options = this.options;
-			if (animation) {
+			if (typeof animation === 'number') {
+				if (options.animation) {
+					animation_options = options.animation.options;
+
+					this.dom.css('background-position', [
+						String(-(animation_options.offsetx + options.multix)),
+						'px ',
+						String(-(animation_options.offsety + options.multiy)),
+						'px'
+					].join(''));
+				}
+			} else if (animation) {
 				animation_options = animation.options;
 
 				this.dom.css({
 					'width': animation_options.frameWidth,
 					'height': animation_options.frameHeight,
 					'background-image': ['url("', animation_options.imageURL, '")'].join(''),
-					'background-position': '0 0'
+					'background-position': [
+						String(-animation_options.offsetx),
+						'px ',
+						String(-animation_options.offsety),
+						'px'
+					].join('')
 				});
 			} else {
-				this.dom.css({
-					'background-image': 'none'
-				});
+				this.dom.css('background-image', 'none');
 			}
 
 			return this;
@@ -153,19 +166,18 @@
 		draw: function () {
 			var
 				options = this.options,
+				currentFrame = options.currentFrame,
 				animation_options;
 
 			if (options.animation) {
 				animation_options = options.animation.options;
-				if (options.idleCounter === 0) {
-					if (animation_options.type & friGame.ANIMATION_HORIZONTAL) {
-						this.dom.css('background-position', [String(-(animation_options.frameWidth * options.currentFrame)), 'px 0'].join(''));
-					} else if (animation_options.type & friGame.ANIMATION_VERTICAL) {
-						this.dom.css('background-position', ['0 ', String(-(animation_options.frameHeight * options.currentFrame)), 'px'].join(''));
-					} else {
-						// No animation
-						$.noop();
-					}
+				if ((options.idleCounter === 0) && (animation_options.numberOfFrame !== 1)) {
+					this.dom.css('background-position', [
+						String(-(animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax))),
+						'px ',
+						String(-(animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay))),
+						'px'
+					].join(''));
 				}
 			}
 		},

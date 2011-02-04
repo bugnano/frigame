@@ -34,18 +34,19 @@
 	$.extend(friGame.PrototypeSprite, {
 		setAnimation: function (animation, callback) {
 			var
-				options,
+				options = this.options,
 				animation_options;
 
 			friGame.PrototypeBaseSprite.setAnimation.apply(this, arguments);
 
-			options = this.options;
-			if (animation) {
-				animation_options = animation.options;
-				options.posOffsetX = -(animation_options.frameWidth / 2);
-				options.posOffsetY = -(animation_options.frameHeight / 2);
-				options.translateX = options.posx - options.posOffsetX;
-				options.translateY = options.posy - options.posOffsetY;
+			if (typeof animation !== 'number') {
+				if (animation) {
+					animation_options = animation.options;
+					options.posOffsetX = -(animation_options.frameWidth / 2);
+					options.posOffsetY = -(animation_options.frameHeight / 2);
+					options.translateX = options.posx - options.posOffsetX;
+					options.translateY = options.posy - options.posOffsetY;
+				}
 			}
 
 			return this;
@@ -91,11 +92,16 @@
 				angle = options.angle,
 				factor = options.factor,
 				animation_options,
+				frameWidth,
+				frameHeight,
 				currentFrame = options.currentFrame,
 				ctx = friGame.ctx;
 
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
+				frameWidth = animation_options.frameWidth;
+				frameHeight = animation_options.frameHeight;
+
 				ctx.save();
 				ctx.translate(options.translateX, options.translateY);
 				if (angle) {
@@ -108,14 +114,14 @@
 				friGame.safeDrawImage(
 					ctx,
 					animation.img,
-					currentFrame * animation_options.deltax,
-					currentFrame * animation_options.deltay,
-					animation_options.frameWidth,
-					animation_options.frameHeight,
+					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
+					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay),
+					frameWidth,
+					frameHeight,
 					options.posOffsetX,
 					options.posOffsetY,
-					animation_options.frameWidth,
-					animation_options.frameHeight
+					frameWidth,
+					frameHeight
 				);
 
 				ctx.restore();

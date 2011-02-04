@@ -65,7 +65,12 @@ if (typeof Object.create !== 'function') {
 				offsetx: 0,
 				offsety: 0,
 				frameWidth: 0,
-				frameHeight: 0
+				frameHeight: 0,
+				deltax: 0,
+				deltay: 0,
+				multix: 0,
+				multiy: 0,
+				once: false
 			},
 
 			init: function (options) {
@@ -95,23 +100,52 @@ if (typeof Object.create !== 'function') {
 				var
 					options = this.options,
 					img = this.img,
-					delta = options.delta;
+					delta = options.delta,
+					distance = options.distance;
 
 				if (options.type & friGame.ANIMATION_HORIZONTAL) {
-					options.deltax = delta;
-					options.deltay = 0;
-					options.frameWidth = delta;
-					options.frameHeight = img.height;
+					if (options.type & friGame.ANIMATION_MULTI) {
+						options.deltax = delta;
+						options.deltay = 0;
+						options.multix = 0;
+						options.multiy = distance;
+						options.frameWidth = delta;
+						options.frameHeight = distance;
+					} else {
+						options.deltax = delta;
+						options.deltay = 0;
+						options.multix = 0;
+						options.multiy = 0;
+						options.frameWidth = delta;
+						options.frameHeight = img.height - options.offsety;
+					}
 				} else if (options.type & friGame.ANIMATION_VERTICAL) {
-					options.deltax = 0;
-					options.deltay = delta;
-					options.frameWidth = img.width;
-					options.frameHeight = delta;
+					if (options.type & friGame.ANIMATION_MULTI) {
+						options.deltax = 0;
+						options.deltay = delta;
+						options.multix = distance;
+						options.multiy = 0;
+						options.frameWidth = distance;
+						options.frameHeight = delta;
+					} else {
+						options.deltax = 0;
+						options.deltay = delta;
+						options.multix = 0;
+						options.multiy = 0;
+						options.frameWidth = img.width - options.offsetx;
+						options.frameHeight = delta;
+					}
 				} else {
 					options.deltax = 0;
 					options.deltay = 0;
-					options.frameWidth = img.width;
-					options.frameHeight = img.height;
+					options.multix = 0;
+					options.multiy = 0;
+					options.frameWidth = img.width - options.offsetx;
+					options.frameHeight = img.height - options.offsety;
+				}
+
+				if (options.type & friGame.ANIMATION_ONCE) {
+					options.once = true;
 				}
 			}
 		},
@@ -136,7 +170,9 @@ if (typeof Object.create !== 'function') {
 				idleCounter: 0,
 				currentFrame: 0,
 				angle: 0,
-				factor: 1
+				factor: 1,
+				multix: 0,
+				multiy: 0
 			},
 
 			init: function (name, options, parent) {
@@ -173,12 +209,25 @@ if (typeof Object.create !== 'function') {
 
 			setAnimation: function (animation, callback) {
 				var
-					options = this.options;
+					options = this.options,
+					animation_options;
 
-				options.animation = animation;
+				if (typeof animation === 'number') {
+					if (options.animation) {
+						animation_options = options.animation.options;
+						options.multix = animation * animation_options.multix;
+						options.multiy = animation * animation_options.multiy;
+					}
+				} else {
+					options.animation = animation;
+					options.multix = 0;
+					options.multiy = 0;
+				}
+
 				options.callback = callback;
 				options.idleCounter = 0;
 				options.currentFrame = 0;
+				this.endAnimation = false;
 
 				return this;
 			},
@@ -187,11 +236,10 @@ if (typeof Object.create !== 'function') {
 				var
 					options = this.options;
 
-				options.angle = ((angle % 360) * Math.PI) / 180;
+				options.angle = angle;
 
 				if (options.animation) {
-					//this.transform(angle, options.factor);
-					this.transform(options.angle, options.factor);
+					this.transform(angle, options.factor);
 				}
 
 				return this;
@@ -217,20 +265,29 @@ if (typeof Object.create !== 'function') {
 					animation_options,
 					currentFrame = options.currentFrame;
 
-				if (animation) {
-					animation_options = animation.options;
+				if (!this.endAnimation) {
+					if (animation) {
+						animation_options = animation.options;
 
-					options.idleCounter += 1;
-					if (options.idleCounter >= animation_options.rate) {
-						options.idleCounter = 0;
-						currentFrame += 1;
-						if (currentFrame >= animation_options.numberOfFrame) {
-							currentFrame = 0;
-							if (options.callback) {
-								options.callback(this);
+						options.idleCounter += 1;
+						if (options.idleCounter >= animation_options.rate) {
+							options.idleCounter = 0;
+							currentFrame += 1;
+							if (currentFrame >= animation_options.numberOfFrame) {
+								if (animation_options.once) {
+									currentFrame -= 1;
+									options.idleCounter += 1;
+									this.endAnimation = true;
+								} else {
+									currentFrame = 0;
+								}
+
+								if (options.callback) {
+									options.callback(this);
+								}
 							}
+							options.currentFrame = currentFrame;
 						}
-						options.currentFrame = currentFrame;
 					}
 				}
 			},

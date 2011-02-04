@@ -1,0 +1,105 @@
+<html>
+    <head>
+        <script src="jquery.js"></script>
+        <script src="../../jquery.frigame.common.js"></script>
+        <script src="../../jquery.frigame.canvas.js"></script>
+        <script>
+            $(function(){
+				var
+					simpleVerticalAnimation = $.friGame.Animation({
+						imageURL: "sv.png",
+						type: $.friGame.ANIMATION_VERTICAL,
+						numberOfFrame: 4,
+						delta: 32,
+						rate: 300
+					}),
+					simpleHorizontalAnimation = $.friGame.Animation({
+						imageURL: "sh.png",
+						type: $.friGame.ANIMATION_HORIZONTAL,
+						numberOfFrame: 4,
+						delta: 32,
+						rate: 300
+					}),
+
+					multiVerticalAnimation = $.friGame.Animation({
+						imageURL: "mv.png",
+						type: $.friGame.ANIMATION_VERTICAL + $.friGame.ANIMATION_MULTI,
+						numberOfFrame: 4,
+						delta: 32,
+						rate: 300,
+						distance: 32
+					}),
+					multiHorizontalAnimation = $.friGame.Animation({
+						imageURL: "mh.png",
+						type: $.friGame.ANIMATION_HORIZONTAL + $.friGame.ANIMATION_MULTI,
+						numberOfFrame: 4,
+						delta: 32,
+						rate: 300,
+						distance: 32
+					}),
+
+					simpleOffsetVerticalAnimation = $.friGame.Animation({
+						imageURL: "sov.png",
+						type: $.friGame.ANIMATION_VERTICAL,
+						offsetx: 100,
+						offsety: 100,
+						numberOfFrame: 4,
+						delta: 32,
+						rate: 300
+					}),
+					simpleOffsetHorizontalAnimation = $.friGame.Animation({
+						imageURL: "soh.png",
+						type: $.friGame.ANIMATION_HORIZONTAL,
+						offsetx: 100,
+						offsety: 100,
+						numberOfFrame: 4,
+						delta: 32,
+						rate: 300
+					}),
+
+					multiOffsetVerticalAnimation = $.friGame.Animation({
+						imageURL: "mov.png",
+						type: $.friGame.ANIMATION_VERTICAL + $.friGame.ANIMATION_MULTI,
+						offsetx: 100,
+						offsety: 100,
+						numberOfFrame: 4,
+						delta: 32,
+						rate: 300,
+						distance: 32
+					}),
+					multiOffsetHorizontalAnimation = $.friGame.Animation({
+						imageURL: "moh.png",
+						type: $.friGame.ANIMATION_HORIZONTAL + $.friGame.ANIMATION_MULTI,
+						offsetx: 100,
+						offsety: 100,
+						numberOfFrame: 4,
+						delta: 32,
+						rate: 300,
+						distance: 32
+					});
+
+				$.friGame.startGame(function () {
+					$.friGame.playground()
+						.addSprite("simpleVertical",{animation: simpleVerticalAnimation, posx: 0})
+						.addSprite("simpleHorizontal",{animation: simpleHorizontalAnimation, posx: 34})
+						.addSprite("multiVertical",{animation: multiVerticalAnimation, posx: 75})
+						.addSprite("multiHorizontal",{animation: multiHorizontalAnimation, posx: 109})
+						.addSprite("simpleOffsetVertical",{animation: simpleOffsetVerticalAnimation, posx: 150})
+						.addSprite("simpleOffsetHorizontal",{animation: simpleOffsetHorizontalAnimation, posx: 184})
+						.addSprite("multiOffsetVertical",{animation: multiOffsetVerticalAnimation, posx: 225})
+						.addSprite("multiOffsetHorizontal",{animation: multiOffsetHorizontalAnimation, posx: 259});
+
+					$.friGame.sprites.multiVertical.setAnimation(1);
+					$.friGame.sprites.multiHorizontal.setAnimation(1);
+					$.friGame.sprites.multiOffsetVertical.setAnimation(1);
+					$.friGame.sprites.multiOffsetHorizontal.setAnimation(1);
+				});
+            });
+        </script>
+    </head>
+    <body style="position: relative;">
+        <h2>All of the following sprites should look the same, without any red visible:</h2>
+        <div id="playground" style="position:absolute; width: 350px; height: 50px; background: white"></div>
+    </body>
+</html>
+
