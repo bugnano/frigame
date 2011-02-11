@@ -91,6 +91,8 @@
 				animation = options.animation,
 				angle = options.angle,
 				factor = options.factor,
+				factorh = options.factorh,
+				factorv = options.factorv,
 				animation_options,
 				frameWidth,
 				frameHeight,
@@ -107,8 +109,8 @@
 				if (angle) {
 					ctx.rotate(angle);
 				}
-				if (factor !== 1) {
-					ctx.scale(factor, factor);
+				if ((factor !== 1) || (factorh !== 1) || (factorv !== 1)) {
+					ctx.scale(factorh * factor, factorv * factor);
 				}
 
 				friGame.safeDrawImage(

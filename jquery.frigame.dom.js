@@ -115,52 +115,59 @@
 			}
 		},
 
-		transform: function (angle, factor) {
+		transform: function () {
+			var
+				dom = this.dom,
+				options = this.options,
+				transformFunction = friGame.transformFunction,
+				factor = options.factor;
+
+			if (transformFunction) {
+				dom.css(transformFunction, ['rotate(', String(options.angle), 'rad) scale(',
+					String(options.factorh * factor), ',', String(options.factorv * factor), ')'].join(''));
+			} else if (friGame.filterFunction) {
+				this.ieFilter();
+			} else {
+				$.noop();
+			}
+
+			return this;
+		},
+
+		ieFilter: function () {
 			var
 				dom = this.dom,
 				options = this.options,
 				animation_options = options.animation.options,
-				angle_rad = angle,
-				transform = ['rotate(', String(angle_rad), 'rad) scale(', String(factor), ')'].join(''),
-				filter,
+				angle = options.angle,
+				factor = options.factor,
+				factorh = options.factorh,
+				factorv = options.factorv,
 				cos,
 				sin,
+				filter,
 				newWidth,
 				newHeight;
 
-			if (dom.css('-moz-transform')) {
-				// For firefox from 3.5
-				dom.css('-moz-transform', transform);
-			} else if (dom.css('-o-transform')) {
-				// For opera from 10.50
-				dom.css('-o-transform', transform);
-			} else if (
-				(dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)
-			) {
-				// For safari from 3.1 (and chrome)
-				dom.css('-webkit-transform', transform);
-			} else if (dom.css('filter') !== undefined) {
-				// For ie from 5.5
-				cos = Math.cos(angle_rad) * factor;
-				sin = Math.sin(angle_rad) * factor;
-				filter = ['progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos),
-					',M12=', String(-sin), 
-					',M21=', String(sin),
-					',M22=', String(cos),
-					',SizingMethod="auto expand",FilterType="nearest neighbor")'].join('');
-				dom.css('filter', filter);
-				newWidth = dom.width();
-				newHeight = dom.height();
-				options.posOffsetX = (newWidth - animation_options.frameWidth) / 2;
-				options.posOffsetY = (newHeight - animation_options.frameHeight) / 2;
+			// Step 1: Apply the transformation matrix
+			cos = Math.cos(angle) * factor;
+			sin = Math.sin(angle) * factor;
+			filter = ['progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * factorh),
+				',M12=', String(-sin * factorv), 
+				',M21=', String(sin * factorh),
+				',M22=', String(cos * factorv),
+				',SizingMethod="auto expand",FilterType="nearest neighbor")'].join('');
+			dom.css(friGame.filterFunction, filter);
 
-				dom.css({
-					'left': [String(options.posx - options.posOffsetX), 'px'].join(''),
-					'top': [String(options.posy - options.posOffsetY), 'px'].join('')
-				});
-			}
-
-			return this;
+			// Step 2: Adjust the element position according to the new width and height
+			newWidth = dom.width();
+			newHeight = dom.height();
+			options.posOffsetX = (newWidth - animation_options.frameWidth) / 2;
+			options.posOffsetY = (newHeight - animation_options.frameHeight) / 2;
+			dom.css({
+				'left': [String(options.posx - options.posOffsetX), 'px'].join(''),
+				'top': [String(options.posy - options.posOffsetY), 'px'].join('')
+			});
 		},
 
 		draw: function () {
@@ -205,12 +212,30 @@
 			}
 
 			dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom);
-			this.dom = dom;
+
+			if (!parent) {
+				if (dom.css('-moz-transform')) {
+					friGame.transformFunction = '-moz-transform';
+				} else if (dom.css('-o-transform')) {
+					friGame.transformFunction = '-o-transform';
+				} else if ((dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)) {
+					friGame.transformFunction = '-webkit-transform';
+				} else if ((dom.css('transform') !== null) && (dom.css('transform') !== undefined)) {
+					friGame.transformFunction = 'transform';
+				} else if (dom.css('filter') !== undefined) {
+					friGame.filterFunction = 'filter';
+				} else {
+					$.noop();
+				}
+			}
+
 			dom.css({
 				'position': 'absolute',
 				'width': parent_dom.css('width'),
 				'height': parent_dom.css('height')
 			});
+
+			this.dom = dom;
 
 			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 		},

@@ -168,7 +168,9 @@ if (typeof Object.create !== 'function') {
 				angle: 0,
 				factor: 1,
 				multix: 0,
-				multiy: 0
+				multiy: 0,
+				factorh: 1,
+				factorv: 1
 			},
 
 			init: function (name, options, parent) {
@@ -235,7 +237,7 @@ if (typeof Object.create !== 'function') {
 				options.angle = angle;
 
 				if (options.animation) {
-					this.transform(angle, options.factor);
+					this.transform();
 				}
 
 				return this;
@@ -248,7 +250,33 @@ if (typeof Object.create !== 'function') {
 				options.factor = factor;
 
 				if (options.animation) {
-					this.transform(options.angle, factor);
+					this.transform();
+				}
+
+				return this;
+			},
+
+			fliph: function () {
+				var
+					options = this.options;
+
+				options.factorh *= -1;
+
+				if (options.animation) {
+					this.transform();
+				}
+
+				return this;
+			},
+
+			flipv: function () {
+				var
+					options = this.options;
+
+				options.factorv *= -1;
+
+				if (options.animation) {
+					this.transform();
 				}
 
 				return this;
