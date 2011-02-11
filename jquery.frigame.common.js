@@ -256,11 +256,17 @@ if (typeof Object.create !== 'function') {
 				return this;
 			},
 
-			fliph: function () {
+			fliph: function (flip) {
 				var
 					options = this.options;
 
-				options.factorh *= -1;
+				if (flip === undefined) {
+					options.factorh *= -1;
+				} else if (flip) {
+					options.factorh = -1;
+				} else {
+					options.factorh = 1;
+				}
 
 				if (options.animation) {
 					this.transform();
@@ -269,11 +275,17 @@ if (typeof Object.create !== 'function') {
 				return this;
 			},
 
-			flipv: function () {
+			flipv: function (flip) {
 				var
 					options = this.options;
 
-				options.factorv *= -1;
+				if (flip === undefined) {
+					options.factorv *= -1;
+				} else if (flip) {
+					options.factorv = -1;
+				} else {
+					options.factorv = 1;
+				}
 
 				if (options.animation) {
 					this.transform();
