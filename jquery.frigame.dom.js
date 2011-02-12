@@ -78,6 +78,10 @@
 						'px'
 					].join('')
 				});
+
+				if (friGame.filterFunction) {
+					this.ieFilter();
+				}
 			} else {
 				this.dom.css('background-image', 'none');
 			}
@@ -120,11 +124,22 @@
 				dom = this.dom,
 				options = this.options,
 				transformFunction = friGame.transformFunction,
-				factor = options.factor;
+				angle = options.angle,
+				factor = options.factor,
+				factorh = options.factorh,
+				factorv = options.factorv,
+				transform = [];
 
 			if (transformFunction) {
-				dom.css(transformFunction, ['rotate(', String(options.angle), 'rad) scale(',
-					String(options.factorh * factor), ',', String(options.factorv * factor), ')'].join(''));
+				if (angle) {
+					transform.push.apply(transform, ['rotate(', String(angle), 'rad)']);
+				}
+
+				if ((factor !== 1) || (factorh !== 1) || (factorv !== 1)) {
+					transform.push.apply(transform, ['scale(', String(factorh * factor), ',', String(factorv * factor), ')']);
+				}
+
+				dom.css(transformFunction, transform.join(''));
 			} else if (friGame.filterFunction) {
 				this.ieFilter();
 			} else {
@@ -150,13 +165,18 @@
 				newHeight;
 
 			// Step 1: Apply the transformation matrix
-			cos = Math.cos(angle) * factor;
-			sin = Math.sin(angle) * factor;
-			filter = ['progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * factorh),
-				',M12=', String(-sin * factorv), 
-				',M21=', String(sin * factorh),
-				',M22=', String(cos * factorv),
-				',SizingMethod="auto expand",FilterType="nearest neighbor")'].join('');
+			if ((angle) || (factor !== 1) || (factorh !== 1) || (factorv !== 1)) {
+				cos = Math.cos(angle) * factor;
+				sin = Math.sin(angle) * factor;
+				filter = ['progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * factorh),
+					',M12=', String(-sin * factorv), 
+					',M21=', String(sin * factorh),
+					',M22=', String(cos * factorv),
+					',SizingMethod="auto expand",FilterType="nearest neighbor")'].join('');
+			} else {
+				filter = '';
+			}
+
 			dom.css(friGame.filterFunction, filter);
 
 			// Step 2: Adjust the element position according to the new width and height
