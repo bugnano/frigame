@@ -80,7 +80,9 @@
 				});
 
 				if (friGame.filterFunction) {
-					this.ieFilter();
+					if ((options.angle) || (options.factor !== 1) || (options.factorh !== 1) || (options.factorv !== 1)) {
+						this.ieFilter();
+					}
 				}
 			} else {
 				this.dom.css('background-image', 'none');
@@ -238,10 +240,10 @@
 					friGame.transformFunction = '-moz-transform';
 				} else if (dom.css('-o-transform')) {
 					friGame.transformFunction = '-o-transform';
-				} else if ((dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)) {
-					friGame.transformFunction = '-webkit-transform';
 				} else if ((dom.css('transform') !== null) && (dom.css('transform') !== undefined)) {
 					friGame.transformFunction = 'transform';
+				} else if ((dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)) {
+					friGame.transformFunction = '-webkit-transform';
 				} else if (dom.css('filter') !== undefined) {
 					friGame.filterFunction = 'filter';
 				} else {
