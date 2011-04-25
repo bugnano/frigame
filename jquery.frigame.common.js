@@ -54,7 +54,7 @@ if (typeof Object.create !== 'function') {
 		groups: {},
 		callbacks: [],
 
-		PrototypeAnimation: {
+		PrototypeBaseAnimation: {
 			defaults: {
 				imageURL: '',
 				numberOfFrame: 1,

@@ -30,6 +30,8 @@
 	var
 		friGame = $.friGame;
 
+	friGame.PrototypeAnimation = Object.create(friGame.PrototypeBaseAnimation);
+
 	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
 	$.extend(friGame.PrototypeSprite, {
 		setAnimation: function (animation, callback) {
