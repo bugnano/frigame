@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="jquery.js"></script>
+        <script src="../../jquery.frigame.common.js"></script>
+        <script src="../../jquery.frigame.dom.js"></script>
+        <script>
+            $(function(){
+                var animation = $.friGame.Animation({imageURL: "sh.png", type: $.friGame.ANIMATION_HORIZONTAL, numberOfFrame: 4, delta: 32, rate: 300});
+
+				$.friGame.startGame(function () {
+					var angle = 45, angle_rad = (angle * Math.PI) / 180;
+
+					$.friGame.playground()
+						.addSprite("aRotateScale",{animation: animation, posx: 16, posy: 16})
+						.addSprite("scaleARotate",{animation: animation, posx: 80, posy: 16})
+						.addSprite("rotateAScale",{animation: animation, posx: 180, posy: 16})
+						.addSprite("aScaleRotate",{animation: animation, posx: 240, posy: 16});
+
+					$.friGame.registerCallback(function(){
+							$.friGame.sprites.aRotateScale.rotate(angle_rad).scale(2);
+							$.friGame.sprites.scaleARotate.scale(2).rotate(-angle_rad);
+							$.friGame.sprites.rotateAScale.rotate(Math.PI / 4).scale(Math.cos(angle_rad)*2);
+							$.friGame.sprites.aScaleRotate.scale(-Math.cos(angle_rad)*2).rotate(Math.PI / 4);
+							angle -= 1;
+							angle %= 360;
+							angle_rad = (angle * Math.PI) / 180;
+						}, 30);
+				});
+            });
+        </script>
+    </head>
+    <body style="position: relative;">
+        <h2>Animated rotation (CCW, CW), 2x scale (two sprites); 45deg rotation, Animated scale (two sprites out-of-phase):</h2>
+        <div id="playground" style="position: absolute; width: 350px; height: 64px; background: white"></div>
+    </body>
+</html>
+

@@ -34,8 +34,8 @@
 			var
 				gl = friGame.gl,
 				options = this.options,
-				halfWidth = options.frameWidth / 2,
-				halfHeight = options.frameHeight / 2,
+				halfWidth = options.halfWidth,
+				halfHeight = options.halfHeight,
 				vertices,
 				vertexPositionBuffer;
 
@@ -235,46 +235,11 @@
 			if (typeof animation !== 'number') {
 				if (animation) {
 					animation_options = animation.options;
-					options.posOffsetX = -(animation_options.frameWidth / 2);
-					options.posOffsetY = -(animation_options.frameHeight / 2);
-					options.translateX = options.posx - options.posOffsetX;
-					options.translateY = options.posy - options.posOffsetY;
+					options.translateX = options.posx + animation_options.halfWidth;
+					options.translateY = options.posy + animation_options.halfHeight;
 				}
 			}
 
-			return this;
-		},
-
-		posx: function (x) {
-			var
-				options = this.options;
-
-			if (x !== undefined) {
-				options.posx = x;
-				options.translateX = x - options.posOffsetX;
-
-				return this;
-			} else {
-				return options.posx;
-			}
-		},
-
-		posy: function (y) {
-			var
-				options = this.options;
-
-			if (y !== undefined) {
-				options.posy = y;
-				options.translateY = y - options.posOffsetY;
-
-				return this;
-			} else {
-				return options.posy;
-			}
-		},
-
-		transform: function () {
-			// The transformations are applied in the draw() function
 			return this;
 		},
 

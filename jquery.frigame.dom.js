@@ -93,36 +93,6 @@
 			return this;
 		},
 
-		posx: function (x) {
-			var
-				options = this.options;
-
-			if (x !== undefined) {
-				this.dom.css('left', [String(x - options.posOffsetX), 'px'].join(''));
-
-				options.posx = x;
-
-				return this;
-			} else {
-				return options.posx;
-			}
-		},
-
-		posy: function (y) {
-			var
-				options = this.options;
-
-			if (y !== undefined) {
-				this.dom.css('top', [String(y - options.posOffsetY), 'px'].join(''));
-
-				options.posy = y;
-
-				return this;
-			} else {
-				return options.posy;
-			}
-		},
-
 		transform: function () {
 			var
 				dom = this.dom,
@@ -198,9 +168,36 @@
 			var
 				options = this.options,
 				currentFrame = options.currentFrame,
-				animation_options;
+				animation_options,
+				posx = options.posx,
+				posy = options.posy,
+				angle = options.angle,
+				factor = options.factor,
+				factorh = options.factorh,
+				factorv = options.factorv;
 
 			if (options.animation) {
+				if (posx !== options.oldPosx) {
+					this.dom.css('left', [String(posx - options.posOffsetX), 'px'].join(''));
+					options.oldPosx = posx;
+				}
+
+				if (posy !== options.oldPosy) {
+					this.dom.css('top', [String(posy - options.posOffsetY), 'px'].join(''));
+					options.oldPosy = posy;
+				}
+
+				if ((angle !== options.oldAngle) ||
+						(factor !== options.oldFactor) ||
+						(factorh !== options.oldFactorh) ||
+						(factorv !== options.oldFactorv)) {
+					this.transform();
+					options.oldAngle = angle;
+					options.oldFactor = factor;
+					options.oldFactorh = factorh;
+					options.oldFactorv = factorv;
+				}
+
 				animation_options = options.animation.options;
 				if ((options.idleCounter === 0) && (animation_options.numberOfFrame !== 1)) {
 					this.dom.css('background-position', [

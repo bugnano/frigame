@@ -33,6 +33,18 @@ if (typeof Object.create !== 'function') {
 	};
 }
 
+// shim layer with setTimeout fallback by Paul Irish
+window.requestAnimFrame = (function () {
+	return window.requestAnimationFrame || 
+		window.webkitRequestAnimationFrame || 
+		window.mozRequestAnimationFrame || 
+		window.oRequestAnimationFrame || 
+		window.msRequestAnimationFrame || 
+		function (callback, element) {
+			window.setTimeout(callback, 1000 / 60);
+		};
+}());
+
 (function ($) {
 	var
 		friGame = {};
@@ -54,6 +66,8 @@ if (typeof Object.create !== 'function') {
 		groups: {},
 		callbacks: [],
 
+		drawDone: true,
+
 		PrototypeBaseAnimation: {
 			defaults: {
 				imageURL: '',
@@ -66,6 +80,8 @@ if (typeof Object.create !== 'function') {
 				offsety: 0,
 				frameWidth: 0,
 				frameHeight: 0,
+				halfWidth: 0,
+				halfHeight: 0,
 				deltax: 0,
 				deltay: 0,
 				multix: 0,
@@ -140,6 +156,9 @@ if (typeof Object.create !== 'function') {
 					options.frameHeight = img.height - options.offsety;
 				}
 
+				options.halfWidth = options.frameWidth / 2;
+				options.halfHeight = options.frameHeight / 2;
+
 				if (options.type & friGame.ANIMATION_ONCE) {
 					options.once = true;
 				}
@@ -159,18 +178,24 @@ if (typeof Object.create !== 'function') {
 			defaults: {
 				posx: 0,
 				posy: 0,
-				posOffsetX: 0,
-				posOffsetY: 0,
 				translateX: 0,
 				translateY: 0,
+				posOffsetX: 0,
+				posOffsetY: 0,
+				oldPosx: 0,
+				oldPosy: 0,
 				idleCounter: 0,
 				currentFrame: 0,
-				angle: 0,
-				factor: 1,
 				multix: 0,
 				multiy: 0,
+				angle: 0,
+				factor: 1,
+				oldAngle: 0,
+				oldFactor: 1,
 				factorh: 1,
-				factorv: 1
+				factorv: 1,
+				oldFactorh: 1,
+				oldFactorv: 1
 			},
 
 			init: function (name, options, parent) {
@@ -230,15 +255,51 @@ if (typeof Object.create !== 'function') {
 				return this;
 			},
 
+			posx: function (x) {
+				var
+					options = this.options,
+					animation = options.animation;
+
+				if (x !== undefined) {
+					options.posx = x;
+
+					if (animation) {
+						options.translateX = x + animation.options.halfWidth;
+					} else {
+						options.translateX = x;
+					}
+
+					return this;
+				} else {
+					return options.posx;
+				}
+			},
+
+			posy: function (y) {
+				var
+					options = this.options,
+					animation = options.animation;
+
+				if (y !== undefined) {
+					options.posy = y;
+
+					if (animation) {
+						options.translateY = y + animation.options.halfHeight;
+					} else {
+						options.translateY = y;
+					}
+
+					return this;
+				} else {
+					return options.posy;
+				}
+			},
+
 			rotate: function (angle) {
 				var
 					options = this.options;
 
 				options.angle = angle;
-
-				if (options.animation) {
-					this.transform();
-				}
 
 				return this;
 			},
@@ -248,10 +309,6 @@ if (typeof Object.create !== 'function') {
 					options = this.options;
 
 				options.factor = factor;
-
-				if (options.animation) {
-					this.transform();
-				}
 
 				return this;
 			},
@@ -268,10 +325,6 @@ if (typeof Object.create !== 'function') {
 					options.factorh = 1;
 				}
 
-				if (options.animation) {
-					this.transform();
-				}
-
 				return this;
 			},
 
@@ -285,10 +338,6 @@ if (typeof Object.create !== 'function') {
 					options.factorv = -1;
 				} else {
 					options.factorv = 1;
-				}
-
-				if (options.animation) {
-					this.transform();
 				}
 
 				return this;
@@ -524,6 +573,11 @@ if (typeof Object.create !== 'function') {
 			}
 		},
 
+		draw: function () {
+			friGame.groups.sceengraph.draw();
+			friGame.drawDone = true;
+		},
+
 		refresh: function () {
 			var
 				callbacks = friGame.callbacks,
@@ -537,7 +591,11 @@ if (typeof Object.create !== 'function') {
 
 			if (sceengraph) {
 				sceengraph.update();
-				sceengraph.draw();
+
+				if (friGame.drawDone) {
+					friGame.drawDone = false;
+					window.requestAnimFrame(friGame.draw);
+				}
 			}
 
 			for (i = 0; i < len_callbacks; i += 1) {
