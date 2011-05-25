@@ -239,12 +239,12 @@
 					friGame.transformFunction = '-moz-transform';
 				} else if (dom.css('-o-transform')) {
 					friGame.transformFunction = '-o-transform';
+				} else if ((dom.css('msTransform') !== null) && (dom.css('msTransform') !== undefined)) {
+					friGame.transformFunction = 'msTransform';
 				} else if ((dom.css('transform') !== null) && (dom.css('transform') !== undefined)) {
 					friGame.transformFunction = 'transform';
 				} else if ((dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)) {
 					friGame.transformFunction = '-webkit-transform';
-				} else if (dom.css('msTransform') !== undefined) {
-					friGame.transformFunction = 'msTransform';
 				} else if (dom.css('filter') !== undefined) {
 					friGame.filterFunction = 'filter';
 				} else {
