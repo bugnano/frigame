@@ -156,8 +156,8 @@ window.requestAnimFrame = (function () {
 					options.frameHeight = img.height - options.offsety;
 				}
 
-				options.halfWidth = options.frameWidth / 2;
-				options.halfHeight = options.frameHeight / 2;
+				options.halfWidth = ((options.frameWidth / 2) + 0.5) << 0;
+				options.halfHeight = ((options.frameHeight / 2) + 0.5) << 0;
 
 				if (options.type & friGame.ANIMATION_ONCE) {
 					options.once = true;
@@ -261,12 +261,12 @@ window.requestAnimFrame = (function () {
 					animation = options.animation;
 
 				if (x !== undefined) {
-					options.posx = x;
+					options.posx = (x + 0.5) << 0;
 
 					if (animation) {
-						options.translateX = x + animation.options.halfWidth;
+						options.translateX = ((x + animation.options.halfWidth) + 0.5) << 0;
 					} else {
-						options.translateX = x;
+						options.translateX = (x + 0.5) << 0;
 					}
 
 					return this;
@@ -281,12 +281,12 @@ window.requestAnimFrame = (function () {
 					animation = options.animation;
 
 				if (y !== undefined) {
-					options.posy = y;
+					options.posy = (y + 0.5) << 0;
 
 					if (animation) {
-						options.translateY = y + animation.options.halfHeight;
+						options.translateY = ((y + animation.options.halfHeight) + 0.5) << 0;
 					} else {
-						options.translateY = y;
+						options.translateY = (y + 0.5) << 0;
 					}
 
 					return this;

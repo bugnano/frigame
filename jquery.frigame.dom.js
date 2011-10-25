@@ -40,6 +40,8 @@
 			dom.css('position', 'absolute');
 
 			friGame.PrototypeBaseSprite.init.apply(this, arguments);
+
+			this.draw();
 		},
 
 		remove: function () {
@@ -156,8 +158,8 @@
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
 			newHeight = dom.height();
-			options.posOffsetX = (newWidth - animation_options.frameWidth) / 2;
-			options.posOffsetY = (newHeight - animation_options.frameHeight) / 2;
+			options.posOffsetX = (((newWidth - animation_options.frameWidth) / 2) + 0.5) << 0;
+			options.posOffsetY = (((newHeight - animation_options.frameHeight) / 2) + 0.5) << 0;
 			dom.css({
 				'left': [String(options.posx - options.posOffsetX), 'px'].join(''),
 				'top': [String(options.posy - options.posOffsetY), 'px'].join('')

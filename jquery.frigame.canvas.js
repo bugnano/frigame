@@ -44,8 +44,8 @@
 			if (typeof animation !== 'number') {
 				if (animation) {
 					animation_options = animation.options;
-					options.translateX = options.posx + animation_options.halfWidth;
-					options.translateY = options.posy + animation_options.halfHeight;
+					options.translateX = ((options.posx + animation_options.halfWidth) + 0.5) << 0;
+					options.translateY = ((options.posy + animation_options.halfHeight) + 0.5) << 0;
 				}
 			}
 
