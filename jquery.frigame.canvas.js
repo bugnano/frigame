@@ -1,5 +1,5 @@
 /*global jQuery */
-/*jslint white: true, browser: true, onevar: true, undef: true, eqeqeq: true, plusplus: true, regexp: true, newcap: true, immed: true */
+/*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011 Franco Bugnano
 
@@ -34,19 +34,17 @@
 
 	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
 	$.extend(friGame.PrototypeSprite, {
-		setAnimation: function (animation, callback) {
+		setAnimation: function (animation, index, callback) {
 			var
 				options = this.options,
 				animation_options;
 
 			friGame.PrototypeBaseSprite.setAnimation.apply(this, arguments);
 
-			if (typeof animation !== 'number') {
-				if (animation) {
-					animation_options = animation.options;
-					options.translateX = ((options.posx + animation_options.halfWidth) + 0.5) << 0;
-					options.translateY = ((options.posy + animation_options.halfHeight) + 0.5) << 0;
-				}
+			if (animation) {
+				animation_options = animation.options;
+				options.translateX = ((options.posx + animation_options.halfWidth) + 0.5) << 0;
+				options.translateY = ((options.posy + animation_options.halfHeight) + 0.5) << 0;
 			}
 
 			return this;

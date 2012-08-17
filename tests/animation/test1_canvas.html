@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+		<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1" />
+
         <script src="jquery.js"></script>
         <script src="../../jquery.frigame.common.js"></script>
         <script src="../../jquery.frigame.canvas.js"></script>
@@ -87,13 +89,11 @@
 						.addSprite("multiHorizontal",{animation: multiHorizontalAnimation, posx: 109})
 						.addSprite("simpleOffsetVertical",{animation: simpleOffsetVerticalAnimation, posx: 150})
 						.addSprite("simpleOffsetHorizontal",{animation: simpleOffsetHorizontalAnimation, posx: 184})
-						.addSprite("multiOffsetVertical",{animation: multiOffsetVerticalAnimation, posx: 225})
-						.addSprite("multiOffsetHorizontal",{animation: multiOffsetHorizontalAnimation, posx: 259});
+						.addSprite("multiOffsetVertical",{animation: multiOffsetVerticalAnimation, animationIndex: 1, posx: 225})
+						.addSprite("multiOffsetHorizontal",{animation: multiOffsetHorizontalAnimation, animationIndex: 1, posx: 259});
 
-					$.friGame.sprites.multiVertical.setAnimation(1);
-					$.friGame.sprites.multiHorizontal.setAnimation(1);
-					$.friGame.sprites.multiOffsetVertical.setAnimation(1);
-					$.friGame.sprites.multiOffsetHorizontal.setAnimation(1);
+					$.friGame.sprites.multiVertical.setAnimationIndex(1);
+					$.friGame.sprites.multiHorizontal.setAnimationIndex(1);
 				});
             });
         </script>

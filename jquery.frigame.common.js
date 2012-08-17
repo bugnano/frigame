@@ -188,10 +188,14 @@ window.requestAnimFrame = (function () {
 
 		PrototypeBaseSprite: {
 			defaults: {
+				// Public options
+				animationIndex: 0,
 				posx: 0,
 				posy: 0,
 				xpos: fg.XPOS_LEFT,
 				ypos: fg.YPOS_TOP,
+
+				// Implementation details
 				translateX: 0,
 				translateY: 0,
 				posOffsetX: 0,
@@ -226,7 +230,7 @@ window.requestAnimFrame = (function () {
 				this.options = Object.create(this.defaults);
 				options = $.extend(this.options, options);
 
-				this.setAnimation(options.animation, options.callback);
+				this.setAnimation(options.animation, options.animationIndex, options.callback);
 
 				xpos = options.xpos;
 				if (xpos === fg.XPOS_CENTER) {
@@ -265,19 +269,29 @@ window.requestAnimFrame = (function () {
 				delete fg.sprites[name];
 			},
 
-			setAnimation: function (animation, callback) {
+			setAnimation: function (animation, index, callback) {
+				this.options.animation = animation;
+
+				return this.setAnimationIndex(index, callback);
+			},
+
+			getAnimation: function () {
+				return this.options.animation;
+			},
+
+			setAnimationIndex: function (index, callback) {
 				var
 					options = this.options,
-					animation_options;
+					animation_options
+				;
 
-				if (typeof animation === 'number') {
-					if (options.animation) {
-						animation_options = options.animation.options;
-						options.multix = animation * animation_options.multix;
-						options.multiy = animation * animation_options.multiy;
-					}
+				options.animationIndex = index;
+
+				if (index && options.animation) {
+					animation_options = options.animation.options;
+					options.multix = index * animation_options.multix;
+					options.multiy = index * animation_options.multiy;
 				} else {
-					options.animation = animation;
 					options.multix = 0;
 					options.multiy = 0;
 				}
@@ -288,6 +302,10 @@ window.requestAnimFrame = (function () {
 				this.endAnimation = false;
 
 				return this;
+			},
+
+			getAnimationIndex: function () {
+				return this.options.animationIndex;
 			},
 
 			setLeft: function (x) {
@@ -699,7 +717,7 @@ window.requestAnimFrame = (function () {
 					var
 						options = this.options;
 
-					this.setAnimation(options.animation, options.callback);
+					this.setAnimation(options.animation, options.animationIndex, options.callback);
 				});
 
 				if (fg.loadCallback) {
