@@ -1,7 +1,7 @@
 /*global jQuery */
-/*jslint white: true, browser: true, onevar: true, undef: true, eqeqeq: true, plusplus: true, regexp: true, newcap: true, immed: true */
+/*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
-// Copyright (c) 2011 Franco Bugnano
+// Copyright (c) 2011-2012 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,11 +35,11 @@ if (typeof Object.create !== 'function') {
 
 // shim layer with setTimeout fallback by Paul Irish
 window.requestAnimFrame = (function () {
-	return window.requestAnimationFrame || 
-		window.webkitRequestAnimationFrame || 
-		window.mozRequestAnimationFrame || 
-		window.oRequestAnimationFrame || 
-		window.msRequestAnimationFrame || 
+	return window.requestAnimationFrame ||
+		window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.oRequestAnimationFrame ||
+		window.msRequestAnimationFrame ||
 		function (callback, element) {
 			window.setTimeout(callback, 1000 / 60);
 		};
@@ -47,16 +47,25 @@ window.requestAnimFrame = (function () {
 
 (function ($) {
 	var
-		friGame = {};
+		fg = {}
+	;
 
-	$.friGame = friGame;
+	$.friGame = fg;
 
-	$.extend(friGame, {
+	$.extend(fg, {
 		// "constants" for the different type of an animation
 		ANIMATION_VERTICAL: 1,		// genertated by a verical offset of the background
 		ANIMATION_HORIZONTAL: 2,	// genertated by a horizontal offset of the background
 		ANIMATION_ONCE: 4,			// played only once (else looping indefinitly)
 		ANIMATION_MULTI: 16,		// The image file contains many animations
+
+		// constants for the various positions
+		XPOS_LEFT: 0,
+		XPOS_RIGHT: 1,
+		XPOS_CENTER: 2,
+		YPOS_TOP: 0,
+		YPOS_BOTTOM: 1,
+		YPOS_CENTER: 2,
 
 		// basic values
 		refreshRate: 30,
@@ -91,19 +100,20 @@ window.requestAnimFrame = (function () {
 
 			init: function (options) {
 				var
-					img = new Image();
+					img = new Image()
+				;
 
 				this.options = Object.create(this.defaults);
 				options = $.extend(this.options, options);
 
-				options.rate = Math.round(options.rate / friGame.refreshRate);
+				options.rate = Math.round(options.rate / fg.refreshRate);
 				if (options.rate === 0) {
 					options.rate = 1;
 				}
 
 				img.src = options.imageURL;
 
-				friGame.animations.push(this);
+				fg.animations.push(this);
 
 				this.img = img;
 			},
@@ -113,10 +123,11 @@ window.requestAnimFrame = (function () {
 					options = this.options,
 					img = this.img,
 					delta = options.delta,
-					distance = options.distance;
+					distance = options.distance
+				;
 
-				if (options.type & friGame.ANIMATION_HORIZONTAL) {
-					if (options.type & friGame.ANIMATION_MULTI) {
+				if (options.type & fg.ANIMATION_HORIZONTAL) {
+					if (options.type & fg.ANIMATION_MULTI) {
 						options.deltax = delta;
 						options.deltay = 0;
 						options.multix = 0;
@@ -131,8 +142,8 @@ window.requestAnimFrame = (function () {
 						options.frameWidth = delta;
 						options.frameHeight = img.height - options.offsety;
 					}
-				} else if (options.type & friGame.ANIMATION_VERTICAL) {
-					if (options.type & friGame.ANIMATION_MULTI) {
+				} else if (options.type & fg.ANIMATION_VERTICAL) {
+					if (options.type & fg.ANIMATION_MULTI) {
 						options.deltax = 0;
 						options.deltay = delta;
 						options.multix = distance;
@@ -159,7 +170,7 @@ window.requestAnimFrame = (function () {
 				options.halfWidth = ((options.frameWidth / 2) + 0.5) << 0;
 				options.halfHeight = ((options.frameHeight / 2) + 0.5) << 0;
 
-				if (options.type & friGame.ANIMATION_ONCE) {
+				if (options.type & fg.ANIMATION_ONCE) {
 					options.once = true;
 				}
 			}
@@ -167,7 +178,8 @@ window.requestAnimFrame = (function () {
 
 		Animation: function () {
 			var
-				animation = Object.create(friGame.PrototypeAnimation);
+				animation = Object.create(fg.PrototypeAnimation)
+			;
 
 			animation.init.apply(animation, arguments);
 
@@ -178,6 +190,8 @@ window.requestAnimFrame = (function () {
 			defaults: {
 				posx: 0,
 				posy: 0,
+				xpos: fg.XPOS_LEFT,
+				ypos: fg.YPOS_TOP,
 				translateX: 0,
 				translateY: 0,
 				posOffsetX: 0,
@@ -199,7 +213,12 @@ window.requestAnimFrame = (function () {
 			},
 
 			init: function (name, options, parent) {
-				friGame.sprites[name] = this;
+				var
+					xpos,
+					ypos
+				;
+
+				fg.sprites[name] = this;
 
 				this.name = name;
 				this.parent = parent;
@@ -207,9 +226,25 @@ window.requestAnimFrame = (function () {
 				this.options = Object.create(this.defaults);
 				options = $.extend(this.options, options);
 
-				this.posx(options.posx);
-				this.posy(options.posy);
 				this.setAnimation(options.animation, options.callback);
+
+				xpos = options.xpos;
+				if (xpos === fg.XPOS_CENTER) {
+					this.setCenterX(options.posx);
+				} else if (xpos === fg.XPOS_RIGHT) {
+					this.setRight(options.posx);
+				} else {
+					this.setLeft(options.posx);
+				}
+
+				ypos = options.ypos;
+				if (ypos === fg.YPOS_CENTER) {
+					this.setCenterY(options.posy);
+				} else if (ypos === fg.YPOS_BOTTOM) {
+					this.setBottom(options.posy);
+				} else {
+					this.setTop(options.posy);
+				}
 			},
 
 			remove: function () {
@@ -227,7 +262,7 @@ window.requestAnimFrame = (function () {
 					}
 				}
 
-				delete friGame.sprites[name];
+				delete fg.sprites[name];
 			},
 
 			setAnimation: function (animation, callback) {
@@ -255,44 +290,145 @@ window.requestAnimFrame = (function () {
 				return this;
 			},
 
-			posx: function (x) {
+			setLeft: function (x) {
 				var
 					options = this.options,
-					animation = options.animation;
+					animation = options.animation
+				;
 
-				if (x !== undefined) {
-					options.posx = (x + 0.5) << 0;
+				options.posx = (x + 0.5) << 0;
 
-					if (animation) {
-						options.translateX = ((x + animation.options.halfWidth) + 0.5) << 0;
-					} else {
-						options.translateX = (x + 0.5) << 0;
-					}
-
-					return this;
+				if (animation) {
+					options.translateX = ((x + animation.options.halfWidth) + 0.5) << 0;
 				} else {
-					return options.posx;
+					options.translateX = (x + 0.5) << 0;
 				}
+
+				return this;
 			},
 
-			posy: function (y) {
+			getLeft: function () {
+				return this.options.posx;
+			},
+
+			setTop: function (y) {
 				var
 					options = this.options,
 					animation = options.animation;
 
-				if (y !== undefined) {
-					options.posy = (y + 0.5) << 0;
+				options.posy = (y + 0.5) << 0;
 
-					if (animation) {
-						options.translateY = ((y + animation.options.halfHeight) + 0.5) << 0;
-					} else {
-						options.translateY = (y + 0.5) << 0;
-					}
-
-					return this;
+				if (animation) {
+					options.translateY = ((y + animation.options.halfHeight) + 0.5) << 0;
 				} else {
-					return options.posy;
+					options.translateY = (y + 0.5) << 0;
 				}
+
+				return this;
+			},
+
+			getTop: function () {
+				return this.options.posy;
+			},
+
+			setRight: function (x) {
+				var
+					animation = this.options.animation
+				;
+
+				if (animation) {
+					x -= animation.options.frameWidth;
+				}
+
+				return this.setLeft(x);
+			},
+
+			getRight: function () {
+				var
+					animation = this.options.animation,
+					x = this.getLeft()
+				;
+
+				if (animation) {
+					x += animation.options.frameWidth;
+				}
+
+				return x;
+			},
+
+			setBottom: function (y) {
+				var
+					animation = this.options.animation
+				;
+
+				if (animation) {
+					y -= animation.options.frameHeight;
+				}
+
+				return this.setTop(y);
+			},
+
+			getBottom: function () {
+				var
+					animation = this.options.animation,
+					y = this.getTop()
+				;
+
+				if (animation) {
+					y += animation.options.frameHeight;
+				}
+
+				return y;
+			},
+
+			setCenterX: function (x) {
+				var
+					animation = this.options.animation
+				;
+
+				if (animation) {
+					x -= animation.options.halfWidth;
+				}
+
+				return this.setLeft(x);
+			},
+
+			getCenterX: function () {
+				var
+					animation = this.options.animation,
+					x = this.getLeft()
+				;
+
+				if (animation) {
+					x += animation.options.halfWidth;
+				}
+
+				return x;
+			},
+
+			setCenterY: function (y) {
+				var
+					animation = this.options.animation
+				;
+
+				if (animation) {
+					y -= animation.options.halfHeight;
+				}
+
+				return this.setTop(y);
+			},
+
+			getCenterY: function () {
+				var
+					animation = this.options.animation,
+					y = this.getTop()
+				;
+
+				if (animation) {
+					y += animation.options.halfHeight;
+				}
+
+				return y;
 			},
 
 			rotate: function (angle) {
@@ -379,30 +515,34 @@ window.requestAnimFrame = (function () {
 
 			width: function () {
 				var
-					animation = this.options.animation;
+					animation = this.options.animation,
+					w = 0
+				;
 
 				if (animation) {
-					return animation.options.frameWidth;
-				} else {
-					return 0;
+					w = animation.options.frameWidth;
 				}
+
+				return w;
 			},
 
 			height: function () {
 				var
-					animation = this.options.animation;
+					animation = this.options.animation,
+					h = 0
+				;
 
 				if (animation) {
-					return animation.options.frameHeight;
-				} else {
-					return 0;
+					h = animation.options.frameHeight;
 				}
+
+				return h;
 			}
 		},
 
 		Sprite: function () {
 			var
-				sprite = Object.create(friGame.PrototypeSprite);
+				sprite = Object.create(fg.PrototypeSprite);
 
 			sprite.init.apply(sprite, arguments);
 
@@ -411,7 +551,7 @@ window.requestAnimFrame = (function () {
 
 		PrototypeBaseSpriteGroup: {
 			init: function (name, parent) {
-				friGame.groups[name] = this;
+				fg.groups[name] = this;
 
 				this.layers = [];
 				this.name = name;
@@ -420,7 +560,7 @@ window.requestAnimFrame = (function () {
 
 			addSprite: function (name, options) {
 				var
-					sprite = friGame.Sprite(name, options, this);
+					sprite = fg.Sprite(name, options, this);
 
 				this.layers.push({name: name, obj: sprite});
 
@@ -429,7 +569,7 @@ window.requestAnimFrame = (function () {
 
 			addGroup: function (name) {
 				var
-					group = friGame.SpriteGroup(name, this);
+					group = fg.SpriteGroup(name, this);
 
 				this.layers.push({name: name, obj: group});
 
@@ -438,13 +578,14 @@ window.requestAnimFrame = (function () {
 
 			end: function () {
 				var
-					parent = this.parent;
+					parent = this.parent
+				;
 
-				if (parent) {
-					return parent;
-				} else {
-					return this;
+				if (!parent) {
+					parent = this;
 				}
+
+				return parent;
 			},
 
 			remove: function () {
@@ -467,7 +608,7 @@ window.requestAnimFrame = (function () {
 					}
 				}
 
-				delete friGame.groups[name];
+				delete fg.groups[name];
 			},
 
 			update: function () {
@@ -519,7 +660,7 @@ window.requestAnimFrame = (function () {
 
 		SpriteGroup: function () {
 			var
-				group = Object.create(friGame.PrototypeSpriteGroup);
+				group = Object.create(fg.PrototypeSpriteGroup);
 
 			group.init.apply(group, arguments);
 
@@ -528,7 +669,7 @@ window.requestAnimFrame = (function () {
 
 		preload: function () {
 			var
-				animations = friGame.animations,
+				animations = fg.animations,
 				len_animations = animations.length,
 				completed = 0,
 				i;
@@ -539,62 +680,62 @@ window.requestAnimFrame = (function () {
 				}
 			}
 
-			if (friGame.loadCallback) {
+			if (fg.loadCallback) {
 				if (len_animations !== 0) {
-					friGame.loadCallback(completed / len_animations);
+					fg.loadCallback(completed / len_animations);
 				} else {
-					friGame.loadCallback(1);
+					fg.loadCallback(1);
 				}
 			}
 
 			if (completed === len_animations) {
-				clearInterval(friGame.idPreload);
+				clearInterval(fg.idPreload);
 
 				for (i = 0; i < len_animations; i += 1) {
 					animations[i].onLoad();
 				}
 
-				$.each(friGame.sprites, function () {
+				$.each(fg.sprites, function () {
 					var
 						options = this.options;
 
 					this.setAnimation(options.animation, options.callback);
 				});
 
-				if (friGame.loadCallback) {
-					delete friGame.loadCallback;
+				if (fg.loadCallback) {
+					delete fg.loadCallback;
 				}
 
-				if (friGame.completeCallback) {
-					friGame.completeCallback();
+				if (fg.completeCallback) {
+					fg.completeCallback();
 				}
 
-				friGame.idRefresh = setInterval(friGame.refresh, friGame.refreshRate);
+				fg.idRefresh = setInterval(fg.refresh, fg.refreshRate);
 			}
 		},
 
 		draw: function () {
-			friGame.groups.sceengraph.draw();
-			friGame.drawDone = true;
+			fg.groups.scenegraph.draw();
+			fg.drawDone = true;
 		},
 
 		refresh: function () {
 			var
-				callbacks = friGame.callbacks,
+				callbacks = fg.callbacks,
 				len_callbacks = callbacks.length,
 				callback,
 				retval,
 				remove_callbacks = [],
 				len_remove_callbacks,
 				i,
-				sceengraph = friGame.groups.sceengraph;
+				scenegraph = fg.groups.scenegraph;
 
-			if (sceengraph) {
-				sceengraph.update();
+			if (scenegraph) {
+				scenegraph.update();
 
-				if (friGame.drawDone) {
-					friGame.drawDone = false;
-					window.requestAnimFrame(friGame.draw);
+				if (fg.drawDone) {
+					fg.drawDone = false;
+					window.requestAnimFrame(fg.draw);
 				}
 			}
 
@@ -618,42 +759,42 @@ window.requestAnimFrame = (function () {
 
 		startGame: function (callback, rate) {
 			if (rate) {
-				friGame.refreshRate = rate;
+				fg.refreshRate = rate;
 			}
 
-			friGame.completeCallback = callback;
-			friGame.idPreload = setInterval(friGame.preload, 100);
+			fg.completeCallback = callback;
+			fg.idPreload = setInterval(fg.preload, 100);
 
 			return this;
 		},
 
 		stopGame: function () {
-			clearInterval(friGame.idRefresh);
+			clearInterval(fg.idRefresh);
 
 			return this;
 		},
 
 		registerCallback: function (callback, rate) {
-			rate = Math.round(rate / friGame.refreshRate);
+			rate = Math.round(rate / fg.refreshRate);
 			if (rate === 0) {
 				rate = 1;
 			}
 
-			friGame.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
+			fg.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
 
 			return this;
 		}
 	});
 
-	friGame.playground = function () {
+	fg.playground = function () {
 		var
-			sceengraph = friGame.groups.sceengraph;
+			scenegraph = fg.groups.scenegraph;
 
-		if (!sceengraph) {
-			sceengraph = friGame.SpriteGroup('sceengraph', null);
+		if (!scenegraph) {
+			scenegraph = fg.SpriteGroup('scenegraph', null);
 		}
 
-		return sceengraph;
+		return scenegraph;
 	};
 }(jQuery));
 
