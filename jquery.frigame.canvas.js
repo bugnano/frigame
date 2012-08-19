@@ -34,22 +34,6 @@
 
 	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
 	$.extend(friGame.PrototypeSprite, {
-		setAnimation: function (animation, index, callback) {
-			var
-				options = this.options,
-				animation_options;
-
-			friGame.PrototypeBaseSprite.setAnimation.apply(this, arguments);
-
-			if (animation) {
-				animation_options = animation.options;
-				options.translateX = ((options.posx + animation_options.halfWidth) + 0.5) << 0;
-				options.translateY = ((options.posy + animation_options.halfHeight) + 0.5) << 0;
-			}
-
-			return this;
-		},
-
 		draw: function () {
 			var
 				options = this.options,

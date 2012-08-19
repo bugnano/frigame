@@ -1,5 +1,5 @@
 /*global $ */
-/*jslint white: true, browser: true, onevar: true, undef: true, eqeqeq: true, plusplus: true, regexp: true, newcap: true, immed: true */
+/*jslint sloppy: true, white: true, browser: true */
 
 (function () {
 	var
@@ -24,17 +24,17 @@
 		bossName = null,
 		gameOver = false,
 
-		_ = {};
+		G = {};
 
 	// Some hellper functions :
 
 	// Function to restart the game:
-	_.restartGame = function () {
+	G.restartGame = function () {
 		location.reload();
 	};
 
 	// Simple square to square collision detection:
-	_.collision = function (left1, top1, width1, height1, left2, top2, width2, height2) {
+	G.collision = function (left1, top1, width1, height1, left2, top2, width2, height2) {
 		var
 			right1 = left1 + width1,
 			bottom1 = top1 + height1,
@@ -50,7 +50,7 @@
 	};
 
 	// Game objects:
-	_.PrototypePlayer = {
+	G.PrototypePlayer = {
 		init: function () {
 			this.parentNode = $.friGame.groups.player;
 			this.node = $.friGame.sprites.playerBody;
@@ -101,42 +101,42 @@
 			}
 		},
 
-		posx: function (nextpos) {
+		move: function (options) {
 			var
-				delta;
+				delta
+			;
 
-			if (nextpos === undefined) {
-				return this.node.posx();
-			} else {
-				delta = nextpos - this.node.posx();
+			if (options.hasOwnProperty('posx')) {
+				delta = options.posx - this.node.posx();
 
-				this.node.posx(nextpos);
-				this.nodeBooster.posx(this.nodeBooster.posx() + delta);
-				this.nodeBoostUp.posx(this.nodeBoostUp.posx() + delta);
-				this.nodeBoostDown.posx(this.nodeBoostDown.posx() + delta);
+				this.node.move({posx: options.posx});
+				this.nodeBooster.move({posx: this.nodeBooster.posx() + delta});
+				this.nodeBoostUp.move({posx: this.nodeBoostUp.posx() + delta});
+				this.nodeBoostDown.move({posx: this.nodeBoostDown.posx() + delta});
 				if (this.hit) {
-					$.friGame.sprites.explosion.posx(nextpos);
+					$.friGame.sprites.explosion.move({posx: options.posx});
+				}
+			}
+
+			if (options.hasOwnProperty('posy')) {
+				delta = options.posy - this.node.posy();
+
+				this.node.move({posy: options.posy});
+				this.nodeBooster.move({posy: this.nodeBooster.posy() + delta});
+				this.nodeBoostUp.move({posy: this.nodeBoostUp.posy() + delta});
+				this.nodeBoostDown.move({posy: this.nodeBoostDown.posy() + delta});
+				if (this.hit) {
+					$.friGame.sprites.explosion.posy({posy: options.posy});
 				}
 			}
 		},
 
+		posx: function () {
+			return this.node.posx();
+		},
+
 		posy: function (nextpos) {
-			var
-				delta;
-
-			if (nextpos === undefined) {
-				return this.node.posy();
-			} else {
-				delta = nextpos - this.node.posy();
-
-				this.node.posy(nextpos);
-				this.nodeBooster.posy(this.nodeBooster.posy() + delta);
-				this.nodeBoostUp.posy(this.nodeBoostUp.posy() + delta);
-				this.nodeBoostDown.posy(this.nodeBoostDown.posy() + delta);
-				if (this.hit) {
-					$.friGame.sprites.explosion.posy(nextpos);
-				}
-			}
+			return this.node.posy();
 		},
 
 		explode: function () {
@@ -152,16 +152,16 @@
 		}
 	};
 
-	_.Player = function () {
+	G.Player = function () {
 		var
-			player = Object.create(_.PrototypePlayer);
+			player = Object.create(G.PrototypePlayer);
 
 		player.init.apply(player, arguments);
 
 		return player;
 	};
 
-	_.PrototypeEnemy = {
+	G.PrototypeEnemy = {
 		init: function (node) {
 			this.shield = 2;
 			this.speedx = -5;
@@ -188,19 +188,19 @@
 			var
 				newpos = this.node.posx() + this.speedx;
 
-			this.node.posx(newpos);
+			this.node.move({posx: newpos});
 		},
 
 		updateY: function (playerNode) {
 			var
 				newpos = this.node.posy() + this.speedy;
 
-			this.node.posy(newpos);
+			this.node.move({posy: newpos});
 		}
 	};
 
-	_.PrototypeMinion = Object.create(_.PrototypeEnemy);
-	$.extend(_.PrototypeMinion, {
+	G.PrototypeMinion = Object.create(G.PrototypeEnemy);
+	$.extend(G.PrototypeMinion, {
 		idle: $.friGame.Animation({imageURL: 'minion_idle.png', numberOfFrame: 5, delta: 52, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
 		explode: $.friGame.Animation({imageURL: 'minion_explode.png', numberOfFrame: 11, delta: 52, rate: 30, type: $.friGame.ANIMATION_VERTICAL}),
 
@@ -209,24 +209,24 @@
 				pos = this.node.posy();
 
 			if (pos > (PLAYGROUND_HEIGHT - 100)) {
-				this.node.posy(pos - 2);
+				this.node.move({posy: pos - 2});
 			}
 		}
 	});
 
-	_.Minion = function () {
+	G.Minion = function () {
 		var
-			minion = Object.create(_.PrototypeMinion);
+			minion = Object.create(G.PrototypeMinion);
 
 		minion.init.apply(minion, arguments);
 
 		return minion;
 	};
 
-	_.PrototypeBrainy = Object.create(_.PrototypeEnemy);
-	$.extend(_.PrototypeBrainy, {
+	G.PrototypeBrainy = Object.create(G.PrototypeEnemy);
+	$.extend(G.PrototypeBrainy, {
 		init: function (node) {
-			_.PrototypeEnemy.init.call(this, node);
+			G.PrototypeEnemy.init.call(this, node);
 
 			this.node = node;
 			this.shield = 5;
@@ -243,27 +243,27 @@
 
 			if ((this.node.posy() + this.alignmentOffset) > playerNode.posy()) {
 				newpos = this.node.posy() - this.speedy;
-				this.node.posy(newpos);
+				this.node.move({posy: newpos});
 			} else if ((this.node.posy() + this.alignmentOffset) < playerNode.posy()) {
 				newpos = this.node.posy() + this.speedy;
-				this.node.posy(newpos);
+				this.node.move({posy: newpos});
 			}
 		}
 	});
 
-	_.Brainy = function () {
+	G.Brainy = function () {
 		var
-			brainy = Object.create(_.PrototypeBrainy);
+			brainy = Object.create(G.PrototypeBrainy);
 
 		brainy.init.apply(brainy, arguments);
 
 		return brainy;
 	};
 
-	_.PrototypeBossy = Object.create(_.PrototypeBrainy);
-	$.extend(_.PrototypeBossy, {
+	G.PrototypeBossy = Object.create(G.PrototypeBrainy);
+	$.extend(G.PrototypeBossy, {
 		init: function (node) {
-			_.PrototypeBrainy.init.call(this, node);
+			G.PrototypeBrainy.init.call(this, node);
 
 			this.node = node;
 			this.shield = 20;
@@ -279,14 +279,14 @@
 				pos = this.node.posx();
 
 			if (pos > (PLAYGROUND_WIDTH - 200)) {
-				this.node.posx(pos + this.speedx);
+				this.node.move({posx: pos + this.speedx});
 			}
 		}
 	});
 
-	_.Bossy = function () {
+	G.Bossy = function () {
 		var
-			bossy = Object.create(_.PrototypeBossy);
+			bossy = Object.create(G.PrototypeBossy);
 
 		bossy.init.apply(bossy, arguments);
 
@@ -350,10 +350,10 @@
 			.addGroup('playerMissileLayer').end()
 			.addGroup('enemiesMissileLayer').end();
 
-		_.thePlayer = _.Player();
-		_.enemiesMissiles = {};
-		_.enemies = {};
-		_.playerMissiles = {};
+		G.thePlayer = G.Player();
+		G.enemiesMissiles = {};
+		G.enemies = {};
+		G.playerMissiles = {};
 
 		//this is the HUD for the player life and shield
 		$('<div id="overlay"></div>').appendTo($('#playground'));
@@ -394,7 +394,7 @@
 			});
 		});
 
-		_.keyTracker = {};
+		G.keyTracker = {};
 
 		//this is where the keybinding occurs
 		$(document).keydown(function (e) {
@@ -403,29 +403,29 @@
 				playerposy,
 				name;
 
-			_.keyTracker[e.keyCode] = true;
+			G.keyTracker[e.keyCode] = true;
 
-			if (!gameOver && !_.thePlayer.hit) {
+			if (!gameOver && !G.thePlayer.hit) {
 				switch (e.keyCode) {
 				case 75: //this is shoot (k)
 					//shoot missile here
-					playerposx = _.thePlayer.posx();
-					playerposy = _.thePlayer.posy();
+					playerposx = G.thePlayer.posx();
+					playerposy = G.thePlayer.posy();
 					name = ['playerMissle_', String(Math.ceil(Math.random() * 1000))].join('');
 					$.friGame.groups.playerMissileLayer.addSprite(name, {animation: missile.player, posx: playerposx + 90, posy: playerposy + 14});
-					_.playerMissiles[name] = $.friGame.sprites[name];
+					G.playerMissiles[name] = $.friGame.sprites[name];
 					break;
 				case 65: //this is left! (a)
-					_.thePlayer.nodeBooster.setAnimation();
+					G.thePlayer.nodeBooster.setAnimation({animation: null});
 					break;
 				case 87: //this is up! (w)
-					_.thePlayer.nodeBoostUp.setAnimation(playerAnimation.up);
+					G.thePlayer.nodeBoostUp.setAnimation({animation: playerAnimation.up});
 					break;
 				case 68: //this is right (d)
-					_.thePlayer.nodeBooster.setAnimation(playerAnimation.booster);
+					G.thePlayer.nodeBooster.setAnimation({animation: playerAnimation.booster});
 					break;
 				case 83: //this is down! (s)
-					_.thePlayer.nodeBoostDown.setAnimation(playerAnimation.down);
+					G.thePlayer.nodeBoostDown.setAnimation({animation: playerAnimation.down});
 					break;
 				}
 			}
@@ -434,21 +434,21 @@
 		//this is where the keybinding occurs
 		$(document).keyup(function (e) {
 
-			_.keyTracker[e.keyCode] = false;
+			G.keyTracker[e.keyCode] = false;
 
-			if (!gameOver && !_.thePlayer.hit) {
+			if (!gameOver && !G.thePlayer.hit) {
 				switch (e.keyCode) {
 				case 65: //this is left! (a)
-					_.thePlayer.nodeBooster.setAnimation(playerAnimation.boost);
+					G.thePlayer.nodeBooster.setAnimation({animation: playerAnimation.boost});
 					break;
 				case 87: //this is up! (w)
-					_.thePlayer.nodeBoostUp.setAnimation();
+					G.thePlayer.nodeBoostUp.setAnimation({animation: null});
 					break;
 				case 68: //this is right (d)
-					_.thePlayer.nodeBooster.setAnimation(playerAnimation.boost);
+					G.thePlayer.nodeBooster.setAnimation({animation: playerAnimation.boost});
 					break;
 				case 83: //this is down! (s)
-					_.thePlayer.nodeBoostDown.setAnimation();
+					G.thePlayer.nodeBoostDown.setAnimation({animation: null});
 					break;
 				}
 			}
@@ -462,96 +462,94 @@
 				posx;
 
 			if (!gameOver) {
-				$('#shieldHUD').html(['shield: ', String(_.thePlayer.shield)].join(''));
-				$('#lifeHUD').html(['life: ', String(_.thePlayer.replay)].join(''));
+				$('#shieldHUD').html(['shield: ', String(G.thePlayer.shield)].join(''));
+				$('#lifeHUD').html(['life: ', String(G.thePlayer.replay)].join(''));
 				//Update the movement of the ship:
-				if (!_.thePlayer.hit) {
-					_.thePlayer.update();
-					if (_.keyTracker[65]) { //this is left! (a)
-						nextpos = _.thePlayer.posx() - 5;
+				if (!G.thePlayer.hit) {
+					G.thePlayer.update();
+					if (G.keyTracker[65]) { //this is left! (a)
+						nextpos = G.thePlayer.posx() - 5;
 						if (nextpos > 0) {
-							_.thePlayer.posx(nextpos);
+							G.thePlayer.move({posx: nextpos});
 						}
 					}
-					if (_.keyTracker[68]) { //this is right! (d)
-						nextpos = _.thePlayer.posx() + 5;
+					if (G.keyTracker[68]) { //this is right! (d)
+						nextpos = G.thePlayer.posx() + 5;
 						if (nextpos < PLAYGROUND_WIDTH - 100) {
-							_.thePlayer.posx(nextpos);
+							G.thePlayer.move({posx: nextpos});
 						}
 					}
-					if (_.keyTracker[87]) { //this is up! (w)
-						nextpos = _.thePlayer.posy() - 3;
+					if (G.keyTracker[87]) { //this is up! (w)
+						nextpos = G.thePlayer.posy() - 3;
 						if (nextpos > 0) {
-							_.thePlayer.posy(nextpos);
+							G.thePlayer.move({posy: nextpos});
 						}
 					}
-					if (_.keyTracker[83]) { //this is down! (s)
-						nextpos = _.thePlayer.posy() + 3;
+					if (G.keyTracker[83]) { //this is down! (s)
+						nextpos = G.thePlayer.posy() + 3;
 						if (nextpos < PLAYGROUND_HEIGHT - 30) {
-							_.thePlayer.posy(nextpos);
+							G.thePlayer.move({posy: nextpos});
 						}
 					}
 				} else {
-					posy = _.thePlayer.posy() + 5;
-					posx = _.thePlayer.posx() - 5;
+					posy = G.thePlayer.posy() + 5;
+					posx = G.thePlayer.posx() - 5;
 					if (posy > PLAYGROUND_HEIGHT) {
 						//Does the player did get out of the screen?
-						if (_.thePlayer.respawn()) {
+						if (G.thePlayer.respawn()) {
 							gameOver = true;
 							$('#playground').append('<div style="position: absolute; top: 50px; width: 700px; color: white; font-family: verdana, sans-serif;"><center><h1>Game Over</h1><br><a style="cursor: pointer;" id="restartbutton">Click here to restart the game!</a></center></div>');
-							$('#restartbutton').click(_.restartGame);
+							$('#restartbutton').click(G.restartGame);
 							//$('#actors, #playerMissileLayer, #enemiesMissileLayer').fadeTo(1000, 0);
 							//$('#background').fadeTo(5000, 0);
 						} else {
-							_.thePlayer.endExplosion();
-							_.thePlayer.posy(PLAYGROUND_HEIGHT / 2);
-							_.thePlayer.posx(PLAYGROUND_WIDTH / 2);
+							G.thePlayer.endExplosion();
+							G.thePlayer.move({posy: PLAYGROUND_HEIGHT / 2, posx: PLAYGROUND_WIDTH / 2});
 						}
 					} else {
-						_.thePlayer.posy(posy);
-						_.thePlayer.posx(posx);
+						G.thePlayer.move({posy: posy, posx: posx});
 					}
 				}
 
 				//Update the movement of the enemies
-				$.each(_.enemies, function (name) {
+				$.each(G.enemies, function (name) {
 					var
 						posx,
 						enemyposx,
 						enemyposy,
 						missilename;
 
-					this.update(_.thePlayer);
+					this.update(G.thePlayer);
 					posx = this.node.posx();
 					if ((posx + 100) < 0) {
 						this.node.remove();
-						delete _.enemies[name];
+						delete G.enemies[name];
 						return;
 					}
 					//Test for collisions
-					if (_.collision(this.node.posx(), this.node.posy(), this.node.width(), this.node.height(), _.thePlayer.node.posx(), _.thePlayer.node.posy(), _.thePlayer.node.width(), _.thePlayer.node.height())) {
-						this.node.setAnimation(this.explode, function (node) {
+					if (G.collision(this.node.posx(), this.node.posy(), this.node.width(), this.node.height(), G.thePlayer.node.posx(), G.thePlayer.node.posy(), G.thePlayer.node.width(), G.thePlayer.node.height())) {
+						this.node.setAnimation({animation: this.explode, callback: function (node) {
 							node.remove();
-						});
+						}});
 						//The player has been hit!
-						if (_.thePlayer.damage()) {
-							_.thePlayer.explode();
+						if (G.thePlayer.damage()) {
+							G.thePlayer.explode();
 						}
 					}
 					//Make the enemy fire
-					if (_.PrototypeBrainy.isPrototypeOf(this)) {
+					if (G.PrototypeBrainy.isPrototypeOf(this)) {
 						if (Math.random() < 0.05) {
 							enemyposx = this.node.posx();
 							enemyposy = this.node.posy();
 							missilename = ['enemiesMissile_', String(Math.ceil(Math.random() * 1000))].join('');
 							$.friGame.groups.enemiesMissileLayer.addSprite(missilename, {animation: missile.enemies, posx: enemyposx, posy: enemyposy + 20});
-							_.enemiesMissiles[missilename] = $.friGame.sprites[missilename];
+							G.enemiesMissiles[missilename] = $.friGame.sprites[missilename];
 						}
 					}
 				});
 
 				//Update the movement of the missiles
-				$.each(_.playerMissiles, function (name) {
+				$.each(G.playerMissiles, function (name) {
 					var
 						posx = this.posx(),
 						collided,
@@ -559,14 +557,14 @@
 
 					if (posx > PLAYGROUND_WIDTH) {
 						this.remove();
-						delete _.playerMissiles[name];
+						delete G.playerMissiles[name];
 						return;
 					}
-					this.posx(posx + MISSILE_SPEED);
+					this.move({posx: posx + MISSILE_SPEED});
 					//Test for collisions
 					collided = {};
-					$.each(_.enemies, function (enemy) {
-						if (_.collision(missile.posx(), missile.posy(), missile.width(), missile.height(), this.node.posx(), this.node.posy(), this.node.width(), this.node.height())) {
+					$.each(G.enemies, function (enemy) {
+						if (G.collision(missile.posx(), missile.posy(), missile.width(), missile.height(), this.node.posx(), this.node.posy(), this.node.width(), this.node.height())) {
 							collided[enemy] = this;
 						}
 					});
@@ -574,40 +572,40 @@
 						//An enemy has been hit!
 						$.each(collided, function (enemy) {
 							if (this.damage()) {
-								this.node.setAnimation(this.explode, function (node) {
+								this.node.setAnimation({animation: this.explode, callback: function (node) {
 									node.remove();
-								});
-								delete _.enemies[enemy];
+								}});
+								delete G.enemies[enemy];
 							}
 						});
-						this.setAnimation(missile.playerexplode, function (node) {
+						this.setAnimation({animation: missile.playerexplode, callback: function (node) {
 							node.remove();
-						});
-						this.posy(this.posy() - 7);
-						delete _.playerMissiles[name];
+						}});
+						this.move({posy: this.posy() - 7});
+						delete G.playerMissiles[name];
 					}
 				});
-				$.each(_.enemiesMissiles, function (name) {
+				$.each(G.enemiesMissiles, function (name) {
 					var
 						posx = this.posx();
 
 					if (posx < 0) {
 						this.remove();
-						delete _.enemiesMissiles[name];
+						delete G.enemiesMissiles[name];
 						return;
 					}
-					this.posx(posx - MISSILE_SPEED);
+					this.move({posx: posx - MISSILE_SPEED});
 					//Test for collisions
-					if (_.collision(this.posx(), this.posy(), this.width(), this.height(), _.thePlayer.node.posx(), _.thePlayer.node.posy(), _.thePlayer.node.width(), _.thePlayer.node.height())) {
+					if (G.collision(this.posx(), this.posy(), this.width(), this.height(), G.thePlayer.node.posx(), G.thePlayer.node.posy(), G.thePlayer.node.width(), G.thePlayer.node.height())) {
 						//The player has been hit!
-						if (_.thePlayer.damage()) {
-							_.thePlayer.explode();
+						if (G.thePlayer.damage()) {
+							G.thePlayer.explode();
 						}
 						//$(this).remove();
-						this.setAnimation(missile.enemiesexplode, function (node) {
+						this.setAnimation({animation: missile.enemiesexplode, callback: function (node) {
 							node.remove();
-						});
-						delete _.enemiesMissiles[name];
+						}});
+						delete G.enemiesMissiles[name];
 					}
 				});
 			}
@@ -621,17 +619,17 @@
 			if (!bossMode && !gameOver) {
 				if (Math.random() < 0.4) {
 					name = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-					$.friGame.groups.actors.addSprite(name, {animation: _.PrototypeMinion.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
-					_.enemies[name] = _.Minion($.friGame.sprites[name]);
+					$.friGame.groups.actors.addSprite(name, {animation: G.PrototypeMinion.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
+					G.enemies[name] = G.Minion($.friGame.sprites[name]);
 				} else if (Math.random() < 0.5) {
 					name = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-					$.friGame.groups.actors.addSprite(name, {animation: _.PrototypeBrainy.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
-					_.enemies[name] = _.Brainy($.friGame.sprites[name]);
+					$.friGame.groups.actors.addSprite(name, {animation: G.PrototypeBrainy.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
+					G.enemies[name] = G.Brainy($.friGame.sprites[name]);
 				} else if (Math.random() > 0.8) {
 					bossMode = true;
 					bossName = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-					$.friGame.groups.actors.addSprite(bossName, {animation: _.PrototypeBossy.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
-					_.enemies[bossName] = _.Bossy($.friGame.sprites[bossName]);
+					$.friGame.groups.actors.addSprite(bossName, {animation: G.PrototypeBossy.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
+					G.enemies[bossName] = G.Bossy($.friGame.sprites[bossName]);
 				}
 			} else {
 				if (!$.friGame.sprites[bossName]) {
@@ -648,22 +646,22 @@
 			var
 				newPos = ($.friGame.sprites.background1.posx() - smallStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
 
-			$.friGame.sprites.background1.posx(newPos);
+			$.friGame.sprites.background1.move({posx: newPos});
 
 			newPos = ($.friGame.sprites.background2.posx() - smallStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background2.posx(newPos);
+			$.friGame.sprites.background2.move({posx: newPos});
 
 			newPos = ($.friGame.sprites.background3.posx() - mediumStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background3.posx(newPos);
+			$.friGame.sprites.background3.move({posx: newPos});
 
 			newPos = ($.friGame.sprites.background4.posx() - mediumStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background4.posx(newPos);
+			$.friGame.sprites.background4.move({posx: newPos});
 
 			newPos = ($.friGame.sprites.background5.posx() - bigStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background5.posx(newPos);
+			$.friGame.sprites.background5.move({posx: newPos});
 
 			newPos = ($.friGame.sprites.background6.posx() - bigStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background6.posx(newPos);
+			$.friGame.sprites.background6.move({posx: newPos});
 		}, REFRESH_RATE);
 	});
 }());

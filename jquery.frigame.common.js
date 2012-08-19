@@ -53,7 +53,9 @@ window.requestAnimFrame = (function () {
 	$.friGame = fg;
 
 	$.extend(fg, {
-		// "constants" for the different type of an animation
+		// Public options
+
+		// constants for the different type of an animation
 		ANIMATION_VERTICAL: 1,		// genertated by a verical offset of the background
 		ANIMATION_HORIZONTAL: 2,	// genertated by a horizontal offset of the background
 		ANIMATION_ONCE: 4,			// played only once (else looping indefinitly)
@@ -67,18 +69,21 @@ window.requestAnimFrame = (function () {
 		YPOS_BOTTOM: 1,
 		YPOS_CENTER: 2,
 
-		// basic values
+		sprites: {},
+		groups: {},
+
+		// Implementation details
+
 		refreshRate: 30,
 
 		animations: [],
-		sprites: {},
-		groups: {},
 		callbacks: [],
 
 		drawDone: true,
 
 		PrototypeBaseAnimation: {
 			defaults: {
+				// Public options
 				imageURL: '',
 				numberOfFrame: 1,
 				delta: 0,
@@ -87,6 +92,8 @@ window.requestAnimFrame = (function () {
 				distance: 0,
 				offsetx: 0,
 				offsety: 0,
+
+				// Implementation details
 				frameWidth: 0,
 				frameHeight: 0,
 				halfWidth: 0,
@@ -117,6 +124,8 @@ window.requestAnimFrame = (function () {
 
 				this.img = img;
 			},
+
+			// Implementation details
 
 			onLoad: function () {
 				var
@@ -189,19 +198,23 @@ window.requestAnimFrame = (function () {
 		PrototypeBaseSprite: {
 			defaults: {
 				// Public options
+				animation: null,
 				animationIndex: 0,
+				callback: null,
 				posx: 0,
 				posy: 0,
 				xpos: fg.XPOS_LEFT,
 				ypos: fg.YPOS_TOP,
 
 				// Implementation details
+				left: 0,
+				top: 0,
 				translateX: 0,
 				translateY: 0,
 				posOffsetX: 0,
 				posOffsetY: 0,
-				oldPosx: 0,
-				oldPosy: 0,
+				oldLeft: 0,
+				oldTop: 0,
 				idleCounter: 0,
 				currentFrame: 0,
 				multix: 0,
@@ -218,6 +231,7 @@ window.requestAnimFrame = (function () {
 
 			init: function (name, options, parent) {
 				var
+					my_options = Object.create(this.defaults),
 					xpos,
 					ypos
 				;
@@ -225,233 +239,126 @@ window.requestAnimFrame = (function () {
 				fg.sprites[name] = this;
 
 				this.name = name;
+				this.options = my_options;
 				this.parent = parent;
 
-				this.options = Object.create(this.defaults);
-				options = $.extend(this.options, options);
-
-				this.setAnimation(options.animation, options.animationIndex, options.callback);
-
-				xpos = options.xpos;
-				if (xpos === fg.XPOS_CENTER) {
-					this.setCenterX(options.posx);
-				} else if (xpos === fg.XPOS_RIGHT) {
-					this.setRight(options.posx);
-				} else {
-					this.setLeft(options.posx);
-				}
-
-				ypos = options.ypos;
-				if (ypos === fg.YPOS_CENTER) {
-					this.setCenterY(options.posy);
-				} else if (ypos === fg.YPOS_BOTTOM) {
-					this.setBottom(options.posy);
-				} else {
-					this.setTop(options.posy);
-				}
+				this.setAnimation(options);
+				this.move();
 			},
 
-			remove: function () {
+			// Public functions
+
+			setAnimation: function (options) {
 				var
-					parent = this.parent,
-					parent_layers = parent.layers,
-					len_parent_layers = parent_layers.length,
-					name = this.name,
-					i;
-
-				for (i = 0; i < len_parent_layers; i += 1) {
-					if (parent_layers[i].name === name) {
-						parent_layers.splice(i, 1);
-						break;
-					}
-				}
-
-				delete fg.sprites[name];
-			},
-
-			setAnimation: function (animation, index, callback) {
-				this.options.animation = animation;
-
-				return this.setAnimationIndex(index, callback);
-			},
-
-			getAnimation: function () {
-				return this.options.animation;
-			},
-
-			setAnimationIndex: function (index, callback) {
-				var
-					options = this.options,
+					my_options = this.options,
+					new_options = options || {},
+					animation,
+					animation_redefined = new_options.hasOwnProperty('animation'),
+					index,
+					index_redefined = new_options.hasOwnProperty('animationIndex'),
 					animation_options
 				;
 
-				options.animationIndex = index;
-
-				if (index && options.animation) {
-					animation_options = options.animation.options;
-					options.multix = index * animation_options.multix;
-					options.multiy = index * animation_options.multiy;
-				} else {
-					options.multix = 0;
-					options.multiy = 0;
+				// If the animation gets redefined, but the index is not defined, assume index of 0
+				if (my_options.animationIndex !== 0) {
+					if ((animation_redefined) && (!index_redefined)) {
+						new_options.animationIndex = 0;
+					}
 				}
 
-				options.callback = callback;
-				options.idleCounter = 0;
-				options.currentFrame = 0;
-				this.endAnimation = false;
+				// Set the new options
+				$.extend(my_options, new_options);
 
-				return this;
-			},
+				// Change settings only if animation or index are redefined
+				if (animation_redefined || index_redefined) {
+					animation = my_options.animation;
+					index = my_options.animationIndex;
 
-			getAnimationIndex: function () {
-				return this.options.animationIndex;
-			},
+					if (animation) {
+						animation_options = animation.options;
 
-			setLeft: function (x) {
-				var
-					options = this.options,
-					animation = options.animation
-				;
+						my_options.translateX = ((my_options.left + animation_options.halfWidth) + 0.5) << 0;
+						my_options.translateY = ((my_options.top + animation_options.halfHeight) + 0.5) << 0;
 
-				options.posx = (x + 0.5) << 0;
+						if (index) {
+							my_options.multix = index * animation_options.multix;
+							my_options.multiy = index * animation_options.multiy;
+						} else {
+							my_options.multix = 0;
+							my_options.multiy = 0;
+						}
+					} else {
+						my_options.translateX = (my_options.left + 0.5) << 0;
+						my_options.translateY = (my_options.top + 0.5) << 0;
 
-				if (animation) {
-					options.translateX = ((x + animation.options.halfWidth) + 0.5) << 0;
-				} else {
-					options.translateX = (x + 0.5) << 0;
-				}
+						my_options.multix = 0;
+						my_options.multiy = 0;
+					}
 
-				return this;
-			},
-
-			getLeft: function () {
-				return this.options.posx;
-			},
-
-			setTop: function (y) {
-				var
-					options = this.options,
-					animation = options.animation;
-
-				options.posy = (y + 0.5) << 0;
-
-				if (animation) {
-					options.translateY = ((y + animation.options.halfHeight) + 0.5) << 0;
-				} else {
-					options.translateY = (y + 0.5) << 0;
+					my_options.idleCounter = 0;
+					my_options.currentFrame = 0;
+					this.endAnimation = false;
 				}
 
 				return this;
 			},
 
-			getTop: function () {
-				return this.options.posy;
-			},
-
-			setRight: function (x) {
+			move: function (options) {
 				var
-					animation = this.options.animation
+					my_options = this.options,
+					new_options = options || {},
+					left,
+					top,
+					xpos,
+					ypos,
+					animation = my_options.animation,
+					animation_options
 				;
 
-				if (animation) {
-					x -= animation.options.frameWidth;
-				}
-
-				return this.setLeft(x);
-			},
-
-			getRight: function () {
-				var
-					animation = this.options.animation,
-					x = this.getLeft()
-				;
+				// Set the new options
+				$.extend(my_options, new_options);
 
 				if (animation) {
-					x += animation.options.frameWidth;
+					animation_options = animation.options;
+
+					xpos = my_options.xpos;
+					if (xpos === fg.XPOS_CENTER) {
+						left = ((my_options.posx - animation_options.halfWidth) + 0.5) << 0;
+					} else if (xpos === fg.XPOS_RIGHT) {
+						left = ((my_options.posx - animation_options.frameWidth) + 0.5) << 0;
+					} else {
+						left = (my_options.posx + 0.5) << 0;
+					}
+
+					ypos = my_options.ypos;
+					if (ypos === fg.YPOS_CENTER) {
+						top = ((my_options.posy - animation_options.halfHeight) + 0.5) << 0;
+					} else if (ypos === fg.YPOS_BOTTOM) {
+						top = ((my_options.posy - animation_options.frameHeight) + 0.5) << 0;
+					} else {
+						top = (my_options.posy + 0.5) << 0;
+					}
+
+					my_options.translateX = ((left + animation_options.halfWidth) + 0.5) << 0;
+					my_options.translateY = ((top + animation_options.halfHeight) + 0.5) << 0;
+				} else {
+					left = (my_options.posx + 0.5) << 0;
+					top = (my_options.posy + 0.5) << 0;
+
+					my_options.translateX = (left + 0.5) << 0;
+					my_options.translateY = (top + 0.5) << 0;
 				}
 
-				return x;
-			},
+				my_options.left = left;
+				my_options.top = top;
 
-			setBottom: function (y) {
-				var
-					animation = this.options.animation
-				;
-
-				if (animation) {
-					y -= animation.options.frameHeight;
-				}
-
-				return this.setTop(y);
-			},
-
-			getBottom: function () {
-				var
-					animation = this.options.animation,
-					y = this.getTop()
-				;
-
-				if (animation) {
-					y += animation.options.frameHeight;
-				}
-
-				return y;
-			},
-
-			setCenterX: function (x) {
-				var
-					animation = this.options.animation
-				;
-
-				if (animation) {
-					x -= animation.options.halfWidth;
-				}
-
-				return this.setLeft(x);
-			},
-
-			getCenterX: function () {
-				var
-					animation = this.options.animation,
-					x = this.getLeft()
-				;
-
-				if (animation) {
-					x += animation.options.halfWidth;
-				}
-
-				return x;
-			},
-
-			setCenterY: function (y) {
-				var
-					animation = this.options.animation
-				;
-
-				if (animation) {
-					y -= animation.options.halfHeight;
-				}
-
-				return this.setTop(y);
-			},
-
-			getCenterY: function () {
-				var
-					animation = this.options.animation,
-					y = this.getTop()
-				;
-
-				if (animation) {
-					y += animation.options.halfHeight;
-				}
-
-				return y;
+				return this;
 			},
 
 			rotate: function (angle) {
 				var
-					options = this.options;
+					options = this.options
+				;
 
 				options.angle = angle;
 
@@ -460,7 +367,8 @@ window.requestAnimFrame = (function () {
 
 			scale: function (factor) {
 				var
-					options = this.options;
+					options = this.options
+				;
 
 				options.factor = factor;
 
@@ -469,7 +377,8 @@ window.requestAnimFrame = (function () {
 
 			fliph: function (flip) {
 				var
-					options = this.options;
+					options = this.options
+				;
 
 				if (flip === undefined) {
 					options.factorh *= -1;
@@ -484,7 +393,8 @@ window.requestAnimFrame = (function () {
 
 			flipv: function (flip) {
 				var
-					options = this.options;
+					options = this.options
+				;
 
 				if (flip === undefined) {
 					options.factorv *= -1;
@@ -497,38 +407,12 @@ window.requestAnimFrame = (function () {
 				return this;
 			},
 
-			update: function () {
-				var
-					options = this.options,
-					animation = options.animation,
-					animation_options,
-					currentFrame = options.currentFrame;
+			posx: function () {
+				return this.options.posx;
+			},
 
-				if (!this.endAnimation) {
-					if (animation) {
-						animation_options = animation.options;
-
-						options.idleCounter += 1;
-						if (options.idleCounter >= animation_options.rate) {
-							options.idleCounter = 0;
-							currentFrame += 1;
-							if (currentFrame >= animation_options.numberOfFrame) {
-								if (animation_options.once) {
-									currentFrame -= 1;
-									options.idleCounter += 1;
-									this.endAnimation = true;
-								} else {
-									currentFrame = 0;
-								}
-
-								if (options.callback) {
-									options.callback(this);
-								}
-							}
-							options.currentFrame = currentFrame;
-						}
-					}
-				}
+			posy: function () {
+				return this.options.posy;
 			},
 
 			width: function () {
@@ -555,12 +439,69 @@ window.requestAnimFrame = (function () {
 				}
 
 				return h;
+			},
+
+			remove: function () {
+				var
+					parent = this.parent,
+					parent_layers = parent.layers,
+					len_parent_layers = parent_layers.length,
+					name = this.name,
+					i
+				;
+
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === name) {
+						parent_layers.splice(i, 1);
+						break;
+					}
+				}
+
+				delete fg.sprites[name];
+			},
+
+			// Implementation details
+
+			update: function () {
+				var
+					options = this.options,
+					animation = options.animation,
+					animation_options,
+					currentFrame = options.currentFrame
+				;
+
+				if (!this.endAnimation) {
+					if (animation) {
+						animation_options = animation.options;
+
+						options.idleCounter += 1;
+						if (options.idleCounter >= animation_options.rate) {
+							options.idleCounter = 0;
+							currentFrame += 1;
+							if (currentFrame >= animation_options.numberOfFrame) {
+								if (animation_options.once) {
+									currentFrame -= 1;
+									options.idleCounter += 1;
+									this.endAnimation = true;
+								} else {
+									currentFrame = 0;
+								}
+
+								if (options.callback) {
+									options.callback(this);
+								}
+							}
+							options.currentFrame = currentFrame;
+						}
+					}
+				}
 			}
 		},
 
 		Sprite: function () {
 			var
-				sprite = Object.create(fg.PrototypeSprite);
+				sprite = Object.create(fg.PrototypeSprite)
+			;
 
 			sprite.init.apply(sprite, arguments);
 
@@ -576,9 +517,12 @@ window.requestAnimFrame = (function () {
 				this.parent = parent;
 			},
 
+			// Public functions
+
 			addSprite: function (name, options) {
 				var
-					sprite = fg.Sprite(name, options, this);
+					sprite = fg.Sprite(name, options, this)
+				;
 
 				this.layers.push({name: name, obj: sprite});
 
@@ -587,7 +531,8 @@ window.requestAnimFrame = (function () {
 
 			addGroup: function (name) {
 				var
-					group = fg.SpriteGroup(name, this);
+					group = fg.SpriteGroup(name, this)
+				;
 
 				this.layers.push({name: name, obj: group});
 
@@ -606,6 +551,30 @@ window.requestAnimFrame = (function () {
 				return parent;
 			},
 
+			hide: function () {
+				var
+					layers = this.layers,
+					len_layers = layers.length,
+					i
+				;
+
+				for (i = 0; i < len_layers; i += 1) {
+					layers[i].obj.hide();
+				}
+			},
+
+			show: function () {
+				var
+					layers = this.layers,
+					len_layers = layers.length,
+					i
+				;
+
+				for (i = 0; i < len_layers; i += 1) {
+					layers[i].obj.show();
+				}
+			},
+
 			remove: function () {
 				var
 					layers = this.layers,
@@ -613,7 +582,8 @@ window.requestAnimFrame = (function () {
 					parent_layers = parent.layers,
 					len_parent_layers = parent_layers.length,
 					name = this.name,
-					i;
+					i
+				;
 
 				while (layers.length) {
 					layers[0].remove();
@@ -629,11 +599,14 @@ window.requestAnimFrame = (function () {
 				delete fg.groups[name];
 			},
 
+			// Implementation details
+
 			update: function () {
 				var
 					layers = this.layers,
 					len_layers = layers.length,
-					i;
+					i
+				;
 
 				for (i = 0; i < len_layers; i += 1) {
 					if (layers[i]) {
@@ -646,133 +619,37 @@ window.requestAnimFrame = (function () {
 				var
 					layers = this.layers,
 					len_layers = layers.length,
-					i;
+					i
+				;
 
 				for (i = 0; i < len_layers; i += 1) {
 					layers[i].obj.draw();
-				}
-			},
-
-			show: function () {
-				var
-					layers = this.layers,
-					len_layers = layers.length,
-					i;
-
-				for (i = 0; i < len_layers; i += 1) {
-					layers[i].obj.show();
-				}
-			},
-
-			hide: function () {
-				var
-					layers = this.layers,
-					len_layers = layers.length,
-					i;
-
-				for (i = 0; i < len_layers; i += 1) {
-					layers[i].obj.hide();
 				}
 			}
 		},
 
 		SpriteGroup: function () {
 			var
-				group = Object.create(fg.PrototypeSpriteGroup);
+				group = Object.create(fg.PrototypeSpriteGroup)
+			;
 
 			group.init.apply(group, arguments);
 
 			return group;
 		},
 
-		preload: function () {
+		// Public functions
+
+		playground: function () {
 			var
-				animations = fg.animations,
-				len_animations = animations.length,
-				completed = 0,
-				i;
+				scenegraph = fg.groups.scenegraph
+			;
 
-			for (i = 0; i < len_animations; i += 1) {
-				if (animations[i].img.complete) {
-					completed += 1;
-				}
+			if (!scenegraph) {
+				scenegraph = fg.SpriteGroup('scenegraph', null);
 			}
 
-			if (fg.loadCallback) {
-				if (len_animations !== 0) {
-					fg.loadCallback(completed / len_animations);
-				} else {
-					fg.loadCallback(1);
-				}
-			}
-
-			if (completed === len_animations) {
-				clearInterval(fg.idPreload);
-
-				for (i = 0; i < len_animations; i += 1) {
-					animations[i].onLoad();
-				}
-
-				$.each(fg.sprites, function () {
-					var
-						options = this.options;
-
-					this.setAnimation(options.animation, options.animationIndex, options.callback);
-				});
-
-				if (fg.loadCallback) {
-					delete fg.loadCallback;
-				}
-
-				if (fg.completeCallback) {
-					fg.completeCallback();
-				}
-
-				fg.idRefresh = setInterval(fg.refresh, fg.refreshRate);
-			}
-		},
-
-		draw: function () {
-			fg.groups.scenegraph.draw();
-			fg.drawDone = true;
-		},
-
-		refresh: function () {
-			var
-				callbacks = fg.callbacks,
-				len_callbacks = callbacks.length,
-				callback,
-				retval,
-				remove_callbacks = [],
-				len_remove_callbacks,
-				i,
-				scenegraph = fg.groups.scenegraph;
-
-			if (scenegraph) {
-				scenegraph.update();
-
-				if (fg.drawDone) {
-					fg.drawDone = false;
-					window.requestAnimFrame(fg.draw);
-				}
-			}
-
-			for (i = 0; i < len_callbacks; i += 1) {
-				callback = callbacks[i];
-				callback.idleCounter += 1;
-				if (callback.idleCounter >= callback.rate) {
-					callback.idleCounter = 0;
-					retval = callback.callback();
-					if (retval) {
-						remove_callbacks.unshift(i);
-					}
-				}
-			}
-
-			len_remove_callbacks = remove_callbacks.length;
-			for (i = 0; i < len_remove_callbacks; i += 1) {
-				callbacks.splice(i, 1);
-			}
+			return scenegraph;
 		},
 
 		startGame: function (callback, rate) {
@@ -801,18 +678,99 @@ window.requestAnimFrame = (function () {
 			fg.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
 
 			return this;
+		},
+
+		// Implementation details
+
+		preload: function () {
+			var
+				animations = fg.animations,
+				len_animations = animations.length,
+				completed = 0,
+				i
+			;
+
+			for (i = 0; i < len_animations; i += 1) {
+				if (animations[i].img.complete) {
+					completed += 1;
+				}
+			}
+
+			if (fg.loadCallback) {
+				if (len_animations !== 0) {
+					fg.loadCallback(completed / len_animations);
+				} else {
+					fg.loadCallback(1);
+				}
+			}
+
+			if (completed === len_animations) {
+				clearInterval(fg.idPreload);
+
+				for (i = 0; i < len_animations; i += 1) {
+					animations[i].onLoad();
+				}
+
+				$.each(fg.sprites, function () {
+					this.setAnimation(this.options);
+					this.move();
+				});
+
+				if (fg.loadCallback) {
+					delete fg.loadCallback;
+				}
+
+				if (fg.completeCallback) {
+					fg.completeCallback();
+				}
+
+				fg.idRefresh = setInterval(fg.refresh, fg.refreshRate);
+			}
+		},
+
+		refresh: function () {
+			var
+				callbacks = fg.callbacks,
+				len_callbacks = callbacks.length,
+				callback,
+				retval,
+				remove_callbacks = [],
+				len_remove_callbacks,
+				i,
+				scenegraph = fg.groups.scenegraph
+			;
+
+			if (scenegraph) {
+				scenegraph.update();
+
+				if (fg.drawDone) {
+					fg.drawDone = false;
+					window.requestAnimFrame(fg.draw);
+				}
+			}
+
+			for (i = 0; i < len_callbacks; i += 1) {
+				callback = callbacks[i];
+				callback.idleCounter += 1;
+				if (callback.idleCounter >= callback.rate) {
+					callback.idleCounter = 0;
+					retval = callback.callback();
+					if (retval) {
+						remove_callbacks.unshift(i);
+					}
+				}
+			}
+
+			len_remove_callbacks = remove_callbacks.length;
+			for (i = 0; i < len_remove_callbacks; i += 1) {
+				callbacks.splice(i, 1);
+			}
+		},
+
+		draw: function () {
+			fg.groups.scenegraph.draw();
+			fg.drawDone = true;
 		}
 	});
-
-	fg.playground = function () {
-		var
-			scenegraph = fg.groups.scenegraph;
-
-		if (!scenegraph) {
-			scenegraph = fg.SpriteGroup('scenegraph', null);
-		}
-
-		return scenegraph;
-	};
 }(jQuery));
 

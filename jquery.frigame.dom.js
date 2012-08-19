@@ -51,53 +51,64 @@
 			fg.PrototypeBaseSprite.remove.apply(this, arguments);
 		},
 
-		setAnimation: function (animation, index, callback) {
+		setAnimation: function (options) {
 			var
-				options = this.options,
-				animation_options
+				my_options = this.options,
+				new_options = options || {},
+				animation,
+				animation_options,
+				index_changed = false,
+				css_options
 			;
 
 			fg.PrototypeBaseSprite.setAnimation.apply(this, arguments);
 
-			if (animation) {
-				animation_options = animation.options;
+			animation = my_options.animation;
+			animation_options = animation && animation.options;
 
-				this.dom.css({
-					'width': [String(animation_options.frameWidth), 'px'].join(''),
-					'height': [String(animation_options.frameHeight), 'px'].join(''),
-					'background-image': ['url("', animation_options.imageURL, '")'].join('')
-				});
+			if (new_options.hasOwnProperty('animationIndex')) {
+				if (animation) {
+					this.dom.css('background-position', [
+						String(-(animation_options.offsetx + my_options.multix)),
+						'px ',
+						String(-(animation_options.offsety + my_options.multiy)),
+						'px'
+					].join(''));
 
-				if (fg.filterFunction) {
-					if ((options.angle) || (options.factor !== 1) || (options.factorh !== 1) || (options.factorv !== 1)) {
-						this.ieFilter();
-					}
+					index_changed = true;
 				}
-			} else {
-				this.dom.css('background-image', 'none');
+			}
+
+			if (new_options.hasOwnProperty('animation')) {
+				if (animation) {
+					css_options = {
+						'width': [String(animation_options.frameWidth), 'px'].join(''),
+						'height': [String(animation_options.frameHeight), 'px'].join(''),
+						'background-image': ['url("', animation_options.imageURL, '")'].join('')
+					};
+
+					if (!index_changed) {
+						css_options['background-position'] = [
+							String(-(animation_options.offsetx + my_options.multix)),
+							'px ',
+							String(-(animation_options.offsety + my_options.multiy)),
+							'px'
+						].join('');
+					}
+
+					this.dom.css(css_options);
+
+					if (fg.filterFunction) {
+						if ((my_options.angle) || (my_options.factor !== 1) || (my_options.factorh !== 1) || (my_options.factorv !== 1)) {
+							this.ieFilter();
+						}
+					}
+				} else {
+					this.dom.css('background-image', 'none');
+				}
 			}
 
 			return this;
-		},
-
-		setAnimationIndex: function (index, callback) {
-			var
-				options = this.options,
-				animation_options
-			;
-
-			fg.PrototypeBaseSprite.setAnimationIndex.apply(this, arguments);
-
-			if (options.animation) {
-				animation_options = options.animation.options;
-
-				this.dom.css('background-position', [
-					String(-(animation_options.offsetx + options.multix)),
-					'px ',
-					String(-(animation_options.offsety + options.multiy)),
-					'px'
-				].join(''));
-			}
 		},
 
 		transform: function () {
@@ -166,8 +177,8 @@
 			options.posOffsetX = (((newWidth - animation_options.frameWidth) / 2) + 0.5) << 0;
 			options.posOffsetY = (((newHeight - animation_options.frameHeight) / 2) + 0.5) << 0;
 			dom.css({
-				'left': [String(options.posx - options.posOffsetX), 'px'].join(''),
-				'top': [String(options.posy - options.posOffsetY), 'px'].join('')
+				'left': [String(options.left - options.posOffsetX), 'px'].join(''),
+				'top': [String(options.top - options.posOffsetY), 'px'].join('')
 			});
 		},
 
@@ -176,22 +187,22 @@
 				options = this.options,
 				currentFrame = options.currentFrame,
 				animation_options,
-				posx = options.posx,
-				posy = options.posy,
+				left = options.left,
+				top = options.top,
 				angle = options.angle,
 				factor = options.factor,
 				factorh = options.factorh,
 				factorv = options.factorv;
 
 			if (options.animation) {
-				if (posx !== options.oldPosx) {
-					this.dom.css('left', [String(posx - options.posOffsetX), 'px'].join(''));
-					options.oldPosx = posx;
+				if (left !== options.oldLeft) {
+					this.dom.css('left', [String(left - options.posOffsetX), 'px'].join(''));
+					options.oldLeft = left;
 				}
 
-				if (posy !== options.oldPosy) {
-					this.dom.css('top', [String(posy - options.posOffsetY), 'px'].join(''));
-					options.oldPosy = posy;
+				if (top !== options.oldTop) {
+					this.dom.css('top', [String(top - options.posOffsetY), 'px'].join(''));
+					options.oldTop = top;
 				}
 
 				if ((angle !== options.oldAngle) ||
