@@ -1,7 +1,7 @@
 /*global jQuery */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
-// Copyright (c) 2011-2012 Franco Bugnano
+// Copyright (c) 2011 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,12 @@
 
 (function ($) {
 	var
-		fg = $.friGame
-	;
+		friGame = $.friGame;
 
-	fg.PrototypeAnimation = Object.create(fg.PrototypeBaseAnimation);
+	friGame.PrototypeAnimation = Object.create(friGame.PrototypeBaseAnimation);
 
-	fg.PrototypeSprite = Object.create(fg.PrototypeBaseSprite);
-	$.extend(fg.PrototypeSprite, {
+	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
+	$.extend(friGame.PrototypeSprite, {
 		init: function (name, options, parent) {
 			var
 				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent.dom);
@@ -40,7 +39,7 @@
 			this.dom = dom;
 			dom.css('position', 'absolute');
 
-			fg.PrototypeBaseSprite.init.apply(this, arguments);
+			friGame.PrototypeBaseSprite.init.apply(this, arguments);
 
 			this.draw();
 		},
@@ -48,7 +47,7 @@
 		remove: function () {
 			this.dom.remove();
 
-			fg.PrototypeBaseSprite.remove.apply(this, arguments);
+			friGame.PrototypeBaseSprite.remove.apply(this, arguments);
 		},
 
 		setAnimation: function (options) {
@@ -56,49 +55,31 @@
 				my_options = this.options,
 				new_options = options || {},
 				animation,
-				animation_options,
-				index_changed = false,
-				css_options
+				index,
+				animation_options
 			;
 
-			fg.PrototypeBaseSprite.setAnimation.apply(this, arguments);
+			friGame.PrototypeBaseSprite.setAnimation.apply(this, arguments);
 
 			animation = my_options.animation;
+			index = my_options.animationIndex;
 			animation_options = animation && animation.options;
 
-			if (new_options.hasOwnProperty('animationIndex')) {
+			if (new_options.animation !== undefined) {
 				if (animation) {
-					this.dom.css('background-position', [
-						String(-(animation_options.offsetx + my_options.multix)),
-						'px ',
-						String(-(animation_options.offsety + my_options.multiy)),
-						'px'
-					].join(''));
-
-					index_changed = true;
-				}
-			}
-
-			if (new_options.hasOwnProperty('animation')) {
-				if (animation) {
-					css_options = {
+					this.dom.css({
 						'width': [String(animation_options.frameWidth), 'px'].join(''),
 						'height': [String(animation_options.frameHeight), 'px'].join(''),
-						'background-image': ['url("', animation_options.imageURL, '")'].join('')
-					};
-
-					if (!index_changed) {
-						css_options['background-position'] = [
+						'background-image': ['url("', animation_options.imageURL, '")'].join(''),
+						'background-position': [
 							String(-(animation_options.offsetx + my_options.multix)),
 							'px ',
 							String(-(animation_options.offsety + my_options.multiy)),
 							'px'
-						].join('');
-					}
+						].join('')
+					});
 
-					this.dom.css(css_options);
-
-					if (fg.filterFunction) {
+					if (friGame.filterFunction) {
 						if ((my_options.angle) || (my_options.factor !== 1) || (my_options.factorh !== 1) || (my_options.factorv !== 1)) {
 							this.ieFilter();
 						}
@@ -106,6 +87,17 @@
 				} else {
 					this.dom.css('background-image', 'none');
 				}
+			} else if (new_options.animationIndex !== undefined) {
+				if (animation) {
+					this.dom.css('background-position', [
+						String(-(animation_options.offsetx + my_options.multix)),
+						'px ',
+						String(-(animation_options.offsety + my_options.multiy)),
+						'px'
+					].join(''));
+				}
+			} else {
+				$.noop();
 			}
 
 			return this;
@@ -115,7 +107,7 @@
 			var
 				dom = this.dom,
 				options = this.options,
-				transformFunction = fg.transformFunction,
+				transformFunction = friGame.transformFunction,
 				angle = options.angle,
 				factor = options.factor,
 				factorh = options.factorh,
@@ -132,7 +124,7 @@
 				}
 
 				dom.css(transformFunction, transform.join(''));
-			} else if (fg.filterFunction) {
+			} else if (friGame.filterFunction) {
 				this.ieFilter();
 			} else {
 				$.noop();
@@ -169,7 +161,7 @@
 				filter = '';
 			}
 
-			dom.css(fg.filterFunction, filter);
+			dom.css(friGame.filterFunction, filter);
 
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
@@ -237,8 +229,8 @@
 		}
 	});
 
-	fg.PrototypeSpriteGroup = Object.create(fg.PrototypeBaseSpriteGroup);
-	$.extend(fg.PrototypeSpriteGroup, {
+	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
+	$.extend(friGame.PrototypeSpriteGroup, {
 		init: function (name, parent) {
 			var
 				dom,
@@ -254,17 +246,17 @@
 
 			if (!parent) {
 				if (dom.css('-moz-transform')) {
-					fg.transformFunction = '-moz-transform';
+					friGame.transformFunction = '-moz-transform';
 				} else if (dom.css('-o-transform')) {
-					fg.transformFunction = '-o-transform';
+					friGame.transformFunction = '-o-transform';
 				} else if ((dom.css('msTransform') !== null) && (dom.css('msTransform') !== undefined)) {
-					fg.transformFunction = 'msTransform';
+					friGame.transformFunction = 'msTransform';
 				} else if ((dom.css('transform') !== null) && (dom.css('transform') !== undefined)) {
-					fg.transformFunction = 'transform';
+					friGame.transformFunction = 'transform';
 				} else if ((dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)) {
-					fg.transformFunction = '-webkit-transform';
+					friGame.transformFunction = '-webkit-transform';
 				} else if (dom.css('filter') !== undefined) {
-					fg.filterFunction = 'filter';
+					friGame.filterFunction = 'filter';
 				} else {
 					$.noop();
 				}
@@ -278,13 +270,13 @@
 
 			this.dom = dom;
 
-			fg.PrototypeBaseSpriteGroup.init.apply(this, arguments);
+			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 		},
 
 		remove: function () {
 			this.dom.remove();
 
-			fg.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
+			friGame.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
 		}
 	});
 }(jQuery));

@@ -126,7 +126,7 @@
 				this.nodeBoostUp.move({posy: this.nodeBoostUp.posy() + delta});
 				this.nodeBoostDown.move({posy: this.nodeBoostDown.posy() + delta});
 				if (this.hit) {
-					$.friGame.sprites.explosion.posy({posy: options.posy});
+					$.friGame.sprites.explosion.move({posy: options.posy});
 				}
 			}
 		},
@@ -135,7 +135,7 @@
 			return this.node.posx();
 		},
 
-		posy: function (nextpos) {
+		posy: function () {
 			return this.node.posy();
 		},
 
@@ -553,7 +553,7 @@
 					var
 						posx = this.posx(),
 						collided,
-						missile = this;
+						playermissile = this;
 
 					if (posx > PLAYGROUND_WIDTH) {
 						this.remove();
@@ -564,7 +564,7 @@
 					//Test for collisions
 					collided = {};
 					$.each(G.enemies, function (enemy) {
-						if (G.collision(missile.posx(), missile.posy(), missile.width(), missile.height(), this.node.posx(), this.node.posy(), this.node.width(), this.node.height())) {
+						if (G.collision(playermissile.posx(), playermissile.posy(), playermissile.width(), playermissile.height(), this.node.posx(), this.node.posy(), this.node.width(), this.node.height())) {
 							collided[enemy] = this;
 						}
 					});
