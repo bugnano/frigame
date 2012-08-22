@@ -56,20 +56,24 @@
 				new_options = options || {},
 				animation,
 				index,
-				animation_options
+				animation_options,
+				animation_details
 			;
 
 			friGame.PrototypeBaseSprite.setAnimation.apply(this, arguments);
 
 			animation = my_options.animation;
 			index = my_options.animationIndex;
-			animation_options = animation && animation.options;
+			if (animation) {
+				animation_options = animation.options;
+				animation_details = animation.details;
+			}
 
 			if (new_options.animation !== undefined) {
 				if (animation) {
 					this.dom.css({
-						'width': [String(animation_options.frameWidth), 'px'].join(''),
-						'height': [String(animation_options.frameHeight), 'px'].join(''),
+						'width': [String(animation_details.frameWidth), 'px'].join(''),
+						'height': [String(animation_details.frameHeight), 'px'].join(''),
 						'background-image': ['url("', animation_options.imageURL, '")'].join(''),
 						'background-position': [
 							String(-(animation_options.offsetx + my_options.multix)),
@@ -137,7 +141,9 @@
 			var
 				dom = this.dom,
 				options = this.options,
-				animation_options = options.animation.options,
+				animation = options.animation,
+				animation_options = animation.options,
+				animation_details = animation.details,
 				angle = options.angle,
 				factor = options.factor,
 				factorh = options.factorh,
@@ -166,8 +172,8 @@
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
 			newHeight = dom.height();
-			options.posOffsetX = (((newWidth - animation_options.frameWidth) / 2) + 0.5) << 0;
-			options.posOffsetY = (((newHeight - animation_options.frameHeight) / 2) + 0.5) << 0;
+			options.posOffsetX = (((newWidth - animation_details.frameWidth) / 2) + 0.5) << 0;
+			options.posOffsetY = (((newHeight - animation_details.frameHeight) / 2) + 0.5) << 0;
 			dom.css({
 				'left': [String(options.left - options.posOffsetX), 'px'].join(''),
 				'top': [String(options.top - options.posOffsetY), 'px'].join('')
@@ -178,7 +184,9 @@
 			var
 				options = this.options,
 				currentFrame = options.currentFrame,
+				animation = options.animation,
 				animation_options,
+				animation_details,
 				left = options.left,
 				top = options.top,
 				angle = options.angle,
@@ -186,7 +194,10 @@
 				factorh = options.factorh,
 				factorv = options.factorv;
 
-			if (options.animation) {
+			if (animation) {
+				animation_options = animation.options;
+				animation_details = animation.details;
+
 				if (left !== options.oldLeft) {
 					this.dom.css('left', [String(left - options.posOffsetX), 'px'].join(''));
 					options.oldLeft = left;
@@ -208,12 +219,11 @@
 					options.oldFactorv = factorv;
 				}
 
-				animation_options = options.animation.options;
 				if ((options.idleCounter === 0) && (animation_options.numberOfFrame !== 1)) {
 					this.dom.css('background-position', [
-						String(-(animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax))),
+						String(-(animation_options.offsetx + options.multix + (currentFrame * animation_details.deltax))),
 						'px ',
-						String(-(animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay))),
+						String(-(animation_options.offsety + options.multiy + (currentFrame * animation_details.deltay))),
 						'px'
 					].join(''));
 				}

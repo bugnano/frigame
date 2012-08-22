@@ -43,6 +43,7 @@
 				factorh = options.factorh,
 				factorv = options.factorv,
 				animation_options,
+				animation_details,
 				frameWidth,
 				frameHeight,
 				currentFrame = options.currentFrame,
@@ -50,8 +51,9 @@
 
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
-				frameWidth = animation_options.frameWidth;
-				frameHeight = animation_options.frameHeight;
+				animation_details = animation.details;
+				frameWidth = animation_details.frameWidth;
+				frameHeight = animation_details.frameHeight;
 
 				ctx.save();
 				ctx.translate(options.translateX, options.translateY);
@@ -65,12 +67,12 @@
 				friGame.safeDrawImage(
 					ctx,
 					animation.img,
-					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
-					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay),
+					animation_options.offsetx + options.multix + (currentFrame * animation_details.deltax),
+					animation_options.offsety + options.multiy + (currentFrame * animation_details.deltay),
 					frameWidth,
 					frameHeight,
-					-(animation_options.halfWidth),
-					-(animation_options.halfHeight),
+					-(animation_details.halfWidth),
+					-(animation_details.halfHeight),
 					frameWidth,
 					frameHeight
 				);

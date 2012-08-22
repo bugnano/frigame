@@ -34,8 +34,9 @@
 			var
 				gl = friGame.gl,
 				options = this.options,
-				halfWidth = options.halfWidth,
-				halfHeight = options.halfHeight,
+				details = this.details,
+				halfWidth = details.halfWidth,
+				halfHeight = details.halfHeight,
 				vertices,
 				vertexPositionBuffer;
 
@@ -62,6 +63,7 @@
 			var
 				gl = friGame.gl,
 				options = this.options,
+				details = this.details,
 				img = this.img,
 				img_width = img.width,
 				img_height = img.height;
@@ -79,13 +81,13 @@
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
 
-			options.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
+			options.textureSize = new Float32Array([details.frameWidth / img_width, details.frameHeight / img_height]);
 			options.offsetx /= img_width;
-			options.multix /= img_width;
-			options.deltax /= img_width;
+			details.multix /= img_width;
+			details.deltax /= img_width;
 			options.offsety /= img_height;
-			options.multiy /= img_height;
-			options.deltay /= img_height;
+			details.multiy /= img_height;
+			details.deltay /= img_height;
 		}
 	});
 
@@ -234,6 +236,7 @@
 				factorh = options.factorh,
 				factorv = options.factorv,
 				animation_options,
+				animation_details,
 				frameWidth,
 				frameHeight,
 				currentFrame = options.currentFrame,
@@ -244,8 +247,9 @@
 
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
-				frameWidth = animation_options.frameWidth;
-				frameHeight = animation_options.frameHeight;
+				animation_details = animation.details;
+				frameWidth = animation_details.frameWidth;
+				frameHeight = animation_details.frameHeight;
 
 				friGame.mvPushMatrix();
 				mat4.translate(mvMatrix, [options.translateX, options.translateY, 0]);
@@ -268,8 +272,8 @@
 
 				gl.uniform2fv(shaderProgram.uTextureSize, animation_options.textureSize);
 				gl.uniform2f(shaderProgram.uTextureOffset,
-					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
-					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay));
+					animation_options.offsetx + options.multix + (currentFrame * animation_details.deltax),
+					animation_options.offsety + options.multiy + (currentFrame * animation_details.deltay));
 
 				gl.uniformMatrix4fv(shaderProgram.uPMatrix, false, pMatrix);
 				gl.uniformMatrix4fv(shaderProgram.uMVMatrix, false, mvMatrix);
