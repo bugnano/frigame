@@ -201,8 +201,8 @@
 
 	G.PrototypeMinion = Object.create(G.PrototypeEnemy);
 	$.extend(G.PrototypeMinion, {
-		idle: $.friGame.Animation({imageURL: 'minion_idle.png', numberOfFrame: 5, delta: 52, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
-		explode: $.friGame.Animation({imageURL: 'minion_explode.png', numberOfFrame: 11, delta: 52, rate: 30, type: $.friGame.ANIMATION_VERTICAL}),
+		idle: $.friGame.Animation('minion_idle.png', {numberOfFrame: 5, delta: 52, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
+		explode: $.friGame.Animation('minion_explode.png', {numberOfFrame: 11, delta: 52, rate: 30, type: $.friGame.ANIMATION_VERTICAL}),
 
 		updateY: function (playerNode) {
 			var
@@ -234,8 +234,8 @@
 			this.alignmentOffset = 5;
 		},
 
-		idle: $.friGame.Animation({imageURL: 'brainy_idle.png', numberOfFrame: 8, delta: 42, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
-		explode: $.friGame.Animation({imageURL: 'brainy_explode.png', numberOfFrame: 8, delta: 42, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
+		idle: $.friGame.Animation('brainy_idle.png', {numberOfFrame: 8, delta: 42, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
+		explode: $.friGame.Animation('brainy_explode.png', {numberOfFrame: 8, delta: 42, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
 
 		updateY: function (playerNode) {
 			var
@@ -271,8 +271,8 @@
 			this.alignmentOffset = 35;
 		},
 
-		idle: $.friGame.Animation({imageURL: 'bossy_idle.png', numberOfFrame: 5, delta: 100, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
-		explode: $.friGame.Animation({imageURL: 'bossy_explode.png', numberOfFrame: 9, delta: 100, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
+		idle: $.friGame.Animation('bossy_idle.png', {numberOfFrame: 5, delta: 100, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
+		explode: $.friGame.Animation('bossy_explode.png', {numberOfFrame: 9, delta: 100, rate: 60, type: $.friGame.ANIMATION_VERTICAL}),
 
 		updateX: function () {
 			var
@@ -303,28 +303,28 @@
 
 		var
 			// The background:
-			background0 = $.friGame.Animation({imageURL: 'background0.png'}),
-			background1 = $.friGame.Animation({imageURL: 'background1.png'}),
-			background2 = $.friGame.Animation({imageURL: 'background2.png'}),
-			background3 = $.friGame.Animation({imageURL: 'background3.png'}),
-			background4 = $.friGame.Animation({imageURL: 'background4.png'}),
-			background5 = $.friGame.Animation({imageURL: 'background5.png'}),
-			background6 = $.friGame.Animation({imageURL: 'background6.png'});
+			background0 = $.friGame.Animation('background0.png'),
+			background1 = $.friGame.Animation('background1.png'),
+			background2 = $.friGame.Animation('background2.png'),
+			background3 = $.friGame.Animation('background3.png'),
+			background4 = $.friGame.Animation('background4.png'),
+			background5 = $.friGame.Animation('background5.png'),
+			background6 = $.friGame.Animation('background6.png');
 
 
 		// Player space shipannimations:
-		playerAnimation.idle = $.friGame.Animation({imageURL: 'player_spaceship.png'});
-		playerAnimation.explode = $.friGame.Animation({imageURL: 'player_explode.png', numberOfFrame: 4, delta: 26, rate: 60, type: $.friGame.ANIMATION_VERTICAL});
-		playerAnimation.up = $.friGame.Animation({imageURL: 'boosterup.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.friGame.ANIMATION_HORIZONTAL});
-		playerAnimation.down = $.friGame.Animation({imageURL: 'boosterdown.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.friGame.ANIMATION_HORIZONTAL});
-		playerAnimation.boost = $.friGame.Animation({imageURL: 'booster1.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.friGame.ANIMATION_VERTICAL});
-		playerAnimation.booster = $.friGame.Animation({imageURL: 'booster2.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.friGame.ANIMATION_VERTICAL});
+		playerAnimation.idle = $.friGame.Animation('player_spaceship.png');
+		playerAnimation.explode = $.friGame.Animation('player_explode.png', {numberOfFrame: 4, delta: 26, rate: 60, type: $.friGame.ANIMATION_VERTICAL});
+		playerAnimation.up = $.friGame.Animation('boosterup.png', {numberOfFrame: 6, delta: 14, rate: 60, type: $.friGame.ANIMATION_HORIZONTAL});
+		playerAnimation.down = $.friGame.Animation('boosterdown.png', {numberOfFrame: 6, delta: 14, rate: 60, type: $.friGame.ANIMATION_HORIZONTAL});
+		playerAnimation.boost = $.friGame.Animation('booster1.png', {numberOfFrame: 6, delta: 14, rate: 60, type: $.friGame.ANIMATION_VERTICAL});
+		playerAnimation.booster = $.friGame.Animation('booster2.png', {numberOfFrame: 6, delta: 14, rate: 60, type: $.friGame.ANIMATION_VERTICAL});
 
 		// Weapon missile:
-		missile.player = $.friGame.Animation({imageURL: 'player_missile.png', numberOfFrame: 6, delta: 10, rate: 90, type: $.friGame.ANIMATION_VERTICAL});
-		missile.enemies = $.friGame.Animation({imageURL: 'enemy_missile.png', numberOfFrame: 6, delta: 15, rate: 90, type: $.friGame.ANIMATION_VERTICAL});
-		missile.playerexplode = $.friGame.Animation({imageURL: 'player_missile_explode.png', numberOfFrame: 8, delta: 23, rate: 90, type: $.friGame.ANIMATION_VERTICAL});
-		missile.enemiesexplode = $.friGame.Animation({imageURL: 'enemy_missile_explode.png', numberOfFrame: 6, delta: 15, rate: 90, type: $.friGame.ANIMATION_VERTICAL});
+		missile.player = $.friGame.Animation('player_missile.png', {numberOfFrame: 6, delta: 10, rate: 90, type: $.friGame.ANIMATION_VERTICAL});
+		missile.enemies = $.friGame.Animation('enemy_missile.png', {numberOfFrame: 6, delta: 15, rate: 90, type: $.friGame.ANIMATION_VERTICAL});
+		missile.playerexplode = $.friGame.Animation('player_missile_explode.png', {numberOfFrame: 8, delta: 23, rate: 90, type: $.friGame.ANIMATION_VERTICAL});
+		missile.enemiesexplode = $.friGame.Animation('enemy_missile_explode.png', {numberOfFrame: 6, delta: 15, rate: 90, type: $.friGame.ANIMATION_VERTICAL});
 
 		// Initialize the game:
 

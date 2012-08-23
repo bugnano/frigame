@@ -10,31 +10,27 @@
         <script>
             $(function(){
 				var
-					simpleVerticalAnimation = $.friGame.Animation({
-						imageURL: "sv.png",
+					simpleVerticalAnimation = $.friGame.Animation("sv.png", {
 						type: $.friGame.ANIMATION_VERTICAL,
 						numberOfFrame: 4,
 						delta: 32,
 						rate: 300
 					}),
-					simpleHorizontalAnimation = $.friGame.Animation({
-						imageURL: "sh.png",
+					simpleHorizontalAnimation = $.friGame.Animation("sh.png", {
 						type: $.friGame.ANIMATION_HORIZONTAL,
 						numberOfFrame: 4,
 						delta: 32,
 						rate: 300
 					}),
 
-					multiVerticalAnimation = $.friGame.Animation({
-						imageURL: "mv.png",
+					multiVerticalAnimation = $.friGame.Animation("mv.png", {
 						type: $.friGame.ANIMATION_VERTICAL + $.friGame.ANIMATION_MULTI,
 						numberOfFrame: 4,
 						delta: 32,
 						rate: 300,
 						distance: 32
 					}),
-					multiHorizontalAnimation = $.friGame.Animation({
-						imageURL: "mh.png",
+					multiHorizontalAnimation = $.friGame.Animation("mh.png", {
 						type: $.friGame.ANIMATION_HORIZONTAL + $.friGame.ANIMATION_MULTI,
 						numberOfFrame: 4,
 						delta: 32,
@@ -42,8 +38,7 @@
 						distance: 32
 					}),
 
-					simpleOffsetVerticalAnimation = $.friGame.Animation({
-						imageURL: "sov.png",
+					simpleOffsetVerticalAnimation = $.friGame.Animation("sov.png", {
 						type: $.friGame.ANIMATION_VERTICAL,
 						offsetx: 100,
 						offsety: 100,
@@ -51,8 +46,7 @@
 						delta: 32,
 						rate: 300
 					}),
-					simpleOffsetHorizontalAnimation = $.friGame.Animation({
-						imageURL: "soh.png",
+					simpleOffsetHorizontalAnimation = $.friGame.Animation("soh.png", {
 						type: $.friGame.ANIMATION_HORIZONTAL,
 						offsetx: 100,
 						offsety: 100,
@@ -61,8 +55,7 @@
 						rate: 300
 					}),
 
-					multiOffsetVerticalAnimation = $.friGame.Animation({
-						imageURL: "mov.png",
+					multiOffsetVerticalAnimation = $.friGame.Animation("mov.png", {
 						type: $.friGame.ANIMATION_VERTICAL + $.friGame.ANIMATION_MULTI,
 						offsetx: 100,
 						offsety: 100,
@@ -71,8 +64,7 @@
 						rate: 300,
 						distance: 32
 					}),
-					multiOffsetHorizontalAnimation = $.friGame.Animation({
-						imageURL: "moh.png",
+					multiOffsetHorizontalAnimation = $.friGame.Animation("moh.png", {
 						type: $.friGame.ANIMATION_HORIZONTAL + $.friGame.ANIMATION_MULTI,
 						offsetx: 100,
 						offsety: 100,

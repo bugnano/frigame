@@ -53,7 +53,7 @@ window.requestAnimFrame = (function () {
 	$.friGame = friGame;
 
 	$.extend(friGame, {
-		// Public options
+		// Public constants
 
 		// constants for the different type of an animation
 		ANIMATION_VERTICAL: 1,		// genertated by a verical offset of the background
@@ -69,12 +69,17 @@ window.requestAnimFrame = (function () {
 		YPOS_BOTTOM: 1,
 		YPOS_CENTER: 2,
 
+		// Implementation details
+
+		refreshRate: 30
+	});
+
+	$.extend(friGame, {
+		// Public options
 		sprites: {},
 		groups: {},
 
 		// Implementation details
-
-		refreshRate: 30,
 
 		images: {},
 		animations: [],
@@ -85,10 +90,9 @@ window.requestAnimFrame = (function () {
 		PrototypeBaseAnimation: {
 			default_options: {
 				// Public options
-				imageURL: '',
 				numberOfFrame: 1,
 				delta: 0,
-				rate: 30,
+				rate: friGame.refreshRate,
 				type: 0,
 				distance: 0,
 				offsetx: 0,
@@ -97,6 +101,8 @@ window.requestAnimFrame = (function () {
 
 			default_details: {
 				// Implementation details
+				imageURL: '',
+				img: null,
 				frameWidth: 0,
 				frameHeight: 0,
 				halfWidth: 0,
@@ -108,21 +114,23 @@ window.requestAnimFrame = (function () {
 				once: false
 			},
 
-			init: function (options) {
+			init: function (imageURL, options) {
 				var
 					img,
-					imageURL = options.imageURL
+					details = Object.create(this.default_details)
 				;
 
 				this.options = Object.create(this.default_options);
 				options = $.extend(this.options, options);
 
-				this.details = Object.create(this.default_details);
+				this.details = details;
 
 				options.rate = Math.round(options.rate / friGame.refreshRate);
 				if (options.rate === 0) {
 					options.rate = 1;
 				}
+
+				details.imageURL = imageURL;
 
 				if (friGame.images[imageURL] === undefined) {
 					img = new Image();
@@ -132,7 +140,7 @@ window.requestAnimFrame = (function () {
 					img = friGame.images[imageURL];
 				}
 
-				this.img = img;
+				details.img = img;
 
 				friGame.animations.push(this);
 			},
@@ -143,7 +151,7 @@ window.requestAnimFrame = (function () {
 				var
 					options = this.options,
 					details = this.details,
-					img = this.img,
+					img = details.img,
 					delta = options.delta,
 					distance = options.distance,
 					round = Math.round
@@ -716,7 +724,7 @@ window.requestAnimFrame = (function () {
 			;
 
 			for (i = 0; i < len_animations; i += 1) {
-				if (animations[i].img.complete) {
+				if (animations[i].details.img.complete) {
 					completed += 1;
 				}
 			}

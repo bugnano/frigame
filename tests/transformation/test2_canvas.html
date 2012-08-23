@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
+		<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1" />
+
         <script src="jquery.js"></script>
         <script src="../../jquery.frigame.common.js"></script>
         <script src="../../jquery.frigame.canvas.js"></script>
         <script>
             $(function(){
-                var animation = $.friGame.Animation({imageURL: "sh.png", type: $.friGame.ANIMATION_HORIZONTAL, numberOfFrame: 4, delta: 32, rate: 300});
+                var animation = $.friGame.Animation("sh.png", {type: $.friGame.ANIMATION_HORIZONTAL, numberOfFrame: 4, delta: 32, rate: 300});
 
 				$.friGame.startGame(function () {
 					var angle = 45, angle_rad = (angle * Math.PI) / 180;

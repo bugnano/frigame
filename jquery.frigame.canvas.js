@@ -66,7 +66,7 @@
 
 				friGame.safeDrawImage(
 					ctx,
-					animation.img,
+					animation_details.img,
 					animation_options.offsetx + options.multix + (currentFrame * animation_details.deltax),
 					animation_options.offsety + options.multiy + (currentFrame * animation_details.deltay),
 					frameWidth,

@@ -64,7 +64,7 @@
 				gl = friGame.gl,
 				options = this.options,
 				details = this.details,
-				img = this.img,
+				img = details.img,
 				img_width = img.width,
 				img_height = img.height;
 

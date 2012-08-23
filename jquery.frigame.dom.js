@@ -74,7 +74,7 @@
 					this.dom.css({
 						'width': [String(animation_details.frameWidth), 'px'].join(''),
 						'height': [String(animation_details.frameHeight), 'px'].join(''),
-						'background-image': ['url("', animation_options.imageURL, '")'].join(''),
+						'background-image': ['url("', animation_details.imageURL, '")'].join(''),
 						'background-position': [
 							String(-(animation_options.offsetx + my_options.multix)),
 							'px ',
