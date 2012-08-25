@@ -250,13 +250,13 @@ window.requestAnimFrame = (function () {
 				ypos: friGame.YPOS_TOP,
 
 				// Implementation details
-				factor: 1,
 
 				// DOM specific
 				oldLeft: 0,
 				oldTop: 0,
 				oldAngle: 0,
-				oldFactor: 1,
+				oldScalex: 1,
+				oldScaley: 1,
 				oldFactorh: 1,
 				oldFactorv: 1
 			},
@@ -272,7 +272,8 @@ window.requestAnimFrame = (function () {
 				multix: 0,
 				multiy: 0,
 				angle: 0,
-
+				scalex: 1,
+				scaley: 1,
 				fliph: 1,
 				flipv: 1,
 
@@ -428,12 +429,19 @@ window.requestAnimFrame = (function () {
 				return this;
 			},
 
-			scale: function (factor) {
-				var
-					options = this.options
-				;
+			scale: function (scalex, scaley) {
+				if (scalex === undefined) {
+					return this.details.scalex;
+				}
 
-				options.factor = factor;
+				this.details.scalex = scalex;
+
+				if (scaley === undefined) {
+					// If scaley isn't specified, it is assumed to be equal to scalex.
+					this.details.scaley = scalex;
+				} else {
+					this.details.scaley = scaley;
+				}
 
 				return this;
 			},

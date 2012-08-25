@@ -41,7 +41,8 @@
 				details = this.details,
 				animation = options.animation,
 				angle = details.angle,
-				factor = options.factor,
+				scalex = details.scalex,
+				scaley = details.scaley,
 				fliph = details.fliph,
 				flipv = details.flipv,
 				animation_options,
@@ -66,8 +67,8 @@
 					ctx.rotate(angle);
 				}
 
-				if ((factor !== 1) || (fliph !== 1) || (flipv !== 1)) {
-					ctx.scale(fliph * factor, flipv * factor);
+				if ((scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
+					ctx.scale(fliph * scalex, flipv * scaley);
 				}
 
 				friGame.safeDrawImage(

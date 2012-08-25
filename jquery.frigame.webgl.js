@@ -241,7 +241,8 @@
 				details = this.details,
 				animation = options.animation,
 				angle = details.angle,
-				factor = options.factor,
+				scalex = details.scalex,
+				scaley = details.scaley,
 				fliph = details.fliph,
 				flipv = details.flipv,
 				animation_options,
@@ -266,8 +267,8 @@
 				if (angle) {
 					mat4.rotate(mvMatrix, angle, [0, 0, 1]);
 				}
-				if ((factor !== 1) || (fliph !== 1) || (flipv !== 1)) {
-					mat4.scale(mvMatrix, [fliph * factor, flipv * factor, 1]);
+				if ((scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
+					mat4.scale(mvMatrix, [fliph * scalex, flipv * scaley, 1]);
 				}
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, animation.vertexPositionBuffer);

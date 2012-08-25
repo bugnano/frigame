@@ -87,7 +87,7 @@
 					});
 
 					if (friGame.filterFunction) {
-						if ((my_details.angle) || (my_options.factor !== 1) || (my_details.fliph !== 1) || (my_details.flipv !== 1)) {
+						if ((my_details.angle) || (my_details.scalex !== 1) || (my_details.scaley !== 1) || (my_details.fliph !== 1) || (my_details.flipv !== 1)) {
 							this.ieFilter();
 						}
 					}
@@ -117,7 +117,8 @@
 				details = this.details,
 				transformFunction = friGame.transformFunction,
 				angle = details.angle,
-				factor = options.factor,
+				scalex = details.scalex,
+				scaley = details.scaley,
 				fliph = details.fliph,
 				flipv = details.flipv,
 				transform = []
@@ -128,8 +129,8 @@
 					transform.push.apply(transform, ['rotate(', String(angle), 'rad)']);
 				}
 
-				if ((factor !== 1) || (fliph !== 1) || (flipv !== 1)) {
-					transform.push.apply(transform, ['scale(', String(fliph * factor), ',', String(flipv * factor), ')']);
+				if ((scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
+					transform.push.apply(transform, ['scale(', String(fliph * scalex), ',', String(flipv * scaley), ')']);
 				}
 
 				dom.css(transformFunction, transform.join(''));
@@ -151,7 +152,8 @@
 				animation_options = animation.options,
 				animation_details = animation.details,
 				angle = details.angle,
-				factor = options.factor,
+				scalex = details.scalex,
+				scaley = details.scaley,
 				fliph = details.fliph,
 				flipv = details.flipv,
 				cos,
@@ -163,14 +165,14 @@
 			;
 
 			// Step 1: Apply the transformation matrix
-			if ((angle) || (factor !== 1) || (fliph !== 1) || (flipv !== 1)) {
-				cos = Math.cos(angle) * factor;
-				sin = Math.sin(angle) * factor;
+			if ((angle) || (scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
+				cos = Math.cos(angle);
+				sin = Math.sin(angle);
 				filter = [
-					'progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * fliph),
-					',M12=', String(-sin * flipv),
-					',M21=', String(sin * fliph),
-					',M22=', String(cos * flipv),
+					'progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * fliph * scalex),
+					',M12=', String(-sin * flipv * scaley),
+					',M21=', String(sin * fliph * scalex),
+					',M22=', String(cos * flipv * scaley),
 					',SizingMethod="auto expand",FilterType="nearest neighbor")'
 				].join('');
 			} else {
@@ -201,7 +203,8 @@
 				left = details.left,
 				top = details.top,
 				angle = details.angle,
-				factor = options.factor,
+				scalex = details.scalex,
+				scaley = details.scaley,
 				fliph = details.fliph,
 				flipv = details.flipv
 			;
@@ -222,13 +225,15 @@
 
 				if	(
 						(angle !== options.oldAngle)
-					||	(factor !== options.oldFactor)
+					||	(scalex !== options.oldScalex)
+					||	(scaley !== options.oldScaley)
 					||	(fliph !== options.oldFactorh)
 					||	(flipv !== options.oldFactorv)
 					) {
 					this.transform();
 					options.oldAngle = angle;
-					options.oldFactor = factor;
+					options.oldScalex = scalex;
+					options.oldScaley = scaley;
 					options.oldFactorh = fliph;
 					options.oldFactorv = flipv;
 				}
