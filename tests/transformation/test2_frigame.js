@@ -22,7 +22,9 @@ $(function () {
 			$.friGame.sprites.rotateAScale.rotate(Math.PI / 4).scale(Math.cos(angle_rad) * 2);
 			$.friGame.sprites.aScaleRotate.scale(-Math.cos(angle_rad) * 2).rotate(Math.PI / 4);
 			angle -= 1;
-			angle %= 360;
+			if (angle < -180) {
+				angle = 180;
+			}
 			angle_rad = (angle * Math.PI) / 180;
 		}, 30);
 	});
