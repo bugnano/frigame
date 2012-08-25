@@ -1,7 +1,7 @@
 /*global jQuery */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
-// Copyright (c) 2011 Franco Bugnano
+// Copyright (c) 2011-2012 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,8 @@
 
 (function ($) {
 	var
-		friGame = $.friGame;
+		friGame = $.friGame
+	;
 
 	friGame.PrototypeAnimation = Object.create(friGame.PrototypeBaseAnimation);
 
@@ -37,17 +38,19 @@
 		draw: function () {
 			var
 				options = this.options,
+				details = this.details,
 				animation = options.animation,
-				angle = options.angle,
+				angle = details.angle,
 				factor = options.factor,
-				factorh = options.factorh,
-				factorv = options.factorv,
+				fliph = details.fliph,
+				flipv = details.flipv,
 				animation_options,
 				animation_details,
 				frameWidth,
 				frameHeight,
-				currentFrame = options.currentFrame,
-				ctx = friGame.ctx;
+				currentFrame = details.currentFrame,
+				ctx = friGame.ctx
+			;
 
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
@@ -56,19 +59,22 @@
 				frameHeight = animation_options.frameHeight;
 
 				ctx.save();
-				ctx.translate(options.translateX, options.translateY);
+
+				ctx.translate(details.translatex, details.translatey);
+
 				if (angle) {
 					ctx.rotate(angle);
 				}
-				if ((factor !== 1) || (factorh !== 1) || (factorv !== 1)) {
-					ctx.scale(factorh * factor, factorv * factor);
+
+				if ((factor !== 1) || (fliph !== 1) || (flipv !== 1)) {
+					ctx.scale(fliph * factor, flipv * factor);
 				}
 
 				friGame.safeDrawImage(
 					ctx,
 					animation_details.img,
-					animation_options.offsetx + options.multix + (currentFrame * animation_details.deltax),
-					animation_options.offsety + options.multiy + (currentFrame * animation_details.deltay),
+					animation_options.offsetx + details.multix + (currentFrame * animation_details.deltax),
+					animation_options.offsety + details.multiy + (currentFrame * animation_details.deltay),
 					frameWidth,
 					frameHeight,
 					-(animation_details.halfWidth),
@@ -95,7 +101,8 @@
 		init: function (name, parent) {
 			var
 				dom,
-				parent_dom;
+				parent_dom
+			;
 
 			if (parent === null) {
 				parent_dom = $('#playground');

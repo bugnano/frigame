@@ -1,7 +1,7 @@
 /*global jQuery, Float32Array, mat4 */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
-// Copyright (c) 2011 Franco Bugnano
+// Copyright (c) 2011-2012 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,8 @@
 
 (function ($) {
 	var
-		friGame = $.friGame;
+		friGame = $.friGame
+	;
 
 	friGame.PrototypeAnimation = Object.create(friGame.PrototypeBaseAnimation);
 	$.extend(friGame.PrototypeAnimation, {
@@ -38,7 +39,8 @@
 				halfWidth = details.halfWidth,
 				halfHeight = details.halfHeight,
 				vertices,
-				vertexPositionBuffer;
+				vertexPositionBuffer
+			;
 
 			if (!gl) {
 				return;
@@ -56,7 +58,7 @@
 			vertexPositionBuffer.itemSize = 3;
 			vertexPositionBuffer.numItems = 4;
 
-			options.vertexPositionBuffer = vertexPositionBuffer;
+			this.vertexPositionBuffer = vertexPositionBuffer;
 		},
 
 		initTexture: function () {
@@ -66,14 +68,15 @@
 				details = this.details,
 				img = details.img,
 				img_width = img.width,
-				img_height = img.height;
+				img_height = img.height
+			;
 
 			if (!gl) {
 				return;
 			}
 
-			options.texture = gl.createTexture();
-			gl.bindTexture(gl.TEXTURE_2D, options.texture);
+			this.texture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -81,7 +84,7 @@
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
 
-			options.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
+			this.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
 			options.offsetx /= img_width;
 			details.multix /= img_width;
 			details.deltax /= img_width;
@@ -94,7 +97,8 @@
 	friGame.getShader = function (str, id) {
 		var
 			gl = friGame.gl,
-			shader;
+			shader
+		;
 
 		if (!gl) {
 			return;
@@ -117,7 +121,8 @@
 			gl = friGame.gl,
 			fragmentShader,
 			vertexShader,
-			shaderProgram;
+			shaderProgram
+		;
 
 		if (!gl) {
 			return;
@@ -186,7 +191,8 @@
         var
 			gl = friGame.gl,
 			textureCoords,
-			textureCoordBuffer;
+			textureCoordBuffer
+		;
 
 		if (!gl) {
 			return;
@@ -210,7 +216,8 @@
 
 	friGame.mvPushMatrix = function () {
 		var
-			copy = mat4.create();
+			copy = mat4.create()
+		;
 
 		mat4.set(friGame.mvMatrix, copy);
 		friGame.mvMatrixStack.push(copy);
@@ -218,7 +225,8 @@
 
 	friGame.mvPopMatrix = function () {
 		var
-			mvMatrixStack = friGame.mvMatrixStack;
+			mvMatrixStack = friGame.mvMatrixStack
+		;
 
 		if (mvMatrixStack.length) {
 			friGame.mvMatrix = mvMatrixStack.pop();
@@ -230,20 +238,22 @@
 		draw: function () {
 			var
 				options = this.options,
+				details = this.details,
 				animation = options.animation,
-				angle = options.angle,
+				angle = details.angle,
 				factor = options.factor,
-				factorh = options.factorh,
-				factorv = options.factorv,
+				fliph = details.fliph,
+				flipv = details.flipv,
 				animation_options,
 				animation_details,
 				frameWidth,
 				frameHeight,
-				currentFrame = options.currentFrame,
+				currentFrame = details.currentFrame,
 				gl = friGame.gl,
 				shaderProgram = friGame.shaderProgram,
 				mvMatrix = friGame.mvMatrix,
-				pMatrix = friGame.pMatrix;
+				pMatrix = friGame.pMatrix
+			;
 
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
@@ -252,33 +262,35 @@
 				frameHeight = animation_options.frameHeight;
 
 				friGame.mvPushMatrix();
-				mat4.translate(mvMatrix, [options.translateX, options.translateY, 0]);
+				mat4.translate(mvMatrix, [details.translatex, details.translatey, 0]);
 				if (angle) {
 					mat4.rotate(mvMatrix, angle, [0, 0, 1]);
 				}
-				if ((factor !== 1) || (factorh !== 1) || (factorv !== 1)) {
-					mat4.scale(mvMatrix, [factorh * factor, factorv * factor, 1]);
+				if ((factor !== 1) || (fliph !== 1) || (flipv !== 1)) {
+					mat4.scale(mvMatrix, [fliph * factor, flipv * factor, 1]);
 				}
 
-				gl.bindBuffer(gl.ARRAY_BUFFER, animation_options.vertexPositionBuffer);
-				gl.vertexAttribPointer(shaderProgram.aVertexPosition, animation_options.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				gl.bindBuffer(gl.ARRAY_BUFFER, animation.vertexPositionBuffer);
+				gl.vertexAttribPointer(shaderProgram.aVertexPosition, animation.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, friGame.textureCoordBuffer);
 				gl.vertexAttribPointer(shaderProgram.aTextureCoord, friGame.textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 				gl.activeTexture(gl.TEXTURE0);
-				gl.bindTexture(gl.TEXTURE_2D, animation_options.texture);
+				gl.bindTexture(gl.TEXTURE_2D, animation.texture);
 				gl.uniform1i(shaderProgram.uSampler, 0);
 
-				gl.uniform2fv(shaderProgram.uTextureSize, animation_options.textureSize);
-				gl.uniform2f(shaderProgram.uTextureOffset,
-					animation_options.offsetx + options.multix + (currentFrame * animation_details.deltax),
-					animation_options.offsety + options.multiy + (currentFrame * animation_details.deltay));
+				gl.uniform2fv(shaderProgram.uTextureSize, animation.textureSize);
+				gl.uniform2f(
+					shaderProgram.uTextureOffset,
+					animation_options.offsetx + details.multix + (currentFrame * animation_details.deltax),
+					animation_options.offsety + details.multiy + (currentFrame * animation_details.deltay)
+				);
 
 				gl.uniformMatrix4fv(shaderProgram.uPMatrix, false, pMatrix);
 				gl.uniformMatrix4fv(shaderProgram.uMVMatrix, false, mvMatrix);
 
-				gl.drawArrays(gl.TRIANGLE_STRIP, 0, animation_options.vertexPositionBuffer.numItems);
+				gl.drawArrays(gl.TRIANGLE_STRIP, 0, animation.vertexPositionBuffer.numItems);
 
 				friGame.mvPopMatrix();
 			}
@@ -307,7 +319,8 @@
 				i,
 				mvMatrix = mat4.create(),
 				mvMatrixStack = [],
-				pMatrix = mat4.create();
+				pMatrix = mat4.create()
+			;
 
 			if (parent === null) {
 				parent_dom = $('#playground');

@@ -130,12 +130,12 @@ window.requestAnimFrame = (function () {
 
 				details.imageURL = imageURL;
 
-				if (friGame.images[imageURL] === undefined) {
+				if (friGame.images[imageURL]) {
+					img = friGame.images[imageURL];
+				} else {
 					img = new Image();
 					img.src = imageURL;
 					friGame.images[imageURL] = img;
-				} else {
-					img = friGame.images[imageURL];
 				}
 
 				details.img = img;
@@ -239,7 +239,7 @@ window.requestAnimFrame = (function () {
 		},
 
 		PrototypeBaseSprite: {
-			defaults: {
+			default_options: {
 				// Public options
 				animation: null,
 				animationIndex: 0,
@@ -250,36 +250,51 @@ window.requestAnimFrame = (function () {
 				ypos: friGame.YPOS_TOP,
 
 				// Implementation details
-				left: 0,
-				top: 0,
-				translateX: 0,
-				translateY: 0,
-				posOffsetX: 0,
-				posOffsetY: 0,
+				factor: 1,
+
+				// DOM specific
 				oldLeft: 0,
 				oldTop: 0,
+				oldAngle: 0,
+				oldFactor: 1,
+				oldFactorh: 1,
+				oldFactorv: 1
+			},
+
+			default_details: {
+				// Implementation details
+				left: 0,
+				top: 0,
+				translatex: 0,
+				translatey: 0,
 				idleCounter: 0,
 				currentFrame: 0,
 				multix: 0,
 				multiy: 0,
 				angle: 0,
-				factor: 1,
-				oldAngle: 0,
-				oldFactor: 1,
-				factorh: 1,
-				factorv: 1,
-				oldFactorh: 1,
-				oldFactorv: 1
+
+				fliph: 1,
+				flipv: 1,
+
+				// ieFilter specific
+				posOffsetX: 0,
+				posOffsetY: 0
 			},
 
 			init: function (name, options, parent) {
+				var
+					details = Object.create(this.default_details)
+				;
+
 				friGame.sprites[name] = this;
 
 				this.name = name;
 				this.parent = parent;
 
-				this.options = Object.create(this.defaults);
+				this.options = Object.create(this.default_options);
 				options = $.extend(this.options, options);
+
+				this.details = details;
 
 				this.setAnimation(options);
 				this.move();
@@ -291,6 +306,7 @@ window.requestAnimFrame = (function () {
 				var
 					my_options = this.options,
 					new_options = options || {},
+					my_details = this.details,
 					round = Math.round,
 					animation,
 					index,
@@ -311,11 +327,11 @@ window.requestAnimFrame = (function () {
 
 				if (animation_redefined) {
 					if (animation) {
-						my_options.translateX = round(my_options.left + animation_details.halfWidth);
-						my_options.translateY = round(my_options.top + animation_details.halfHeight);
+						my_details.translatex = round(my_details.left + animation_details.halfWidth);
+						my_details.translatey = round(my_details.top + animation_details.halfHeight);
 					} else {
-						my_options.translateX = round(my_options.left);
-						my_options.translateY = round(my_options.top);
+						my_details.translatex = round(my_details.left);
+						my_details.translatey = round(my_details.top);
 					}
 
 					// If the animation gets redefined, set default index of 0
@@ -329,17 +345,17 @@ window.requestAnimFrame = (function () {
 					if (animation) {
 						index = my_options.animationIndex;
 
-						my_options.multix = index * animation_details.multix;
-						my_options.multiy = index * animation_details.multiy;
+						my_details.multix = index * animation_details.multix;
+						my_details.multiy = index * animation_details.multiy;
 					} else {
-						my_options.multix = 0;
-						my_options.multiy = 0;
+						my_details.multix = 0;
+						my_details.multiy = 0;
 					}
 				}
 
 				if (animation_redefined || index_redefined) {
-					my_options.idleCounter = 0;
-					my_options.currentFrame = 0;
+					my_details.idleCounter = 0;
+					my_details.currentFrame = 0;
 					this.endAnimation = false;
 				}
 
@@ -350,6 +366,7 @@ window.requestAnimFrame = (function () {
 				var
 					my_options = this.options,
 					new_options = options || {},
+					my_details = this.details,
 					round = Math.round,
 					left,
 					top,
@@ -385,28 +402,28 @@ window.requestAnimFrame = (function () {
 						top = my_options.posy;
 					}
 
-					my_options.translateX = round(left + animation_details.halfWidth);
-					my_options.translateY = round(top + animation_details.halfHeight);
+					my_details.translatex = round(left + animation_details.halfWidth);
+					my_details.translatey = round(top + animation_details.halfHeight);
 				} else {
 					left = my_options.posx;
 					top = my_options.posy;
 
-					my_options.translateX = round(left);
-					my_options.translateY = round(top);
+					my_details.translatex = round(left);
+					my_details.translatey = round(top);
 				}
 
-				my_options.left = round(left);
-				my_options.top = round(top);
+				my_details.left = round(left);
+				my_details.top = round(top);
 
 				return this;
 			},
 
 			rotate: function (angle) {
-				var
-					options = this.options
-				;
+				if (angle === undefined) {
+					return this.details.angle;
+				}
 
-				options.angle = angle;
+				this.details.angle = angle;
 
 				return this;
 			},
@@ -422,32 +439,28 @@ window.requestAnimFrame = (function () {
 			},
 
 			fliph: function (flip) {
-				var
-					options = this.options
-				;
-
 				if (flip === undefined) {
-					options.factorh *= -1;
-				} else if (flip) {
-					options.factorh = -1;
+					return (this.details.fliph < 0);
+				}
+
+				if (flip) {
+					this.details.fliph = -1;
 				} else {
-					options.factorh = 1;
+					this.details.fliph = 1;
 				}
 
 				return this;
 			},
 
 			flipv: function (flip) {
-				var
-					options = this.options
-				;
-
 				if (flip === undefined) {
-					options.factorv *= -1;
-				} else if (flip) {
-					options.factorv = -1;
+					return (this.details.flipv < 0);
+				}
+
+				if (flip) {
+					this.details.flipv = -1;
 				} else {
-					options.factorv = 1;
+					this.details.flipv = 1;
 				}
 
 				return this;
@@ -511,11 +524,12 @@ window.requestAnimFrame = (function () {
 			update: function () {
 				var
 					options = this.options,
+					details = this.details,
 					callback = options.callback,
 					animation = options.animation,
 					animation_options,
 					animation_details,
-					currentFrame = options.currentFrame
+					currentFrame = details.currentFrame
 				;
 
 				if (!this.endAnimation) {
@@ -523,14 +537,14 @@ window.requestAnimFrame = (function () {
 						animation_options = animation.options;
 						animation_details = animation.details;
 
-						options.idleCounter += 1;
-						if (options.idleCounter >= animation_options.rate) {
-							options.idleCounter = 0;
+						details.idleCounter += 1;
+						if (details.idleCounter >= animation_options.rate) {
+							details.idleCounter = 0;
 							currentFrame += 1;
 							if (currentFrame >= animation_options.numberOfFrame) {
 								if (animation_details.once) {
 									currentFrame -= 1;
-									options.idleCounter += 1;
+									details.idleCounter = 1;
 									this.endAnimation = true;
 								} else {
 									currentFrame = 0;
@@ -540,7 +554,7 @@ window.requestAnimFrame = (function () {
 									callback.call(this, this);
 								}
 							}
-							options.currentFrame = currentFrame;
+							details.currentFrame = currentFrame;
 						}
 					} else {
 						// Make sure that the callback is called even if there is no animation

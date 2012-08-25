@@ -1,7 +1,7 @@
 /*global jQuery */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
-// Copyright (c) 2011 Franco Bugnano
+// Copyright (c) 2011-2012 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,8 @@
 
 (function ($) {
 	var
-		friGame = $.friGame;
+		friGame = $.friGame
+	;
 
 	friGame.PrototypeAnimation = Object.create(friGame.PrototypeBaseAnimation);
 
@@ -34,7 +35,8 @@
 	$.extend(friGame.PrototypeSprite, {
 		init: function (name, options, parent) {
 			var
-				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent.dom);
+				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent.dom)
+			;
 
 			this.dom = dom;
 			dom.css('position', 'absolute');
@@ -54,6 +56,7 @@
 			var
 				my_options = this.options,
 				new_options = options || {},
+				my_details = this.details,
 				animation,
 				index,
 				animation_options,
@@ -76,15 +79,15 @@
 						'height': [String(animation_options.frameHeight), 'px'].join(''),
 						'background-image': ['url("', animation_details.imageURL, '")'].join(''),
 						'background-position': [
-							String(-(animation_options.offsetx + my_options.multix)),
+							String(-(animation_options.offsetx + my_details.multix)),
 							'px ',
-							String(-(animation_options.offsety + my_options.multiy)),
+							String(-(animation_options.offsety + my_details.multiy)),
 							'px'
 						].join('')
 					});
 
 					if (friGame.filterFunction) {
-						if ((my_options.angle) || (my_options.factor !== 1) || (my_options.factorh !== 1) || (my_options.factorv !== 1)) {
+						if ((my_details.angle) || (my_options.factor !== 1) || (my_details.fliph !== 1) || (my_details.flipv !== 1)) {
 							this.ieFilter();
 						}
 					}
@@ -94,9 +97,9 @@
 			} else if (new_options.animationIndex !== undefined) {
 				if (animation) {
 					this.dom.css('background-position', [
-						String(-(animation_options.offsetx + my_options.multix)),
+						String(-(animation_options.offsetx + my_details.multix)),
 						'px ',
-						String(-(animation_options.offsety + my_options.multiy)),
+						String(-(animation_options.offsety + my_details.multiy)),
 						'px'
 					].join(''));
 				}
@@ -111,20 +114,22 @@
 			var
 				dom = this.dom,
 				options = this.options,
+				details = this.details,
 				transformFunction = friGame.transformFunction,
-				angle = options.angle,
+				angle = details.angle,
 				factor = options.factor,
-				factorh = options.factorh,
-				factorv = options.factorv,
-				transform = [];
+				fliph = details.fliph,
+				flipv = details.flipv,
+				transform = []
+			;
 
 			if (transformFunction) {
 				if (angle) {
 					transform.push.apply(transform, ['rotate(', String(angle), 'rad)']);
 				}
 
-				if ((factor !== 1) || (factorh !== 1) || (factorv !== 1)) {
-					transform.push.apply(transform, ['scale(', String(factorh * factor), ',', String(factorv * factor), ')']);
+				if ((factor !== 1) || (fliph !== 1) || (flipv !== 1)) {
+					transform.push.apply(transform, ['scale(', String(fliph * factor), ',', String(flipv * factor), ')']);
 				}
 
 				dom.css(transformFunction, transform.join(''));
@@ -141,28 +146,33 @@
 			var
 				dom = this.dom,
 				options = this.options,
+				details = this.details,
 				animation = options.animation,
 				animation_options = animation.options,
 				animation_details = animation.details,
-				angle = options.angle,
+				angle = details.angle,
 				factor = options.factor,
-				factorh = options.factorh,
-				factorv = options.factorv,
+				fliph = details.fliph,
+				flipv = details.flipv,
 				cos,
 				sin,
 				filter,
 				newWidth,
-				newHeight;
+				newHeight,
+				round = Math.round
+			;
 
 			// Step 1: Apply the transformation matrix
-			if ((angle) || (factor !== 1) || (factorh !== 1) || (factorv !== 1)) {
+			if ((angle) || (factor !== 1) || (fliph !== 1) || (flipv !== 1)) {
 				cos = Math.cos(angle) * factor;
 				sin = Math.sin(angle) * factor;
-				filter = ['progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * factorh),
-					',M12=', String(-sin * factorv),
-					',M21=', String(sin * factorh),
-					',M22=', String(cos * factorv),
-					',SizingMethod="auto expand",FilterType="nearest neighbor")'].join('');
+				filter = [
+					'progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * fliph),
+					',M12=', String(-sin * flipv),
+					',M21=', String(sin * fliph),
+					',M22=', String(cos * flipv),
+					',SizingMethod="auto expand",FilterType="nearest neighbor")'
+				].join('');
 			} else {
 				filter = '';
 			}
@@ -172,58 +182,62 @@
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
 			newHeight = dom.height();
-			options.posOffsetX = (((newWidth - animation_options.frameWidth) / 2) + 0.5) << 0;
-			options.posOffsetY = (((newHeight - animation_options.frameHeight) / 2) + 0.5) << 0;
+			details.posOffsetX = round((newWidth - animation_options.frameWidth) / 2);
+			details.posOffsetY = round((newHeight - animation_options.frameHeight) / 2);
 			dom.css({
-				'left': [String(options.left - options.posOffsetX), 'px'].join(''),
-				'top': [String(options.top - options.posOffsetY), 'px'].join('')
+				'left': [String(details.left - details.posOffsetX), 'px'].join(''),
+				'top': [String(details.top - details.posOffsetY), 'px'].join('')
 			});
 		},
 
 		draw: function () {
 			var
 				options = this.options,
-				currentFrame = options.currentFrame,
+				details = this.details,
+				currentFrame = details.currentFrame,
 				animation = options.animation,
 				animation_options,
 				animation_details,
-				left = options.left,
-				top = options.top,
-				angle = options.angle,
+				left = details.left,
+				top = details.top,
+				angle = details.angle,
 				factor = options.factor,
-				factorh = options.factorh,
-				factorv = options.factorv;
+				fliph = details.fliph,
+				flipv = details.flipv
+			;
 
 			if (animation) {
 				animation_options = animation.options;
 				animation_details = animation.details;
 
 				if (left !== options.oldLeft) {
-					this.dom.css('left', [String(left - options.posOffsetX), 'px'].join(''));
+					this.dom.css('left', [String(left - details.posOffsetX), 'px'].join(''));
 					options.oldLeft = left;
 				}
 
 				if (top !== options.oldTop) {
-					this.dom.css('top', [String(top - options.posOffsetY), 'px'].join(''));
+					this.dom.css('top', [String(top - details.posOffsetY), 'px'].join(''));
 					options.oldTop = top;
 				}
 
-				if ((angle !== options.oldAngle) ||
-						(factor !== options.oldFactor) ||
-						(factorh !== options.oldFactorh) ||
-						(factorv !== options.oldFactorv)) {
+				if	(
+						(angle !== options.oldAngle)
+					||	(factor !== options.oldFactor)
+					||	(fliph !== options.oldFactorh)
+					||	(flipv !== options.oldFactorv)
+					) {
 					this.transform();
 					options.oldAngle = angle;
 					options.oldFactor = factor;
-					options.oldFactorh = factorh;
-					options.oldFactorv = factorv;
+					options.oldFactorh = fliph;
+					options.oldFactorv = flipv;
 				}
 
-				if ((options.idleCounter === 0) && (animation_options.numberOfFrame !== 1)) {
+				if ((details.idleCounter === 0) && (animation_options.numberOfFrame !== 1)) {
 					this.dom.css('background-position', [
-						String(-(animation_options.offsetx + options.multix + (currentFrame * animation_details.deltax))),
+						String(-(animation_options.offsetx + details.multix + (currentFrame * animation_details.deltax))),
 						'px ',
-						String(-(animation_options.offsety + options.multiy + (currentFrame * animation_details.deltay))),
+						String(-(animation_options.offsety + details.multiy + (currentFrame * animation_details.deltay))),
 						'px'
 					].join(''));
 				}
@@ -244,7 +258,8 @@
 		init: function (name, parent) {
 			var
 				dom,
-				parent_dom;
+				parent_dom
+			;
 
 			if (parent) {
 				parent_dom = parent.dom;
