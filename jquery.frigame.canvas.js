@@ -52,8 +52,8 @@
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
 				animation_details = animation.details;
-				frameWidth = animation_details.frameWidth;
-				frameHeight = animation_details.frameHeight;
+				frameWidth = animation_options.frameWidth;
+				frameHeight = animation_options.frameHeight;
 
 				ctx.save();
 				ctx.translate(options.translateX, options.translateY);

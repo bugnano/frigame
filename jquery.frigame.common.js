@@ -91,20 +91,18 @@ window.requestAnimFrame = (function () {
 			default_options: {
 				// Public options
 				numberOfFrame: 1,
-				delta: 0,
 				rate: friGame.refreshRate,
 				type: 0,
-				distance: 0,
 				offsetx: 0,
-				offsety: 0
+				offsety: 0,
+				frameWidth: 0,
+				frameHeight: 0
 			},
 
 			default_details: {
 				// Implementation details
 				imageURL: '',
 				img: null,
-				frameWidth: 0,
-				frameHeight: 0,
 				halfWidth: 0,
 				halfHeight: 0,
 				deltax: 0,
@@ -152,54 +150,77 @@ window.requestAnimFrame = (function () {
 					options = this.options,
 					details = this.details,
 					img = details.img,
-					delta = options.delta,
-					distance = options.distance,
 					round = Math.round
 				;
 
 				if (options.type & friGame.ANIMATION_HORIZONTAL) {
+					// On horizontal animations the frameWidth parameter is optional
+					if (!options.frameWidth) {
+						options.frameWidth = round((img.width - options.offsetx) / options.numberOfFrame);
+					}
+
 					if (options.type & friGame.ANIMATION_MULTI) {
-						details.deltax = delta;
+						// On multi horizontal animations the frameHeight parameter is required
+						details.deltax = options.frameWidth;
 						details.deltay = 0;
 						details.multix = 0;
-						details.multiy = distance;
-						details.frameWidth = delta;
-						details.frameHeight = distance;
+						details.multiy = options.frameHeight;
 					} else {
-						details.deltax = delta;
+						// On multi horizontal animations the frameHeight parameter is optional
+						if (!options.frameHeight) {
+							options.frameHeight = img.height - options.offsety;
+						}
+
+						details.deltax = options.frameWidth;
 						details.deltay = 0;
 						details.multix = 0;
 						details.multiy = 0;
-						details.frameWidth = delta;
-						details.frameHeight = img.height - options.offsety;
 					}
 				} else if (options.type & friGame.ANIMATION_VERTICAL) {
+					// On vertical animations the frameHeight parameter is optional
+					if (!options.frameHeight) {
+						options.frameHeight = round((img.height - options.offsety) / options.numberOfFrame);
+					}
+
 					if (options.type & friGame.ANIMATION_MULTI) {
+						// On multi vertical animations the frameWidth parameter is required
 						details.deltax = 0;
-						details.deltay = delta;
-						details.multix = distance;
+						details.deltay = options.frameHeight;
+						details.multix = options.frameWidth;
 						details.multiy = 0;
-						details.frameWidth = distance;
-						details.frameHeight = delta;
 					} else {
+						// On multi vertical animations the frameWidth parameter is optional
+						if (!options.frameWidth) {
+							options.frameWidth = img.width - options.offsetx;
+						}
+
 						details.deltax = 0;
-						details.deltay = delta;
+						details.deltay = options.frameHeight;
 						details.multix = 0;
 						details.multiy = 0;
-						details.frameWidth = img.width - options.offsetx;
-						details.frameHeight = delta;
 					}
 				} else {
+					// Neither horizontal, nor vertical animation. Force single frame
+					options.numberOfFrame = 1;
+
+					// On single frame animations the frameWidth parameter is optional
+					if (!options.frameWidth) {
+						options.frameWidth = img.width - options.offsetx;
+					}
+
+					// On single frame animations the frameHeight parameter is optional
+					if (!options.frameHeight) {
+						options.frameHeight = img.height - options.offsety;
+					}
+
 					details.deltax = 0;
 					details.deltay = 0;
 					details.multix = 0;
 					details.multiy = 0;
-					details.frameWidth = img.width - options.offsetx;
-					details.frameHeight = img.height - options.offsety;
 				}
 
-				details.halfWidth = round(details.frameWidth / 2);
-				details.halfHeight = round(details.frameHeight / 2);
+				details.halfWidth = round(options.frameWidth / 2);
+				details.halfHeight = round(options.frameHeight / 2);
 
 				if (options.type & friGame.ANIMATION_ONCE) {
 					details.once = true;
@@ -350,7 +371,7 @@ window.requestAnimFrame = (function () {
 					if (xpos === friGame.XPOS_CENTER) {
 						left = my_options.posx - animation_details.halfWidth;
 					} else if (xpos === friGame.XPOS_RIGHT) {
-						left = my_options.posx - animation_details.frameWidth;
+						left = my_options.posx - animation_options.frameWidth;
 					} else {
 						left = my_options.posx;
 					}
@@ -359,7 +380,7 @@ window.requestAnimFrame = (function () {
 					if (ypos === friGame.YPOS_CENTER) {
 						top = my_options.posy - animation_details.halfHeight;
 					} else if (ypos === friGame.YPOS_BOTTOM) {
-						top = my_options.posy - animation_details.frameHeight;
+						top = my_options.posy - animation_options.frameHeight;
 					} else {
 						top = my_options.posy;
 					}
@@ -447,7 +468,7 @@ window.requestAnimFrame = (function () {
 				;
 
 				if (animation) {
-					w = animation.details.frameWidth;
+					w = animation.options.frameWidth;
 				}
 
 				return w;
@@ -460,7 +481,7 @@ window.requestAnimFrame = (function () {
 				;
 
 				if (animation) {
-					h = animation.details.frameHeight;
+					h = animation.options.frameHeight;
 				}
 
 				return h;

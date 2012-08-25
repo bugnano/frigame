@@ -75,18 +75,13 @@
 			options.texture = gl.createTexture();
 			gl.bindTexture(gl.TEXTURE_2D, options.texture);
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-
-			//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-			//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
 
-			options.textureSize = new Float32Array([details.frameWidth / img_width, details.frameHeight / img_height]);
+			options.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
 			options.offsetx /= img_width;
 			details.multix /= img_width;
 			details.deltax /= img_width;
@@ -253,8 +248,8 @@
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
 				animation_details = animation.details;
-				frameWidth = animation_details.frameWidth;
-				frameHeight = animation_details.frameHeight;
+				frameWidth = animation_options.frameWidth;
+				frameHeight = animation_options.frameHeight;
 
 				friGame.mvPushMatrix();
 				mat4.translate(mvMatrix, [options.translateX, options.translateY, 0]);

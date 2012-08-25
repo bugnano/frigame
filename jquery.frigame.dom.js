@@ -72,8 +72,8 @@
 			if (new_options.animation !== undefined) {
 				if (animation) {
 					this.dom.css({
-						'width': [String(animation_details.frameWidth), 'px'].join(''),
-						'height': [String(animation_details.frameHeight), 'px'].join(''),
+						'width': [String(animation_options.frameWidth), 'px'].join(''),
+						'height': [String(animation_options.frameHeight), 'px'].join(''),
 						'background-image': ['url("', animation_details.imageURL, '")'].join(''),
 						'background-position': [
 							String(-(animation_options.offsetx + my_options.multix)),
@@ -172,8 +172,8 @@
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
 			newHeight = dom.height();
-			options.posOffsetX = (((newWidth - animation_details.frameWidth) / 2) + 0.5) << 0;
-			options.posOffsetY = (((newHeight - animation_details.frameHeight) / 2) + 0.5) << 0;
+			options.posOffsetX = (((newWidth - animation_options.frameWidth) / 2) + 0.5) << 0;
+			options.posOffsetY = (((newHeight - animation_options.frameHeight) / 2) + 0.5) << 0;
 			dom.css({
 				'left': [String(options.left - options.posOffsetX), 'px'].join(''),
 				'top': [String(options.top - options.posOffsetY), 'px'].join('')
