@@ -105,7 +105,7 @@
 				parent_dom
 			;
 
-			if (parent === null) {
+			if (!parent) {
 				parent_dom = $('#playground');
 				dom = $(['<canvas id="', name, '" width ="', String(parent_dom.width()), '" height="', String(parent_dom.height()), '"></canvas>'].join('')).appendTo(parent_dom);
 				friGame.ctx = document.getElementById(name).getContext('2d');

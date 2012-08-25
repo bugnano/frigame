@@ -34,81 +34,31 @@
 	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
 	$.extend(friGame.PrototypeSprite, {
 		init: function (name, options, parent) {
-			var
-				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent.dom)
-			;
-
-			this.dom = dom;
-			dom.css('position', 'absolute');
-
 			friGame.PrototypeBaseSprite.init.apply(this, arguments);
 
-			this.draw();
+			this.old_options = {};
+			this.old_details = {};
 		},
 
+		// Public functions
+
 		remove: function () {
-			this.dom.remove();
+			if (this.dom) {
+				this.dom.remove();
+			}
 
 			friGame.PrototypeBaseSprite.remove.apply(this, arguments);
 		},
 
-		setAnimation: function (options) {
-			var
-				my_options = this.options,
-				new_options = options || {},
-				my_details = this.details,
-				animation,
-				index,
-				animation_options,
-				animation_details
-			;
-
-			friGame.PrototypeBaseSprite.setAnimation.apply(this, arguments);
-
-			animation = my_options.animation;
-			index = my_options.animationIndex;
-			if (animation) {
-				animation_options = animation.options;
-				animation_details = animation.details;
-			}
-
-			if (new_options.animation !== undefined) {
-				if (animation) {
-					this.dom.css({
-						'width': [String(animation_options.frameWidth), 'px'].join(''),
-						'height': [String(animation_options.frameHeight), 'px'].join(''),
-						'background-image': ['url("', animation_details.imageURL, '")'].join(''),
-						'background-position': [
-							String(-(animation_options.offsetx + my_details.multix)),
-							'px ',
-							String(-(animation_options.offsety + my_details.multiy)),
-							'px'
-						].join('')
-					});
-
-					if (friGame.filterFunction) {
-						if ((my_details.angle) || (my_details.scalex !== 1) || (my_details.scaley !== 1) || (my_details.fliph !== 1) || (my_details.flipv !== 1)) {
-							this.ieFilter();
-						}
-					}
-				} else {
-					this.dom.css('background-image', 'none');
-				}
-			} else if (new_options.animationIndex !== undefined) {
-				if (animation) {
-					this.dom.css('background-position', [
-						String(-(animation_options.offsetx + my_details.multix)),
-						'px ',
-						String(-(animation_options.offsety + my_details.multiy)),
-						'px'
-					].join(''));
-				}
-			} else {
-				$.noop();
-			}
-
-			return this;
+		show: function () {
+			this.dom.show();
 		},
+
+		hide: function () {
+			this.dom.hide();
+		},
+
+		// Implementation details
 
 		transform: function () {
 			var
@@ -196,65 +146,114 @@
 			var
 				options = this.options,
 				details = this.details,
+				old_options = this.old_options,
+				old_details = this.old_details,
 				currentFrame = details.currentFrame,
 				animation = options.animation,
 				animation_options,
 				animation_details,
+				dom = this.dom,
 				left = details.left,
 				top = details.top,
+				multix = details.multix,
+				multiy = details.multiy,
 				angle = details.angle,
 				scalex = details.scalex,
 				scaley = details.scaley,
 				fliph = details.fliph,
-				flipv = details.flipv
+				flipv = details.flipv,
+				css_options = {},
+				update_css = false,
+				update_position = false,
+				update_transform = false
 			;
+
+			if (!dom) {
+				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(this.parent.dom);
+
+				css_options.position = 'absolute';
+				update_css = true;
+
+				this.dom = dom;
+			}
 
 			if (animation) {
 				animation_options = animation.options;
 				animation_details = animation.details;
 
-				if (left !== options.oldLeft) {
-					this.dom.css('left', [String(left - details.posOffsetX), 'px'].join(''));
-					options.oldLeft = left;
+				if (left !== old_details.left) {
+					css_options.left = [String(left - details.posOffsetX), 'px'].join('');
+					update_css = true;
+
+					old_details.left = left;
 				}
 
-				if (top !== options.oldTop) {
-					this.dom.css('top', [String(top - details.posOffsetY), 'px'].join(''));
-					options.oldTop = top;
+				if (top !== old_details.top) {
+					css_options.top = [String(top - details.posOffsetY), 'px'].join('');
+					update_css = true;
+
+					old_details.top = top;
+				}
+
+				if (animation !== old_options.animation) {
+					$.extend(css_options, {
+						'width': [String(animation_options.frameWidth), 'px'].join(''),
+						'height': [String(animation_options.frameHeight), 'px'].join(''),
+						'background-image': ['url("', animation_details.imageURL, '")'].join('')
+					});
+					update_css = true;
+					update_position = true;
+
+					if ((angle) || (scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
+						update_transform = true;
+					}
+
+					old_options.animation = animation;
+				}
+
+				if ((multix !== old_details.multix)  || (multiy !== old_details.multiy)) {
+					update_position = true;
+
+					old_details.multix = multix;
+					old_details.multiy = multiy;
+				}
+
+				if (update_position || ((details.idleCounter === 0) && (animation_options.numberOfFrame !== 1))) {
+					css_options['background-position'] = [
+						String(-(animation_options.offsetx + multix + (currentFrame * animation_details.deltax))),
+						'px ',
+						String(-(animation_options.offsety + multiy + (currentFrame * animation_details.deltay))),
+						'px'
+					].join('');
+					update_css = true;
+				}
+
+				if (update_css) {
+					dom.css(css_options);
 				}
 
 				if	(
-						(angle !== options.oldAngle)
-					||	(scalex !== options.oldScalex)
-					||	(scaley !== options.oldScaley)
-					||	(fliph !== options.oldFactorh)
-					||	(flipv !== options.oldFactorv)
+						update_transform
+					||	(angle !== old_details.angle)
+					||	(scalex !== old_details.scalex)
+					||	(scaley !== old_details.scaley)
+					||	(fliph !== old_details.fliph)
+					||	(flipv !== old_details.flipv)
 					) {
 					this.transform();
-					options.oldAngle = angle;
-					options.oldScalex = scalex;
-					options.oldScaley = scaley;
-					options.oldFactorh = fliph;
-					options.oldFactorv = flipv;
-				}
 
-				if ((details.idleCounter === 0) && (animation_options.numberOfFrame !== 1)) {
-					this.dom.css('background-position', [
-						String(-(animation_options.offsetx + details.multix + (currentFrame * animation_details.deltax))),
-						'px ',
-						String(-(animation_options.offsety + details.multiy + (currentFrame * animation_details.deltay))),
-						'px'
-					].join(''));
+					old_options.angle = angle;
+					old_options.scalex = scalex;
+					old_options.scaley = scaley;
+					old_options.fliph = fliph;
+					old_options.flipv = flipv;
+				}
+			} else {
+				if (animation !== old_options.animation) {
+					dom.css('background-image', 'none');
+					old_options.animation = animation;
 				}
 			}
-		},
-
-		show: function () {
-			this.dom.show();
-		},
-
-		hide: function () {
-			this.dom.hide();
 		}
 	});
 
@@ -262,19 +261,14 @@
 	$.extend(friGame.PrototypeSpriteGroup, {
 		init: function (name, parent) {
 			var
-				dom,
-				parent_dom
+				dom
 			;
 
-			if (parent) {
-				parent_dom = parent.dom;
-			} else {
-				parent_dom = $('#playground');
-			}
-
-			dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom);
+			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
+				dom = this.makeDOM($('#playground'));
+
 				if (dom.css('-moz-transform')) {
 					friGame.transformFunction = '-moz-transform';
 				} else if (dom.css('-o-transform')) {
@@ -291,6 +285,24 @@
 					$.noop();
 				}
 			}
+		},
+
+		// Public functions
+
+		remove: function () {
+			friGame.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
+
+			if ((this.parent) && (this.dom)) {
+				this.dom.remove();
+			}
+		},
+
+		// Implementation details
+
+		makeDOM: function (parent_dom) {
+			var
+				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom)
+			;
 
 			dom.css({
 				'position': 'absolute',
@@ -300,13 +312,15 @@
 
 			this.dom = dom;
 
-			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
+			return dom;
 		},
 
-		remove: function () {
-			this.dom.remove();
+		draw: function () {
+			if (!this.dom) {
+				this.makeDOM(this.parent.dom);
+			}
 
-			friGame.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
+			friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
 		}
 	});
 }(jQuery));

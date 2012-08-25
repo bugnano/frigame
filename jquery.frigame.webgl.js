@@ -323,7 +323,7 @@
 				pMatrix = mat4.create()
 			;
 
-			if (parent === null) {
+			if (!parent) {
 				parent_dom = $('#playground');
 				width = parent_dom.width();
 				height = parent_dom.height();

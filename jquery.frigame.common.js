@@ -247,18 +247,7 @@ window.requestAnimFrame = (function () {
 				posx: 0,
 				posy: 0,
 				xpos: friGame.XPOS_LEFT,
-				ypos: friGame.YPOS_TOP,
-
-				// Implementation details
-
-				// DOM specific
-				oldLeft: 0,
-				oldTop: 0,
-				oldAngle: 0,
-				oldScalex: 1,
-				oldScaley: 1,
-				oldFactorh: 1,
-				oldFactorv: 1
+				ypos: friGame.YPOS_TOP
 			},
 
 			default_details: {
