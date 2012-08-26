@@ -13,14 +13,14 @@ $(function () {
 		}),
 
 		multiVerticalAnimation = $.friGame.Animation('mv.png', {
-			type: $.friGame.ANIMATION_VERTICAL + $.friGame.ANIMATION_MULTI,
+			type: $.friGame.ANIMATION_VERTICAL,
 			numberOfFrame: 4,
 			rate: 300,
 			frameWidth: 32
 		}),
 
 		multiHorizontalAnimation = $.friGame.Animation('mh.png', {
-			type: $.friGame.ANIMATION_HORIZONTAL + $.friGame.ANIMATION_MULTI,
+			type: $.friGame.ANIMATION_HORIZONTAL,
 			numberOfFrame: 4,
 			rate: 300,
 			frameHeight: 32
@@ -43,7 +43,7 @@ $(function () {
 		}),
 
 		multiOffsetVerticalAnimation = $.friGame.Animation('mov.png', {
-			type: $.friGame.ANIMATION_VERTICAL + $.friGame.ANIMATION_MULTI,
+			type: $.friGame.ANIMATION_VERTICAL,
 			numberOfFrame: 4,
 			rate: 300,
 			offsetx: 100,
@@ -52,7 +52,7 @@ $(function () {
 		}),
 
 		multiOffsetHorizontalAnimation = $.friGame.Animation('moh.png', {
-			type: $.friGame.ANIMATION_HORIZONTAL + $.friGame.ANIMATION_MULTI,
+			type: $.friGame.ANIMATION_HORIZONTAL,
 			numberOfFrame: 4,
 			rate: 300,
 			offsetx: 100,

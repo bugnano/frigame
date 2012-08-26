@@ -59,7 +59,6 @@ window.requestAnimFrame = (function () {
 		ANIMATION_VERTICAL: 1,		// genertated by a verical offset of the background
 		ANIMATION_HORIZONTAL: 2,	// genertated by a horizontal offset of the background
 		ANIMATION_ONCE: 4,			// played only once (else looping indefinitly)
-		ANIMATION_MULTI: 16,		// The image file contains many animations
 
 		// constants for the various positions
 		XPOS_LEFT: 0,
@@ -159,46 +158,30 @@ window.requestAnimFrame = (function () {
 						options.frameWidth = round((img.width - options.offsetx) / options.numberOfFrame);
 					}
 
-					if (options.type & friGame.ANIMATION_MULTI) {
-						// On multi horizontal animations the frameHeight parameter is required
-						details.deltax = options.frameWidth;
-						details.deltay = 0;
-						details.multix = 0;
-						details.multiy = options.frameHeight;
-					} else {
-						// On multi horizontal animations the frameHeight parameter is optional
-						if (!options.frameHeight) {
-							options.frameHeight = img.height - options.offsety;
-						}
-
-						details.deltax = options.frameWidth;
-						details.deltay = 0;
-						details.multix = 0;
-						details.multiy = 0;
+					// On multi horizontal animations the frameHeight parameter is required
+					if (!options.frameHeight) {
+						options.frameHeight = img.height - options.offsety;
 					}
+
+					details.deltax = options.frameWidth;
+					details.deltay = 0;
+					details.multix = 0;
+					details.multiy = options.frameHeight;
 				} else if (options.type & friGame.ANIMATION_VERTICAL) {
+					// On multi vertical animations the frameWidth parameter is required
+					if (!options.frameWidth) {
+						options.frameWidth = img.width - options.offsetx;
+					}
+
 					// On vertical animations the frameHeight parameter is optional
 					if (!options.frameHeight) {
 						options.frameHeight = round((img.height - options.offsety) / options.numberOfFrame);
 					}
 
-					if (options.type & friGame.ANIMATION_MULTI) {
-						// On multi vertical animations the frameWidth parameter is required
-						details.deltax = 0;
-						details.deltay = options.frameHeight;
-						details.multix = options.frameWidth;
-						details.multiy = 0;
-					} else {
-						// On multi vertical animations the frameWidth parameter is optional
-						if (!options.frameWidth) {
-							options.frameWidth = img.width - options.offsetx;
-						}
-
-						details.deltax = 0;
-						details.deltay = options.frameHeight;
-						details.multix = 0;
-						details.multiy = 0;
-					}
+					details.deltax = 0;
+					details.deltay = options.frameHeight;
+					details.multix = options.frameWidth;
+					details.multiy = 0;
 				} else {
 					// Neither horizontal, nor vertical animation. Force single frame
 					options.numberOfFrame = 1;
