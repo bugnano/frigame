@@ -265,6 +265,7 @@ window.requestAnimFrame = (function () {
 				scaley: 1,
 				fliph: 1,
 				flipv: 1,
+				hidden: false,
 
 				// ieFilter specific
 				posOffsetX: 0,
@@ -496,6 +497,15 @@ window.requestAnimFrame = (function () {
 
 				return h;
 			},
+
+			show: function () {
+				this.details.hidden = false;
+			},
+
+			hide: function () {
+				this.details.hidden = true;
+			},
+
 
 			remove: function () {
 				var

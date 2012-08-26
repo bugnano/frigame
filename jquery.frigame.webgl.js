@@ -34,7 +34,6 @@
 		initBuffers: function () {
 			var
 				gl = friGame.gl,
-				options = this.options,
 				details = this.details,
 				halfWidth = details.halfWidth,
 				halfHeight = details.halfHeight,
@@ -256,7 +255,7 @@
 				pMatrix = friGame.pMatrix
 			;
 
-			if (animation && !options.hidden) {
+			if (animation && !details.hidden) {
 				animation_options = animation.options;
 				animation_details = animation.details;
 				frameWidth = animation_options.frameWidth;
@@ -295,14 +294,6 @@
 
 				friGame.mvPopMatrix();
 			}
-		},
-
-		show: function () {
-			this.options.hidden = false;
-		},
-
-		hide: function () {
-			this.options.hidden = true;
 		}
 	});
 
@@ -322,6 +313,8 @@
 				mvMatrixStack = [],
 				pMatrix = mat4.create()
 			;
+
+			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
 				parent_dom = $('#playground');
@@ -359,8 +352,6 @@
 					mat4.identity(mvMatrix);
 				}
 			}
-
-			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 		}
 	});
 }(jQuery));

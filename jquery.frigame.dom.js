@@ -50,14 +50,6 @@
 			friGame.PrototypeBaseSprite.remove.apply(this, arguments);
 		},
 
-		show: function () {
-			this.dom.show();
-		},
-
-		hide: function () {
-			this.dom.hide();
-		},
-
 		// Implementation details
 
 		transform: function () {
@@ -162,24 +154,29 @@
 				scaley = details.scaley,
 				fliph = details.fliph,
 				flipv = details.flipv,
+				hidden = details.hidden,
 				css_options = {},
 				update_css = false,
 				update_position = false,
 				update_transform = false
 			;
 
-			if (!dom) {
-				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(this.parent.dom);
-
-				css_options.position = 'absolute';
-				update_css = true;
-
-				this.dom = dom;
-			}
-
-			if (animation) {
+			if (animation && !hidden) {
 				animation_options = animation.options;
 				animation_details = animation.details;
+
+				if (!dom) {
+					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
+
+					dom.css('position', 'absolute');
+
+					this.dom = dom;
+				}
+
+				if (hidden !== old_details.hidden) {
+					dom.show();
+					old_details.hidden = hidden;
+				}
 
 				if (left !== old_details.left) {
 					css_options.left = [String(left - details.posOffsetX), 'px'].join('');
@@ -249,9 +246,16 @@
 					old_options.flipv = flipv;
 				}
 			} else {
-				if (animation !== old_options.animation) {
-					dom.css('background-image', 'none');
-					old_options.animation = animation;
+				if (dom) {
+					if (hidden && (hidden !== old_details.hidden)) {
+						dom.hide();
+						old_details.hidden = hidden;
+					}
+
+					if ((!animation) && (animation !== old_options.animation)) {
+						dom.css('background-image', 'none');
+						old_options.animation = animation;
+					}
 				}
 			}
 		}
@@ -267,7 +271,7 @@
 			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
-				dom = this.makeDOM($('#playground'));
+				dom = this.makeDOM(name, $('#playground'));
 
 				if (dom.css('-moz-transform')) {
 					friGame.transformFunction = '-moz-transform';
@@ -299,7 +303,7 @@
 
 		// Implementation details
 
-		makeDOM: function (parent_dom) {
+		makeDOM: function (name, parent_dom) {
 			var
 				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom)
 			;
@@ -317,7 +321,7 @@
 
 		draw: function () {
 			if (!this.dom) {
-				this.makeDOM(this.parent.dom);
+				this.makeDOM(this.name, this.parent.dom);
 			}
 
 			friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);

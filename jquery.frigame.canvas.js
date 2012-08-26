@@ -53,7 +53,7 @@
 				ctx = friGame.ctx
 			;
 
-			if (animation && !options.hidden) {
+			if (animation && !details.hidden) {
 				animation_options = animation.options;
 				animation_details = animation.details;
 				frameWidth = animation_options.frameWidth;
@@ -86,14 +86,6 @@
 
 				ctx.restore();
 			}
-		},
-
-		show: function () {
-			this.options.hidden = false;
-		},
-
-		hide: function () {
-			this.options.hidden = true;
 		}
 	});
 
@@ -105,13 +97,13 @@
 				parent_dom
 			;
 
+			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
+
 			if (!parent) {
 				parent_dom = $('#playground');
 				dom = $(['<canvas id="', name, '" width ="', String(parent_dom.width()), '" height="', String(parent_dom.height()), '"></canvas>'].join('')).appendTo(parent_dom);
 				friGame.ctx = document.getElementById(name).getContext('2d');
 			}
-
-			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 		}
 	});
 
