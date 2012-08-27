@@ -58,6 +58,20 @@ $(function () {
 			offsetx: 100,
 			offsety: 100,
 			frameHeight: 32
+		}),
+
+		pingpongAnimation = $.friGame.Animation('rebound.png', {
+			type: $.friGame.ANIMATION_HORIZONTAL + $.friGame.ANIMATION_PINGPONG + $.friGame.ANIMATION_ONCE,
+			numberOfFrame: 9,
+			//rate: 60
+			rate: 600
+		}),
+
+		multiPingpongAnimation = $.friGame.Animation('reboundm.png', {
+			type: $.friGame.ANIMATION_HORIZONTAL + $.friGame.ANIMATION_PINGPONG,
+			numberOfFrame: 9,
+			rate: 60,
+			frameHeight: 64
 		})
 	;
 
@@ -71,10 +85,16 @@ $(function () {
 			.addSprite('simpleOffsetHorizontal', {animation: simpleOffsetHorizontalAnimation, posx: 184})
 			.addSprite('multiOffsetVertical', {animation: multiOffsetVerticalAnimation, animationIndex: 1, posx: 225})
 			.addSprite('multiOffsetHorizontal', {animation: multiOffsetHorizontalAnimation, animationIndex: 1, posx: 259})
+			.addSprite('pingpong', {animation: pingpongAnimation, posx: 286})
+			.addSprite('multiPingpong', {animation: multiPingpongAnimation, posx: 350})
 		;
 
 		$.friGame.sprites.multiVertical.setAnimation({animationIndex: 1});
 		$.friGame.sprites.multiHorizontal.setAnimation({animationIndex: 1});
+		$.friGame.sprites.multiPingpong.setAnimation({animationIndex: 1});
+		$.friGame.sprites.pingpong.setAnimation({callback: function () {
+			$('<p>Done</p>').appendTo('#playground').css({position: 'absolute', top: '64px'});
+		}});
 	});
 });
 

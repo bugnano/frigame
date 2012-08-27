@@ -94,16 +94,30 @@
 		init: function (name, parent) {
 			var
 				dom,
-				parent_dom
+				parent_dom,
+				width,
+				height
 			;
 
 			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
 				parent_dom = $('#playground');
-				dom = $(['<canvas id="', name, '" width ="', String(parent_dom.width()), '" height="', String(parent_dom.height()), '"></canvas>'].join('')).appendTo(parent_dom);
+				width = parent_dom.width();
+				height = parent_dom.height();
+				dom = $(['<canvas id="', name, '" width ="', String(width), '" height="', String(height), '"></canvas>'].join('')).appendTo(parent_dom);
 				friGame.ctx = document.getElementById(name).getContext('2d');
+				this.canvasWidth = width;
+				this.canvasHeight = height;
 			}
+		},
+
+		draw: function () {
+			if (!this.parent) {
+				friGame.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+			}
+
+			friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
 		}
 	});
 

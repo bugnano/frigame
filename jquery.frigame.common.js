@@ -45,6 +45,13 @@ window.requestAnimFrame = (function () {
 		};
 }());
 
+// Date.now() by Mozilla
+if (!Date.now) {
+	Date.now = function () {
+		return (new Date()).getTime();
+	};
+}
+
 (function ($) {
 	var
 		friGame = {}
@@ -59,6 +66,7 @@ window.requestAnimFrame = (function () {
 		ANIMATION_VERTICAL: 1,		// genertated by a verical offset of the background
 		ANIMATION_HORIZONTAL: 2,	// genertated by a horizontal offset of the background
 		ANIMATION_ONCE: 4,			// played only once (else looping indefinitly)
+		ANIMATION_PINGPONG: 32,		// at the last frame of the animation it reverses
 
 		// constants for the various positions
 		XPOS_LEFT: 0,
@@ -108,7 +116,8 @@ window.requestAnimFrame = (function () {
 				deltay: 0,
 				multix: 0,
 				multiy: 0,
-				once: false
+				once: false,
+				pingpong: false
 			},
 
 			init: function (imageURL, options) {
@@ -140,6 +149,14 @@ window.requestAnimFrame = (function () {
 				details.img = img;
 
 				friGame.animations.push(this);
+			},
+
+			width: function () {
+				return this.options.frameWidth;
+			},
+
+			height: function () {
+				return this.options.frameHeight;
 			},
 
 			// Implementation details
@@ -208,6 +225,10 @@ window.requestAnimFrame = (function () {
 				if (options.type & friGame.ANIMATION_ONCE) {
 					details.once = true;
 				}
+
+				if (options.type & friGame.ANIMATION_PINGPONG) {
+					details.pingpong = true;
+				}
 			}
 		},
 
@@ -241,6 +262,7 @@ window.requestAnimFrame = (function () {
 				translatey: 0,
 				idleCounter: 0,
 				currentFrame: 0,
+				frameIncrement: 1,
 				multix: 0,
 				multiy: 0,
 				angle: 0,
@@ -330,6 +352,7 @@ window.requestAnimFrame = (function () {
 				if (animation_redefined || index_redefined) {
 					my_details.idleCounter = 0;
 					my_details.currentFrame = 0;
+					my_details.frameIncrement = 1;
 					this.endAnimation = false;
 				}
 
@@ -530,21 +553,66 @@ window.requestAnimFrame = (function () {
 						details.idleCounter += 1;
 						if (details.idleCounter >= animation_options.rate) {
 							details.idleCounter = 0;
-							currentFrame += 1;
-							if (currentFrame >= animation_options.numberOfFrame) {
-								if (animation_details.once) {
-									currentFrame -= 1;
-									details.idleCounter = 1;
-									this.endAnimation = true;
-								} else {
-									currentFrame = 0;
-								}
+							currentFrame += details.frameIncrement;
+							if (animation_details.pingpong) {
+								// In pingpong animations the end is when the frame goes below 0
+								if (currentFrame < 0) {
+									details.frameIncrement = 1;
+									if (animation_details.once) {
+										currentFrame = 0;
+										details.idleCounter = 1;
+										this.endAnimation = true;
+									} else {
+										// The first frame has already been displayed, start from the second
+										if (animation_options.numberOfFrame > 1) {
+											currentFrame = 1;
+										} else {
+											currentFrame = 0;
+										}
+									}
 
-								if (callback) {
-									callback.call(this, this);
+									// Update the details before the callback
+									details.currentFrame = currentFrame;
+
+									if (callback) {
+										callback.call(this, this);
+									}
+								} else if (currentFrame >= animation_options.numberOfFrame) {
+									// Last frame reached, change animation direction
+									details.frameIncrement = -1;
+									if (animation_options.numberOfFrame > 1) {
+										currentFrame -= 2;
+									} else {
+										currentFrame -= 1;
+									}
+									details.currentFrame = currentFrame;
+								} else {
+									// This is no particular frame, simply update the details
+									details.currentFrame = currentFrame;
+								}
+							} else {
+								// Normal animation
+								if (currentFrame >= animation_options.numberOfFrame) {
+									// Last frame reached
+									if (animation_details.once) {
+										currentFrame -= 1;
+										details.idleCounter = 1;
+										this.endAnimation = true;
+									} else {
+										currentFrame = 0;
+									}
+
+									// Update the details before the callback
+									details.currentFrame = currentFrame;
+
+									if (callback) {
+										callback.call(this, this);
+									}
+								} else {
+									// This is no particular frame, simply update the details
+									details.currentFrame = currentFrame;
 								}
 							}
-							details.currentFrame = currentFrame;
 						}
 					} else {
 						// Make sure that the callback is called even if there is no animation
