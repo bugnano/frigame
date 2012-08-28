@@ -263,7 +263,7 @@
 
 	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
 	$.extend(friGame.PrototypeSpriteGroup, {
-		init: function (name, parent) {
+		init: function (name, options, parent) {
 			var
 				dom
 			;

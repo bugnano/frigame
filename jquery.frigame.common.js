@@ -635,15 +635,100 @@ if (!Date.now) {
 		},
 
 		PrototypeBaseSpriteGroup: {
-			init: function (name, parent) {
+			default_options: {
+				// Public options
+				posx: 0,
+				posy: 0,
+				xpos: friGame.XPOS_LEFT,
+				ypos: friGame.YPOS_TOP,
+				width: 0,
+				height: 0
+			},
+
+			default_details: {
+				// Implementation details
+				left: 0,
+				top: 0,
+				halfWidth: 0,
+				halfHeight: 0
+			},
+
+			init: function (name, options, parent) {
+				var
+					details = Object.create(this.default_details)
+				;
+
 				friGame.groups[name] = this;
 
 				this.layers = [];
 				this.name = name;
 				this.parent = parent;
+
+				this.options = Object.create(this.default_options);
+				options = $.extend(this.options, options);
+
+				this.details = details;
+
+				this.resize();
 			},
 
 			// Public functions
+
+			resize: function (options) {
+				var
+					my_options = this.options,
+					new_options = options || {},
+					my_details = this.details,
+					round = Math.round
+				;
+
+				// Set the new options
+				$.extend(my_options, new_options);
+
+				my_details.halfWidth = round(my_options.width / 2);
+				my_details.halfHeight = round(my_options.height / 2);
+
+				return this.move();
+			},
+
+			move: function (options) {
+				var
+					my_options = this.options,
+					new_options = options || {},
+					my_details = this.details,
+					round = Math.round,
+					left,
+					top,
+					xpos,
+					ypos
+				;
+
+				// Set the new options
+				$.extend(my_options, new_options);
+
+				xpos = my_options.xpos;
+				if (xpos === friGame.XPOS_CENTER) {
+					left = my_options.posx - my_details.halfWidth;
+				} else if (xpos === friGame.XPOS_RIGHT) {
+					left = my_options.posx - my_options.width;
+				} else {
+					left = my_options.posx;
+				}
+
+				ypos = my_options.ypos;
+				if (ypos === friGame.YPOS_CENTER) {
+					top = my_options.posy - my_details.halfHeight;
+				} else if (ypos === friGame.YPOS_BOTTOM) {
+					top = my_options.posy - my_options.height;
+				} else {
+					top = my_options.posy;
+				}
+
+				my_details.left = round(left);
+				my_details.top = round(top);
+
+				return this;
+			},
 
 			addSprite: function (name, options) {
 				var
@@ -655,9 +740,9 @@ if (!Date.now) {
 				return this;
 			},
 
-			addGroup: function (name) {
+			addGroup: function (name, options) {
 				var
-					group = friGame.SpriteGroup(name, this)
+					group = friGame.SpriteGroup(name, options, this)
 				;
 
 				this.layers.push({name: name, obj: group});
@@ -772,7 +857,7 @@ if (!Date.now) {
 			;
 
 			if (!scenegraph) {
-				scenegraph = friGame.SpriteGroup('scenegraph', null);
+				scenegraph = friGame.SpriteGroup('scenegraph', {}, null);
 			}
 
 			return scenegraph;

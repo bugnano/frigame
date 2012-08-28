@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="jquery.js"></script>
+        <script src="../jquery.js"></script>
         <script src="jquery.gamequery.js"></script>
         <script>
             $(function(){
                 var animation = new $.gameQuery.Animation({imageURL: "sh.png", type: $.gameQuery.ANIMATION_HORIZONTAL, numberOfFrame: 4, delta: 32, rate: 300});
-                
+
                 $("#playground").playground({height: 64, width: 350});
-                
+
                 $.playground()
                     .addSprite("aRotateScale",{animation: animation, posx: 16, posy: 16})
                     .addSprite("scaleARotate",{animation: animation, posx: 80, posy: 16})
                     .addSprite("rotateAScale",{animation: animation, posx: 180, posy: 16})
                     .addSprite("aScaleRotate",{animation: animation, posx: 240, posy: 16})
-                
+
                 var angle = 45;
                 $.playground().registerCallback(function(){
                         $("#aRotateScale").rotate(angle).scale(2);
@@ -24,7 +24,7 @@
                         angle -= 1;
                         angle %= 360;
                     }, 30);
-                
+
                 $.playground().startGame();
             });
         </script>
