@@ -168,7 +168,13 @@
 				if (!dom) {
 					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
 
-					dom.css('position', 'absolute');
+					dom.css({
+						'position': 'absolute',
+						'margin': '0px',
+						'padding': '0px',
+						'border': 'none',
+						'outline': 'none'
+					});
 
 					this.dom = dom;
 				}
@@ -310,8 +316,15 @@
 
 			dom.css({
 				'position': 'absolute',
-				'width': parent_dom.css('width'),
-				'height': parent_dom.css('height')
+				'left': '0px',
+				'top': '0px',
+				'width': [String(parent_dom.width()), 'px'].join(''),
+				'height': [String(parent_dom.height()), 'px'].join(''),
+				'margin': '0px',
+				'padding': '0px',
+				'border': 'none',
+				'outline': 'none',
+				'background': 'none'
 			});
 
 			this.dom = dom;

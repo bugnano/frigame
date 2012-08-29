@@ -306,6 +306,8 @@
 				parent_dom,
 				width,
 				height,
+				str_width,
+				str_height,
 				animations = friGame.animations,
 				len_animations = animations.length,
 				i,
@@ -320,7 +322,23 @@
 				parent_dom = $('#playground');
 				width = parent_dom.width();
 				height = parent_dom.height();
-				dom = $(['<canvas id="', name, '" width ="', String(width), '" height="', String(height), '"></canvas>'].join('')).appendTo(parent_dom);
+				str_width = String(width);
+				str_height = String(height);
+
+				dom = $(['<canvas id="', name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).appendTo(parent_dom);
+				dom.css({
+					'position': 'absolute',
+					'left': '0px',
+					'top': '0px',
+					'width': [str_width, 'px'].join(''),
+					'height': [str_height, 'px'].join(''),
+					'margin': '0px',
+					'padding': '0px',
+					'border': 'none',
+					'outline': 'none',
+					'background': 'none'
+				});
+
 				try {
 					gl = document.getElementById(name).getContext('experimental-webgl');
 					gl.viewportWidth = width;
