@@ -94,6 +94,207 @@ if (!Date.now) {
 
 		drawDone: true,
 
+		PrototypeRect: {
+			default_options: {
+				// Public options
+				left: 0,
+				right: 0,
+				centerx: 0,
+				top: 0,
+				bottom: 0,
+				centery: 0,
+				width: 0,
+				height: 0,
+				halfWidth: 0,
+				halfHeight: 0,
+				radius: 0
+			},
+
+			init: function (options) {
+				$.extend(this, this.default_options);
+
+				this.options = Object.create(this.default_options);
+
+				if (options.centerx !== undefined) {
+					this.last_x = 'centerx';
+				} else if (options.right !== undefined) {
+					this.last_x = 'right';
+				} else {
+					this.last_x = 'left';
+				}
+
+				if (options.centery !== undefined) {
+					this.last_y = 'centery';
+				} else if (options.bottom !== undefined) {
+					this.last_y = 'bottom';
+				} else {
+					this.last_y = 'top';
+				}
+
+				this.resize(options);
+			},
+
+			resize: function (options) {
+				var
+					my_options = this.options,
+					new_options = options || {},
+					round = Math.round,
+					change_radius
+				;
+
+				if (new_options.radius !== undefined) {
+					my_options.radius = round(new_options.radius);
+
+					my_options.width = my_options.radius * 2;
+					my_options.halfWidth = my_options.radius;
+					my_options.height = my_options.width;
+					my_options.halfHeight = my_options.halfWidth;
+				} else {
+					if (new_options.width !== undefined) {
+						my_options.width = round(new_options.width);
+						my_options.halfWidth = round(new_options.width / 2);
+						change_radius = true;
+					} else if (new_options.halfWidth !== undefined) {
+						my_options.width = round(new_options.halfWidth * 2);
+						my_options.halfWidth = round(new_options.halfWidth);
+						change_radius = true;
+					} else {
+						// No width is being redefined
+						change_radius = false;
+					}
+
+					if (new_options.height !== undefined) {
+						my_options.height = round(new_options.height);
+						my_options.halfHeight = round(new_options.height / 2);
+						change_radius = true;
+					} else if (new_options.halfHeight !== undefined) {
+						my_options.height = round(new_options.halfHeight * 2);
+						my_options.halfHeight = round(new_options.halfHeight);
+						change_radius = true;
+					} else {
+						// No height is being redefined
+						change_radius = false;
+					}
+
+					if (change_radius) {
+						my_options.radius = Math.max(my_options.halfWidth, my_options.halfHeight);
+					}
+				}
+
+				return this.move(options);
+			},
+
+			move: function (options) {
+				var
+					my_options = this.options,
+					new_options = options || {},
+					round = Math.round
+				;
+
+				if (new_options.centerx !== undefined) {
+					my_options.centerx = round(new_options.centerx);
+					this.last_x = 'centerx';
+				} else if (new_options.right !== undefined) {
+					my_options.right = round(new_options.right);
+					this.last_x = 'right';
+				} else if (new_options.left !== undefined) {
+					my_options.left = round(new_options.left);
+					this.last_x = 'left';
+				} else {
+					// No x is being redefined
+					$.noop();
+				}
+
+				if (new_options.centery !== undefined) {
+					my_options.centery = round(new_options.centery);
+					this.last_y = 'centery';
+				} else if (new_options.bottom !== undefined) {
+					my_options.bottom = round(new_options.bottom);
+					this.last_y = 'bottom';
+				} else if (new_options.top !== undefined) {
+					my_options.top = round(new_options.top);
+					this.last_y = 'top';
+				} else {
+					// No y is being redefined
+					$.noop();
+				}
+
+				if (this.last_x === 'centerx') {
+					my_options.left = my_options.centerx - my_options.halfWidth;
+					my_options.right = my_options.left + my_options.width;
+				} else if (this.last_x === 'right') {
+					my_options.left = my_options.right - my_options.width;
+					my_options.centerx = my_options.left + my_options.halfWidth;
+				} else {
+					my_options.centerx = my_options.left + my_options.halfWidth;
+					my_options.right = my_options.left + my_options.width;
+				}
+
+				if (this.last_y === 'centery') {
+					my_options.top = my_options.centery - my_options.halfHeight;
+					my_options.bottom = my_options.top + my_options.height;
+				} else if (this.last_y === 'bottom') {
+					my_options.top = my_options.bottom - my_options.height;
+					my_options.centery = my_options.top + my_options.halfHeight;
+				} else {
+					my_options.centery = my_options.top + my_options.halfHeight;
+					my_options.bottom = my_options.top + my_options.height;
+				}
+
+				return this;
+			},
+
+			left: function () {
+				return this.options.left;
+			},
+
+			right: function () {
+				return this.options.right;
+			},
+
+			centerx: function () {
+				return this.options.centerx;
+			},
+
+			top: function () {
+				return this.options.top;
+			},
+
+			bottom: function () {
+				return this.options.bottom;
+			},
+
+			centery: function () {
+				return this.options.centery;
+			},
+
+			width: function () {
+				return this.options.width;
+			},
+
+			height: function () {
+				return this.options.height;
+			},
+
+			halfWidth: function () {
+				return this.options.halfWidth;
+			},
+
+			halfHeight: function () {
+				return this.options.halfHeight;
+			}
+		},
+
+		Rect: function () {
+			var
+				rect = Object.create(friGame.PrototypeRect)
+			;
+
+			rect.init.apply(rect, arguments);
+
+			return rect;
+		},
+
 		PrototypeBaseAnimation: {
 			default_options: {
 				// Public options
