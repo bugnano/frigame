@@ -504,14 +504,17 @@ if (!Date.now) {
 				return h;
 			},
 
-			show: function () {
-				this.details.hidden = false;
-			},
-
 			hide: function () {
 				this.details.hidden = true;
+
+				return this;
 			},
 
+			show: function () {
+				this.details.hidden = false;
+
+				return this;
+			},
 
 			remove: function () {
 				var
@@ -650,7 +653,8 @@ if (!Date.now) {
 				left: 0,
 				top: 0,
 				halfWidth: 0,
-				halfHeight: 0
+				halfHeight: 0,
+				hidden: false
 			},
 
 			init: function (name, options, parent) {
@@ -679,11 +683,24 @@ if (!Date.now) {
 					my_options = this.options,
 					new_options = options || {},
 					my_details = this.details,
-					round = Math.round
+					round = Math.round,
+					parent = this.parent
 				;
 
 				// Set the new options
 				$.extend(my_options, new_options);
+
+				if (parent) {
+					// A width of 0 means the same width as the parent
+					if (!my_options.width) {
+						my_options.width = parent.options.width;
+					}
+
+					// A height of 0 means the same height as the parent
+					if (!my_options.height) {
+						my_options.height = parent.options.height;
+					}
+				}
 
 				my_details.halfWidth = round(my_options.width / 2);
 				my_details.halfHeight = round(my_options.height / 2);
@@ -763,47 +780,39 @@ if (!Date.now) {
 			},
 
 			hide: function () {
-				var
-					layers = this.layers,
-					len_layers = layers.length,
-					i
-				;
+				this.details.hidden = true;
 
-				for (i = 0; i < len_layers; i += 1) {
-					layers[i].obj.hide();
-				}
+				return this;
 			},
 
 			show: function () {
-				var
-					layers = this.layers,
-					len_layers = layers.length,
-					i
-				;
+				this.details.hidden = false;
 
-				for (i = 0; i < len_layers; i += 1) {
-					layers[i].obj.show();
-				}
+				return this;
 			},
 
 			remove: function () {
 				var
 					layers = this.layers,
 					parent = this.parent,
-					parent_layers = parent.layers,
-					len_parent_layers = parent_layers.length,
+					parent_layers,
+					len_parent_layers,
 					name = this.name,
 					i
 				;
 
 				while (layers.length) {
-					layers[0].remove();
+					layers[0].obj.remove();
 				}
 
-				for (i = 0; i < len_parent_layers; i += 1) {
-					if (parent_layers[i].name === name) {
-						parent_layers.splice(i, 1);
-						break;
+				if (parent) {
+					parent_layers = parent.layers;
+					len_parent_layers = parent_layers.length;
+					for (i = 0; i < len_parent_layers; i += 1) {
+						if (parent_layers[i].name === name) {
+							parent_layers.splice(i, 1);
+							break;
+						}
 					}
 				}
 
@@ -851,13 +860,24 @@ if (!Date.now) {
 
 		// Public functions
 
-		playground: function () {
+		playground: function (parentDOM) {
 			var
-				scenegraph = friGame.groups.scenegraph
+				scenegraph = friGame.groups.scenegraph,
+				dom
 			;
 
 			if (!scenegraph) {
-				scenegraph = friGame.SpriteGroup('scenegraph', {}, null);
+				if (parentDOM) {
+					dom = $(parentDOM);
+				} else {
+					dom = $('#playground');
+				}
+
+				scenegraph = friGame.SpriteGroup('scenegraph', {width: dom.width(), height: dom.height(), parentDOM: dom}, null);
+
+				// The scenegraph cannot be resized or moved
+				scenegraph.resize = null;
+				scenegraph.move = null;
 			}
 
 			return scenegraph;

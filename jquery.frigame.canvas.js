@@ -94,48 +94,80 @@
 		init: function (name, options, parent) {
 			var
 				dom,
-				parent_dom,
 				width,
-				height,
-				str_width,
-				str_height
+				height
 			;
 
 			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
-				parent_dom = $('#playground');
-				width = parent_dom.width();
-				height = parent_dom.height();
-				str_width = String(width);
-				str_height = String(height);
+				width = String(options.width);
+				height = String(options.height);
 
-				dom = $(['<canvas id="', name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).appendTo(parent_dom);
+				dom = $(['<canvas id="', name, '" width ="', width, '" height="', height, '"></canvas>'].join('')).appendTo(options.parentDOM);
 				dom.css({
 					'position': 'absolute',
 					'left': '0px',
 					'top': '0px',
-					'width': [str_width, 'px'].join(''),
-					'height': [str_height, 'px'].join(''),
+					'width': [width, 'px'].join(''),
+					'height': [height, 'px'].join(''),
 					'margin': '0px',
 					'padding': '0px',
 					'border': 'none',
 					'outline': 'none',
-					'background': 'none'
+					'background': 'none',
+					'overflow': 'hidden'
 				});
 
+				this.dom = dom;
+
 				friGame.ctx = document.getElementById(name).getContext('2d');
-				this.canvasWidth = width;
-				this.canvasHeight = height;
 			}
 		},
 
+		// Public functions
+
+		remove: function () {
+			friGame.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
+
+			if (this.dom) {
+				this.dom.remove();
+			}
+		},
+
+		// Implementation details
+
 		draw: function () {
+			var
+				options = this.options,
+				details = this.details,
+				left = details.left,
+				top = details.top,
+				hidden = details.hidden,
+				ctx = friGame.ctx,
+				context_saved = false
+			;
+
 			if (!this.parent) {
-				friGame.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+				friGame.ctx.clearRect(0, 0, options.width, options.height);
 			}
 
-			friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
+			if (this.layers.length && !hidden) {
+				if (left || top) {
+					if (!context_saved) {
+						ctx.save();
+						context_saved = true;
+					}
+
+					ctx.translate(left, top);
+				}
+
+				friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
+
+				if (context_saved) {
+					ctx.restore();
+				}
+			}
 		}
 	});
 

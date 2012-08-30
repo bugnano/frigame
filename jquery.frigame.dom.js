@@ -173,7 +173,8 @@
 						'margin': '0px',
 						'padding': '0px',
 						'border': 'none',
-						'outline': 'none'
+						'outline': 'none',
+						'background': 'none'	// Reset background properties set by external CSS
 					});
 
 					this.dom = dom;
@@ -259,7 +260,7 @@
 					}
 
 					if ((!animation) && (animation !== old_options.animation)) {
-						dom.css('background-image', 'none');
+						dom.css('background', 'none');
 						old_options.animation = animation;
 					}
 				}
@@ -276,8 +277,11 @@
 
 			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 
+			this.old_options = {};
+			this.old_details = {};
+
 			if (!parent) {
-				dom = this.makeDOM(name, $('#playground'));
+				dom = this.makeDOM(name, options.parentDOM);
 
 				if (dom.css('-moz-transform')) {
 					friGame.transformFunction = '-moz-transform';
@@ -302,7 +306,7 @@
 		remove: function () {
 			friGame.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
 
-			if ((this.parent) && (this.dom)) {
+			if (this.dom) {
 				this.dom.remove();
 			}
 		},
@@ -311,20 +315,45 @@
 
 		makeDOM: function (name, parent_dom) {
 			var
+				options = this.options,
+				details = this.details,
+				old_options = this.old_options,
+				old_details = this.old_details,
+				left,
+				top,
+				width,
+				height,
+				overflow,
 				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom)
 			;
 
+			left = details.left;
+			top = details.top;
+			width = options.width;
+			height = options.height;
+			old_details.left = left;
+			old_details.top = top;
+			old_options.width = width;
+			old_options.height = height;
+
+			if (!this.parent) {
+				overflow = 'hidden';
+			} else {
+				overflow = 'visible';
+			}
+
 			dom.css({
 				'position': 'absolute',
-				'left': '0px',
-				'top': '0px',
-				'width': [String(parent_dom.width()), 'px'].join(''),
-				'height': [String(parent_dom.height()), 'px'].join(''),
+				'left': [String(left), 'px'].join(''),
+				'top': [String(top), 'px'].join(''),
+				'width': [String(width), 'px'].join(''),
+				'height': [String(height), 'px'].join(''),
 				'margin': '0px',
 				'padding': '0px',
 				'border': 'none',
 				'outline': 'none',
-				'background': 'none'
+				'background': 'none',
+				'overflow': overflow
 			});
 
 			this.dom = dom;
@@ -333,11 +362,72 @@
 		},
 
 		draw: function () {
-			if (!this.dom) {
-				this.makeDOM(this.name, this.parent.dom);
-			}
+			var
+				options = this.options,
+				details = this.details,
+				old_options = this.old_options,
+				old_details = this.old_details,
+				dom = this.dom,
+				left = details.left,
+				top = details.top,
+				width = options.width,
+				height = options.height,
+				hidden = details.hidden,
+				css_options = {},
+				update_css = false
+			;
 
-			friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
+			if (this.layers.length && !hidden) {
+				if (!this.dom) {
+					dom = this.makeDOM(this.name, this.parent.dom);
+				}
+
+				if (hidden !== old_details.hidden) {
+					dom.show();
+					old_details.hidden = hidden;
+				}
+
+				if (left !== old_details.left) {
+					css_options.left = [String(left), 'px'].join('');
+					update_css = true;
+
+					old_details.left = left;
+				}
+
+				if (top !== old_details.top) {
+					css_options.top = [String(top), 'px'].join('');
+					update_css = true;
+
+					old_details.top = top;
+				}
+
+				if (width !== old_options.width) {
+					css_options.width = [String(width), 'px'].join('');
+					update_css = true;
+
+					old_options.width = top;
+				}
+
+				if (height !== old_options.height) {
+					css_options.height = [String(height), 'px'].join('');
+					update_css = true;
+
+					old_options.width = top;
+				}
+
+				if (update_css) {
+					dom.css(css_options);
+				}
+
+				friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
+			} else {
+				if (dom) {
+					if (hidden && (hidden !== old_details.hidden)) {
+						dom.hide();
+						old_details.hidden = hidden;
+					}
+				}
+			}
 		}
 	});
 }(jQuery));

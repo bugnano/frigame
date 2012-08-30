@@ -7,7 +7,7 @@ $(function () {
 
 	$.friGame.startGame(function () {
 		$.friGame.playground()
-			.addGroup('background')
+			.addGroup('background', {width: 1, height: 1})
 				.addSprite('ruler', {animation: background})
 			.end()
 			.addGroup('group1')

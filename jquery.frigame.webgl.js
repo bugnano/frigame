@@ -303,7 +303,6 @@
 			var
 				gl,
 				dom,
-				parent_dom,
 				width,
 				height,
 				str_width,
@@ -319,13 +318,12 @@
 			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
-				parent_dom = $('#playground');
-				width = parent_dom.width();
-				height = parent_dom.height();
+				width = options.width;
+				height = options.height;
 				str_width = String(width);
 				str_height = String(height);
 
-				dom = $(['<canvas id="', name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).appendTo(parent_dom);
+				dom = $(['<canvas id="', name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).appendTo(options.parentDOM);
 				dom.css({
 					'position': 'absolute',
 					'left': '0px',
@@ -336,8 +334,11 @@
 					'padding': '0px',
 					'border': 'none',
 					'outline': 'none',
-					'background': 'none'
+					'background': 'none',
+					'overflow': 'hidden'
 				});
+
+				this.dom = dom;
 
 				try {
 					gl = document.getElementById(name).getContext('experimental-webgl');
@@ -359,7 +360,7 @@
 					friGame.mvMatrixStack = mvMatrixStack;
 					friGame.pMatrix = pMatrix;
 
-					gl.clearColor(1, 1, 1, 1);
+					gl.clearColor(0, 0, 0, 0);
 					gl.disable(gl.DEPTH_TEST);
 
 					gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -368,6 +369,52 @@
 					mat4.ortho(0, gl.viewportWidth, gl.viewportHeight, 0, -1, 1, pMatrix);
 
 					mat4.identity(mvMatrix);
+				}
+			}
+		},
+
+		// Public functions
+
+		remove: function () {
+			friGame.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
+
+			if (this.dom) {
+				this.dom.remove();
+			}
+		},
+
+		// Implementation details
+
+		draw: function () {
+			var
+				options = this.options,
+				details = this.details,
+				left = details.left,
+				top = details.top,
+				hidden = details.hidden,
+				gl = friGame.gl,
+				mvMatrix = friGame.mvMatrix,
+				context_saved = false
+			;
+
+			if (!this.parent) {
+				gl.clear(gl.COLOR_BUFFER_BIT);
+			}
+
+			if (this.layers.length && !hidden) {
+				if (left || top) {
+					if (!context_saved) {
+						friGame.mvPushMatrix();
+						context_saved = true;
+					}
+
+					mat4.translate(mvMatrix, [left, top, 0]);
+				}
+
+				friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
+
+				if (context_saved) {
+					friGame.mvPopMatrix();
 				}
 			}
 		}
