@@ -29,7 +29,11 @@
 		friGame = $.friGame
 	;
 
-	friGame.PrototypeAnimation = Object.create(friGame.PrototypeBaseAnimation);
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
 
 	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
 	$.extend(friGame.PrototypeSprite, {
@@ -92,7 +96,6 @@
 				details = this.details,
 				animation = options.animation,
 				animation_options = animation.options,
-				animation_details = animation.details,
 				angle = details.angle,
 				scalex = details.scalex,
 				scaley = details.scaley,
@@ -143,7 +146,6 @@
 				currentFrame = details.currentFrame,
 				animation = options.animation,
 				animation_options,
-				animation_details,
 				dom = this.dom,
 				left = details.left,
 				top = details.top,
@@ -163,7 +165,6 @@
 
 			if (animation && !hidden) {
 				animation_options = animation.options;
-				animation_details = animation.details;
 
 				if (!dom) {
 					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
@@ -203,7 +204,7 @@
 					$.extend(css_options, {
 						'width': [String(animation_options.frameWidth), 'px'].join(''),
 						'height': [String(animation_options.frameHeight), 'px'].join(''),
-						'background-image': ['url("', animation_details.imageURL, '")'].join('')
+						'background-image': ['url("', animation_options.imageURL, '")'].join('')
 					});
 					update_css = true;
 					update_position = true;
@@ -224,9 +225,9 @@
 
 				if (update_position || ((details.idleCounter === 0) && (animation_options.numberOfFrame !== 1))) {
 					css_options['background-position'] = [
-						String(-(animation_options.offsetx + multix + (currentFrame * animation_details.deltax))),
+						String(-(animation_options.offsetx + multix + (currentFrame * animation_options.deltax))),
 						'px ',
-						String(-(animation_options.offsety + multiy + (currentFrame * animation_details.deltay))),
+						String(-(animation_options.offsety + multiy + (currentFrame * animation_options.deltay))),
 						'px'
 					].join('');
 					update_css = true;
@@ -267,6 +268,12 @@
 			}
 		}
 	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
 
 	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
 	$.extend(friGame.PrototypeSpriteGroup, {

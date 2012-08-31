@@ -31,7 +31,11 @@
 		friGame = $.friGame
 	;
 
-	friGame.PrototypeAnimation = Object.create(friGame.PrototypeBaseAnimation);
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
 
 	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
 	$.extend(friGame.PrototypeSprite, {
@@ -46,7 +50,6 @@
 				fliph = details.fliph,
 				flipv = details.flipv,
 				animation_options,
-				animation_details,
 				frameWidth,
 				frameHeight,
 				currentFrame = details.currentFrame,
@@ -55,7 +58,6 @@
 
 			if (animation && !details.hidden) {
 				animation_options = animation.options;
-				animation_details = animation.details;
 				frameWidth = animation_options.frameWidth;
 				frameHeight = animation_options.frameHeight;
 
@@ -73,13 +75,13 @@
 
 				friGame.safeDrawImage(
 					ctx,
-					animation_details.img,
-					animation_options.offsetx + details.multix + (currentFrame * animation_details.deltax),
-					animation_options.offsety + details.multiy + (currentFrame * animation_details.deltay),
+					animation_options.img,
+					animation_options.offsetx + details.multix + (currentFrame * animation_options.deltax),
+					animation_options.offsety + details.multiy + (currentFrame * animation_options.deltay),
 					frameWidth,
 					frameHeight,
-					-(animation_details.halfWidth),
-					-(animation_details.halfHeight),
+					-(animation_options.halfWidth),
+					-(animation_options.halfHeight),
 					frameWidth,
 					frameHeight
 				);
@@ -88,6 +90,12 @@
 			}
 		}
 	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
 
 	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
 	$.extend(friGame.PrototypeSpriteGroup, {
@@ -170,6 +178,12 @@
 			}
 		}
 	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
 
 	friGame.safeDrawImage = function (tox, img, sx, sy, sw, sh, dx, dy, dw, dh) {
 		if ((!img) || (!tox)) {

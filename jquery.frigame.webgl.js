@@ -29,14 +29,20 @@
 		friGame = $.friGame
 	;
 
-	friGame.PrototypeAnimation = Object.create(friGame.PrototypeBaseAnimation);
-	$.extend(friGame.PrototypeAnimation, {
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	friGame.PrototypeWebGLAnimation = Object.create(friGame.PrototypeAnimation);
+	$.extend(friGame.PrototypeWebGLAnimation, {
 		initBuffers: function () {
 			var
 				gl = friGame.gl,
-				details = this.details,
-				halfWidth = details.halfWidth,
-				halfHeight = details.halfHeight,
+				options = this.options,
+				halfWidth = options.halfWidth,
+				halfHeight = options.halfHeight,
 				vertices,
 				vertexPositionBuffer
 			;
@@ -64,8 +70,7 @@
 			var
 				gl = friGame.gl,
 				options = this.options,
-				details = this.details,
-				img = details.img,
+				img = options.img,
 				img_width = img.width,
 				img_height = img.height
 			;
@@ -85,13 +90,29 @@
 
 			this.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
 			options.offsetx /= img_width;
-			details.multix /= img_width;
-			details.deltax /= img_width;
+			options.multix /= img_width;
+			options.deltax /= img_width;
 			options.offsety /= img_height;
-			details.multiy /= img_height;
-			details.deltay /= img_height;
+			options.multiy /= img_height;
+			options.deltay /= img_height;
 		}
 	});
+
+	friGame.Animation = function () {
+		var
+			animation = Object.create(friGame.PrototypeWebGLAnimation)
+		;
+
+		animation.init.apply(animation, arguments);
+
+		return animation;
+	};
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
 
 	friGame.getShader = function (str, id) {
 		var
@@ -232,6 +253,12 @@
 		}
 	};
 
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
 	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
 	$.extend(friGame.PrototypeSprite, {
 		draw: function () {
@@ -245,7 +272,6 @@
 				fliph = details.fliph,
 				flipv = details.flipv,
 				animation_options,
-				animation_details,
 				frameWidth,
 				frameHeight,
 				currentFrame = details.currentFrame,
@@ -257,7 +283,6 @@
 
 			if (animation && !details.hidden) {
 				animation_options = animation.options;
-				animation_details = animation.details;
 				frameWidth = animation_options.frameWidth;
 				frameHeight = animation_options.frameHeight;
 
@@ -283,8 +308,8 @@
 				gl.uniform2fv(shaderProgram.uTextureSize, animation.textureSize);
 				gl.uniform2f(
 					shaderProgram.uTextureOffset,
-					animation_options.offsetx + details.multix + (currentFrame * animation_details.deltax),
-					animation_options.offsety + details.multiy + (currentFrame * animation_details.deltay)
+					animation_options.offsetx + details.multix + (currentFrame * animation_options.deltax),
+					animation_options.offsety + details.multiy + (currentFrame * animation_options.deltay)
 				);
 
 				gl.uniformMatrix4fv(shaderProgram.uPMatrix, false, pMatrix);
@@ -296,6 +321,12 @@
 			}
 		}
 	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
 
 	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
 	$.extend(friGame.PrototypeSpriteGroup, {
