@@ -42,28 +42,25 @@
 		draw: function () {
 			var
 				options = this.options,
-				details = this.details,
 				animation = options.animation,
-				angle = details.angle,
-				scalex = details.scalex,
-				scaley = details.scaley,
-				fliph = details.fliph,
-				flipv = details.flipv,
+				angle = options.angle,
+				scalex = options.scalex,
+				scaley = options.scaley,
+				fliph = options.fliph,
+				flipv = options.flipv,
 				animation_options,
-				frameWidth,
-				frameHeight,
-				currentFrame = details.currentFrame,
+				width = options.width,
+				height = options.height,
+				currentFrame = options.currentFrame,
 				ctx = friGame.ctx
 			;
 
-			if (animation && !details.hidden) {
+			if (animation && !options.hidden) {
 				animation_options = animation.options;
-				frameWidth = animation_options.frameWidth;
-				frameHeight = animation_options.frameHeight;
 
 				ctx.save();
 
-				ctx.translate(details.translatex, details.translatey);
+				ctx.translate(options.centerx, options.centery);
 
 				if (angle) {
 					ctx.rotate(angle);
@@ -76,14 +73,14 @@
 				friGame.safeDrawImage(
 					ctx,
 					animation_options.img,
-					animation_options.offsetx + details.multix + (currentFrame * animation_options.deltax),
-					animation_options.offsety + details.multiy + (currentFrame * animation_options.deltay),
-					frameWidth,
-					frameHeight,
-					-(animation_options.halfWidth),
-					-(animation_options.halfHeight),
-					frameWidth,
-					frameHeight
+					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
+					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay),
+					width,
+					height,
+					-(options.halfWidth),
+					-(options.halfHeight),
+					width,
+					height
 				);
 
 				ctx.restore();
@@ -158,10 +155,9 @@
 		draw: function () {
 			var
 				options = this.options,
-				details = this.details,
-				left = details.left,
-				top = details.top,
-				hidden = details.hidden,
+				left = options.left,
+				top = options.top,
+				hidden = options.hidden,
 				ctx = friGame.ctx,
 				context_saved = false
 			;

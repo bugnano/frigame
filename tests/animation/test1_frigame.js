@@ -77,16 +77,16 @@ $(function () {
 
 	$.friGame.startGame(function () {
 		$.friGame.playground()
-			.addSprite('simpleVertical', {animation: simpleVerticalAnimation, posx: 0})
-			.addSprite('simpleHorizontal', {animation: simpleHorizontalAnimation, posx: 34})
-			.addSprite('multiVertical', {animation: multiVerticalAnimation, posx: 75})
-			.addSprite('multiHorizontal', {animation: multiHorizontalAnimation, posx: 109})
-			.addSprite('simpleOffsetVertical', {animation: simpleOffsetVerticalAnimation, posx: 150})
-			.addSprite('simpleOffsetHorizontal', {animation: simpleOffsetHorizontalAnimation, posx: 184})
-			.addSprite('multiOffsetVertical', {animation: multiOffsetVerticalAnimation, animationIndex: 1, posx: 225})
-			.addSprite('multiOffsetHorizontal', {animation: multiOffsetHorizontalAnimation, animationIndex: 1, posx: 259})
-			.addSprite('pingpong', {animation: pingpongAnimation, posx: 286})
-			.addSprite('multiPingpong', {animation: multiPingpongAnimation, posx: 350})
+			.addSprite('simpleVertical', {animation: simpleVerticalAnimation, left: 0})
+			.addSprite('simpleHorizontal', {animation: simpleHorizontalAnimation, left: 34})
+			.addSprite('multiVertical', {animation: multiVerticalAnimation, left: 75})
+			.addSprite('multiHorizontal', {animation: multiHorizontalAnimation, left: 109})
+			.addSprite('simpleOffsetVertical', {animation: simpleOffsetVerticalAnimation, left: 150})
+			.addSprite('simpleOffsetHorizontal', {animation: simpleOffsetHorizontalAnimation, left: 184})
+			.addSprite('multiOffsetVertical', {animation: multiOffsetVerticalAnimation, animationIndex: 1, left: 225})
+			.addSprite('multiOffsetHorizontal', {animation: multiOffsetHorizontalAnimation, animationIndex: 1, left: 259})
+			.addSprite('pingpong', {animation: pingpongAnimation, left: 286})
+			.addSprite('multiPingpong', {animation: multiPingpongAnimation, left: 350})
 		;
 
 		$.friGame.sprites.multiVertical.setAnimation({animationIndex: 1});

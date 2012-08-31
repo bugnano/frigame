@@ -4,14 +4,13 @@ $(function () {
 		animation = $.friGame.Animation('sh.png', {type: $.friGame.ANIMATION_HORIZONTAL, numberOfFrame: 4, rate: 300})
 	;
 
-
 	$.friGame.startGame(function () {
 		$.friGame.playground()
 			.addGroup('background', {width: 1, height: 1})
 				.addSprite('ruler', {animation: background})
 			.end()
 			.addGroup('group1')
-				.addSprite('sprite1', {animation: animation, posx: 48, posy: 16})
+				.addSprite('sprite1', {animation: animation, left: 48, top: 16})
 			.end()
 		;
 	});

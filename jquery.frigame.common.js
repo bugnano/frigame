@@ -140,6 +140,7 @@ if (!Date.now) {
 				change_radius
 			;
 
+			// width MUST have priority over halfWidth
 			if (new_options.width !== undefined) {
 				my_options.width = round(new_options.width);
 				my_options.halfWidth = round(new_options.width / 2);
@@ -153,6 +154,7 @@ if (!Date.now) {
 				change_radius = false;
 			}
 
+			// height MUST have priority over halfHeight
 			if (new_options.height !== undefined) {
 				my_options.height = round(new_options.height);
 				my_options.halfHeight = round(new_options.height / 2);
@@ -730,13 +732,19 @@ if (!Date.now) {
 				animation = new_options.animation;
 				my_options.animation = animation;
 
+				// Force new width and height based on the animation frame size
 				if (animation) {
 					animation_options = animation.options;
 
-					friGame.PrototypeBaseSprite.resize.call(this, {width: animation_options.width, height: animation_options.height});
+					new_options.width = animation_options.frameWidth;
+					new_options.height = animation_options.frameHeight;
 				} else {
-					friGame.PrototypeBaseSprite.resize.call(this, {width: 0, height: 0});
+					new_options.width = 0;
+					new_options.height = 0;
 				}
+
+				// Call the resize method with all the options in order to update the position
+				friGame.PrototypeBaseSprite.resize.call(this, new_options);
 
 				// If the animation gets redefined, set default index of 0
 				if ((my_options.animationIndex !== 0) && (!index_redefined)) {

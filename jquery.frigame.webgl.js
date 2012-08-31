@@ -264,30 +264,25 @@
 		draw: function () {
 			var
 				options = this.options,
-				details = this.details,
 				animation = options.animation,
-				angle = details.angle,
-				scalex = details.scalex,
-				scaley = details.scaley,
-				fliph = details.fliph,
-				flipv = details.flipv,
+				angle = options.angle,
+				scalex = options.scalex,
+				scaley = options.scaley,
+				fliph = options.fliph,
+				flipv = options.flipv,
 				animation_options,
-				frameWidth,
-				frameHeight,
-				currentFrame = details.currentFrame,
+				currentFrame = options.currentFrame,
 				gl = friGame.gl,
 				shaderProgram = friGame.shaderProgram,
 				mvMatrix = friGame.mvMatrix,
 				pMatrix = friGame.pMatrix
 			;
 
-			if (animation && !details.hidden) {
+			if (animation && !options.hidden) {
 				animation_options = animation.options;
-				frameWidth = animation_options.frameWidth;
-				frameHeight = animation_options.frameHeight;
 
 				friGame.mvPushMatrix();
-				mat4.translate(mvMatrix, [details.translatex, details.translatey, 0]);
+				mat4.translate(mvMatrix, [options.centerx, options.centery, 0]);
 				if (angle) {
 					mat4.rotate(mvMatrix, angle, [0, 0, 1]);
 				}
@@ -308,8 +303,8 @@
 				gl.uniform2fv(shaderProgram.uTextureSize, animation.textureSize);
 				gl.uniform2f(
 					shaderProgram.uTextureOffset,
-					animation_options.offsetx + details.multix + (currentFrame * animation_options.deltax),
-					animation_options.offsety + details.multiy + (currentFrame * animation_options.deltay)
+					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
+					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay)
 				);
 
 				gl.uniformMatrix4fv(shaderProgram.uPMatrix, false, pMatrix);
@@ -429,10 +424,9 @@
 		draw: function () {
 			var
 				options = this.options,
-				details = this.details,
-				left = details.left,
-				top = details.top,
-				hidden = details.hidden,
+				left = options.left,
+				top = options.top,
+				hidden = options.hidden,
 				gl = friGame.gl,
 				mvMatrix = friGame.mvMatrix,
 				context_saved = false

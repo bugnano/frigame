@@ -6,10 +6,10 @@ $(function () {
 
 	$.friGame.startGame(function () {
 		$.friGame.playground()
-			.addSprite('rotate', {animation: animation, posx: 0, posy: 16})
-			.addSprite('scale', {animation: animation, posx: 80, posy: 16})
-			.addSprite('rotateScale', {animation: animation, posx: 160, posy: 16})
-			.addSprite('scaleRotate', {animation: animation, posx: 240, posy: 16})
+			.addSprite('rotate', {animation: animation, left: 0, top: 16})
+			.addSprite('scale', {animation: animation, left: 80, top: 16})
+			.addSprite('rotateScale', {animation: animation, left: 160, top: 16})
+			.addSprite('scaleRotate', {animation: animation, left: 240, top: 16})
 		;
 
 		$.friGame.sprites.rotate.rotate(Math.PI / 4);

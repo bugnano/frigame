@@ -10,10 +10,10 @@ $(function () {
 		;
 
 		$.friGame.playground()
-			.addSprite('aRotateScale', {animation: animation, posx: 16, posy: 16})
-			.addSprite('scaleARotate', {animation: animation, posx: 80, posy: 16})
-			.addSprite('rotateAScale', {animation: animation, posx: 180, posy: 16})
-			.addSprite('aScaleRotate', {animation: animation, posx: 240, posy: 16})
+			.addSprite('aRotateScale', {animation: animation, left: 16, top: 16})
+			.addSprite('scaleARotate', {animation: animation, left: 80, top: 16})
+			.addSprite('rotateAScale', {animation: animation, left: 180, top: 16})
+			.addSprite('aScaleRotate', {animation: animation, left: 240, top: 16})
 		;
 
 		$.friGame.registerCallback(function () {

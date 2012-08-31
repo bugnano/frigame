@@ -106,37 +106,37 @@
 				delta
 			;
 
-			if (options.hasOwnProperty('posx')) {
-				delta = options.posx - this.node.posx();
+			if (options.hasOwnProperty('left')) {
+				delta = options.left - this.node.left();
 
-				this.node.move({posx: options.posx});
-				this.nodeBooster.move({posx: this.nodeBooster.posx() + delta});
-				this.nodeBoostUp.move({posx: this.nodeBoostUp.posx() + delta});
-				this.nodeBoostDown.move({posx: this.nodeBoostDown.posx() + delta});
+				this.node.move({left: options.left});
+				this.nodeBooster.move({left: this.nodeBooster.left() + delta});
+				this.nodeBoostUp.move({left: this.nodeBoostUp.left() + delta});
+				this.nodeBoostDown.move({left: this.nodeBoostDown.left() + delta});
 				if (this.hit) {
-					$.friGame.sprites.explosion.move({posx: options.posx});
+					$.friGame.sprites.explosion.move({left: options.left});
 				}
 			}
 
-			if (options.hasOwnProperty('posy')) {
-				delta = options.posy - this.node.posy();
+			if (options.hasOwnProperty('top')) {
+				delta = options.top - this.node.top();
 
-				this.node.move({posy: options.posy});
-				this.nodeBooster.move({posy: this.nodeBooster.posy() + delta});
-				this.nodeBoostUp.move({posy: this.nodeBoostUp.posy() + delta});
-				this.nodeBoostDown.move({posy: this.nodeBoostDown.posy() + delta});
+				this.node.move({top: options.top});
+				this.nodeBooster.move({top: this.nodeBooster.top() + delta});
+				this.nodeBoostUp.move({top: this.nodeBoostUp.top() + delta});
+				this.nodeBoostDown.move({top: this.nodeBoostDown.top() + delta});
 				if (this.hit) {
-					$.friGame.sprites.explosion.move({posy: options.posy});
+					$.friGame.sprites.explosion.move({top: options.top});
 				}
 			}
 		},
 
-		posx: function () {
-			return this.node.posx();
+		left: function () {
+			return this.node.left();
 		},
 
-		posy: function () {
-			return this.node.posy();
+		top: function () {
+			return this.node.top();
 		},
 
 		explode: function () {
@@ -186,16 +186,16 @@
 
 		updateX: function (playerNode) {
 			var
-				newpos = this.node.posx() + this.speedx;
+				newpos = this.node.left() + this.speedx;
 
-			this.node.move({posx: newpos});
+			this.node.move({left: newpos});
 		},
 
 		updateY: function (playerNode) {
 			var
-				newpos = this.node.posy() + this.speedy;
+				newpos = this.node.top() + this.speedy;
 
-			this.node.move({posy: newpos});
+			this.node.move({top: newpos});
 		}
 	};
 
@@ -206,10 +206,10 @@
 
 		updateY: function (playerNode) {
 			var
-				pos = this.node.posy();
+				pos = this.node.top();
 
 			if (pos > (PLAYGROUND_HEIGHT - 100)) {
-				this.node.move({posy: pos - 2});
+				this.node.move({top: pos - 2});
 			}
 		}
 	});
@@ -241,12 +241,12 @@
 			var
 				newpos;
 
-			if ((this.node.posy() + this.alignmentOffset) > playerNode.posy()) {
-				newpos = this.node.posy() - this.speedy;
-				this.node.move({posy: newpos});
-			} else if ((this.node.posy() + this.alignmentOffset) < playerNode.posy()) {
-				newpos = this.node.posy() + this.speedy;
-				this.node.move({posy: newpos});
+			if ((this.node.top() + this.alignmentOffset) > playerNode.top()) {
+				newpos = this.node.top() - this.speedy;
+				this.node.move({top: newpos});
+			} else if ((this.node.top() + this.alignmentOffset) < playerNode.top()) {
+				newpos = this.node.top() + this.speedy;
+				this.node.move({top: newpos});
 			}
 		}
 	});
@@ -276,10 +276,10 @@
 
 		updateX: function () {
 			var
-				pos = this.node.posx();
+				pos = this.node.left();
 
 			if (pos > (PLAYGROUND_WIDTH - 200)) {
-				this.node.move({posx: pos + this.speedx});
+				this.node.move({left: pos + this.speedx});
 			}
 		}
 	});
@@ -333,18 +333,18 @@
 			.addGroup('background')
 				.addSprite('background0', {animation: background0})
 				.addSprite('background1', {animation: background1})
-				.addSprite('background2', {animation: background2, posx: PLAYGROUND_WIDTH})
+				.addSprite('background2', {animation: background2, left: PLAYGROUND_WIDTH})
 				.addSprite('background3', {animation: background3})
-				.addSprite('background4', {animation: background4, posx: PLAYGROUND_WIDTH})
+				.addSprite('background4', {animation: background4, left: PLAYGROUND_WIDTH})
 				.addSprite('background5', {animation: background5})
-				.addSprite('background6', {animation: background6, posx: PLAYGROUND_WIDTH})
+				.addSprite('background6', {animation: background6, left: PLAYGROUND_WIDTH})
 			.end()
 			.addGroup('actors')
-				.addGroup('player', {posx: 0, posy: 0})
-					.addSprite('playerBoostUp', {posx: (PLAYGROUND_WIDTH / 2) + 37, posy: (PLAYGROUND_HEIGHT / 2) + 15})
-					.addSprite('playerBody', {animation: playerAnimation.idle, posx: (PLAYGROUND_WIDTH / 2), posy: (PLAYGROUND_HEIGHT / 2)})
-					.addSprite('playerBooster', {animation: playerAnimation.boost, posx: (PLAYGROUND_WIDTH / 2) - 32, posy: (PLAYGROUND_HEIGHT / 2) + 5})
-					.addSprite('playerBoostDown', {posx: (PLAYGROUND_WIDTH / 2) + 37, posy: (PLAYGROUND_HEIGHT / 2) - 7})
+				.addGroup('player', {left: 0, top: 0})
+					.addSprite('playerBoostUp', {left: (PLAYGROUND_WIDTH / 2) + 37, top: (PLAYGROUND_HEIGHT / 2) + 15})
+					.addSprite('playerBody', {animation: playerAnimation.idle, left: (PLAYGROUND_WIDTH / 2), top: (PLAYGROUND_HEIGHT / 2)})
+					.addSprite('playerBooster', {animation: playerAnimation.boost, left: (PLAYGROUND_WIDTH / 2) - 32, top: (PLAYGROUND_HEIGHT / 2) + 5})
+					.addSprite('playerBoostDown', {left: (PLAYGROUND_WIDTH / 2) + 37, top: (PLAYGROUND_HEIGHT / 2) - 7})
 				.end()
 			.end()
 			.addGroup('playerMissileLayer').end()
@@ -399,8 +399,8 @@
 		//this is where the keybinding occurs
 		$(document).keydown(function (e) {
 			var
-				playerposx,
-				playerposy,
+				playerleft,
+				playertop,
 				name;
 
 			G.keyTracker[e.keyCode] = true;
@@ -409,10 +409,10 @@
 				switch (e.keyCode) {
 				case 75: //this is shoot (k)
 					//shoot missile here
-					playerposx = G.thePlayer.posx();
-					playerposy = G.thePlayer.posy();
+					playerleft = G.thePlayer.left();
+					playertop = G.thePlayer.top();
 					name = ['playerMissle_', String(Math.ceil(Math.random() * 1000))].join('');
-					$.friGame.groups.playerMissileLayer.addSprite(name, {animation: missile.player, posx: playerposx + 90, posy: playerposy + 14});
+					$.friGame.groups.playerMissileLayer.addSprite(name, {animation: missile.player, left: playerleft + 90, top: playertop + 14});
 					G.playerMissiles[name] = $.friGame.sprites[name];
 					break;
 				case 65: //this is left! (a)
@@ -458,8 +458,8 @@
 		$.friGame.registerCallback(function () {
 			var
 				nextpos,
-				posy,
-				posx;
+				top,
+				left;
 
 			if (!gameOver) {
 				$('#shieldHUD').html(['shield: ', String(G.thePlayer.shield)].join(''));
@@ -468,33 +468,33 @@
 				if (!G.thePlayer.hit) {
 					G.thePlayer.update();
 					if (G.keyTracker[65]) { //this is left! (a)
-						nextpos = G.thePlayer.posx() - 5;
+						nextpos = G.thePlayer.left() - 5;
 						if (nextpos > 0) {
-							G.thePlayer.move({posx: nextpos});
+							G.thePlayer.move({left: nextpos});
 						}
 					}
 					if (G.keyTracker[68]) { //this is right! (d)
-						nextpos = G.thePlayer.posx() + 5;
+						nextpos = G.thePlayer.left() + 5;
 						if (nextpos < PLAYGROUND_WIDTH - 100) {
-							G.thePlayer.move({posx: nextpos});
+							G.thePlayer.move({left: nextpos});
 						}
 					}
 					if (G.keyTracker[87]) { //this is up! (w)
-						nextpos = G.thePlayer.posy() - 3;
+						nextpos = G.thePlayer.top() - 3;
 						if (nextpos > 0) {
-							G.thePlayer.move({posy: nextpos});
+							G.thePlayer.move({top: nextpos});
 						}
 					}
 					if (G.keyTracker[83]) { //this is down! (s)
-						nextpos = G.thePlayer.posy() + 3;
+						nextpos = G.thePlayer.top() + 3;
 						if (nextpos < PLAYGROUND_HEIGHT - 30) {
-							G.thePlayer.move({posy: nextpos});
+							G.thePlayer.move({top: nextpos});
 						}
 					}
 				} else {
-					posy = G.thePlayer.posy() + 5;
-					posx = G.thePlayer.posx() - 5;
-					if (posy > PLAYGROUND_HEIGHT) {
+					top = G.thePlayer.top() + 5;
+					left = G.thePlayer.left() - 5;
+					if (top > PLAYGROUND_HEIGHT) {
 						//Does the player did get out of the screen?
 						if (G.thePlayer.respawn()) {
 							gameOver = true;
@@ -504,30 +504,30 @@
 							//$('#background').fadeTo(5000, 0);
 						} else {
 							G.thePlayer.endExplosion();
-							G.thePlayer.move({posy: PLAYGROUND_HEIGHT / 2, posx: PLAYGROUND_WIDTH / 2});
+							G.thePlayer.move({top: PLAYGROUND_HEIGHT / 2, left: PLAYGROUND_WIDTH / 2});
 						}
 					} else {
-						G.thePlayer.move({posy: posy, posx: posx});
+						G.thePlayer.move({top: top, left: left});
 					}
 				}
 
 				//Update the movement of the enemies
 				$.each(G.enemies, function (name) {
 					var
-						posx,
-						enemyposx,
-						enemyposy,
+						left,
+						enemyleft,
+						enemytop,
 						missilename;
 
 					this.update(G.thePlayer);
-					posx = this.node.posx();
-					if ((posx + 100) < 0) {
+					left = this.node.left();
+					if ((left + 100) < 0) {
 						this.node.remove();
 						delete G.enemies[name];
 						return;
 					}
 					//Test for collisions
-					if (G.collision(this.node.posx(), this.node.posy(), this.node.width(), this.node.height(), G.thePlayer.node.posx(), G.thePlayer.node.posy(), G.thePlayer.node.width(), G.thePlayer.node.height())) {
+					if (G.collision(this.node.left(), this.node.top(), this.node.width(), this.node.height(), G.thePlayer.node.left(), G.thePlayer.node.top(), G.thePlayer.node.width(), G.thePlayer.node.height())) {
 						this.node.setAnimation({animation: this.explode, callback: function (node) {
 							node.remove();
 						}});
@@ -539,10 +539,10 @@
 					//Make the enemy fire
 					if (G.PrototypeBrainy.isPrototypeOf(this)) {
 						if (Math.random() < 0.05) {
-							enemyposx = this.node.posx();
-							enemyposy = this.node.posy();
+							enemyleft = this.node.left();
+							enemytop = this.node.top();
 							missilename = ['enemiesMissile_', String(Math.ceil(Math.random() * 1000))].join('');
-							$.friGame.groups.enemiesMissileLayer.addSprite(missilename, {animation: missile.enemies, posx: enemyposx, posy: enemyposy + 20});
+							$.friGame.groups.enemiesMissileLayer.addSprite(missilename, {animation: missile.enemies, left: enemyleft, top: enemytop + 20});
 							G.enemiesMissiles[missilename] = $.friGame.sprites[missilename];
 						}
 					}
@@ -551,20 +551,20 @@
 				//Update the movement of the missiles
 				$.each(G.playerMissiles, function (name) {
 					var
-						posx = this.posx(),
+						left = this.left(),
 						collided,
 						playermissile = this;
 
-					if (posx > PLAYGROUND_WIDTH) {
+					if (left > PLAYGROUND_WIDTH) {
 						this.remove();
 						delete G.playerMissiles[name];
 						return;
 					}
-					this.move({posx: posx + MISSILE_SPEED});
+					this.move({left: left + MISSILE_SPEED});
 					//Test for collisions
 					collided = {};
 					$.each(G.enemies, function (enemy) {
-						if (G.collision(playermissile.posx(), playermissile.posy(), playermissile.width(), playermissile.height(), this.node.posx(), this.node.posy(), this.node.width(), this.node.height())) {
+						if (G.collision(playermissile.left(), playermissile.top(), playermissile.width(), playermissile.height(), this.node.left(), this.node.top(), this.node.width(), this.node.height())) {
 							collided[enemy] = this;
 						}
 					});
@@ -581,22 +581,22 @@
 						this.setAnimation({animation: missile.playerexplode, callback: function (node) {
 							node.remove();
 						}});
-						this.move({posy: this.posy() - 7});
+						this.move({top: this.top() - 7});
 						delete G.playerMissiles[name];
 					}
 				});
 				$.each(G.enemiesMissiles, function (name) {
 					var
-						posx = this.posx();
+						left = this.left();
 
-					if (posx < 0) {
+					if (left < 0) {
 						this.remove();
 						delete G.enemiesMissiles[name];
 						return;
 					}
-					this.move({posx: posx - MISSILE_SPEED});
+					this.move({left: left - MISSILE_SPEED});
 					//Test for collisions
-					if (G.collision(this.posx(), this.posy(), this.width(), this.height(), G.thePlayer.node.posx(), G.thePlayer.node.posy(), G.thePlayer.node.width(), G.thePlayer.node.height())) {
+					if (G.collision(this.left(), this.top(), this.width(), this.height(), G.thePlayer.node.left(), G.thePlayer.node.top(), G.thePlayer.node.width(), G.thePlayer.node.height())) {
 						//The player has been hit!
 						if (G.thePlayer.damage()) {
 							G.thePlayer.explode();
@@ -619,16 +619,16 @@
 			if (!bossMode && !gameOver) {
 				if (Math.random() < 0.4) {
 					name = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-					$.friGame.groups.actors.addSprite(name, {animation: G.PrototypeMinion.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
+					$.friGame.groups.actors.addSprite(name, {animation: G.PrototypeMinion.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
 					G.enemies[name] = G.Minion($.friGame.sprites[name]);
 				} else if (Math.random() < 0.5) {
 					name = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-					$.friGame.groups.actors.addSprite(name, {animation: G.PrototypeBrainy.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
+					$.friGame.groups.actors.addSprite(name, {animation: G.PrototypeBrainy.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
 					G.enemies[name] = G.Brainy($.friGame.sprites[name]);
 				} else if (Math.random() > 0.8) {
 					bossMode = true;
 					bossName = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-					$.friGame.groups.actors.addSprite(bossName, {animation: G.PrototypeBossy.idle, posx: PLAYGROUND_WIDTH, posy: Math.random() * PLAYGROUND_HEIGHT});
+					$.friGame.groups.actors.addSprite(bossName, {animation: G.PrototypeBossy.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
 					G.enemies[bossName] = G.Bossy($.friGame.sprites[bossName]);
 				}
 			} else {
@@ -644,24 +644,24 @@
 		$.friGame.registerCallback(function () {
 			//Offset all the pane:
 			var
-				newPos = ($.friGame.sprites.background1.posx() - smallStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
+				newPos = ($.friGame.sprites.background1.left() - smallStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
 
-			$.friGame.sprites.background1.move({posx: newPos});
+			$.friGame.sprites.background1.move({left: newPos});
 
-			newPos = ($.friGame.sprites.background2.posx() - smallStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background2.move({posx: newPos});
+			newPos = ($.friGame.sprites.background2.left() - smallStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
+			$.friGame.sprites.background2.move({left: newPos});
 
-			newPos = ($.friGame.sprites.background3.posx() - mediumStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background3.move({posx: newPos});
+			newPos = ($.friGame.sprites.background3.left() - mediumStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
+			$.friGame.sprites.background3.move({left: newPos});
 
-			newPos = ($.friGame.sprites.background4.posx() - mediumStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background4.move({posx: newPos});
+			newPos = ($.friGame.sprites.background4.left() - mediumStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
+			$.friGame.sprites.background4.move({left: newPos});
 
-			newPos = ($.friGame.sprites.background5.posx() - bigStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background5.move({posx: newPos});
+			newPos = ($.friGame.sprites.background5.left() - bigStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
+			$.friGame.sprites.background5.move({left: newPos});
 
-			newPos = ($.friGame.sprites.background6.posx() - bigStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
-			$.friGame.sprites.background6.move({posx: newPos});
+			newPos = ($.friGame.sprites.background6.left() - bigStarSpeed - PLAYGROUND_WIDTH) % (-2 * PLAYGROUND_WIDTH) + PLAYGROUND_WIDTH;
+			$.friGame.sprites.background6.move({left: newPos});
 		}, REFRESH_RATE);
 	});
 }());

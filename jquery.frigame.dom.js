@@ -41,7 +41,6 @@
 			friGame.PrototypeSprite.init.apply(this, arguments);
 
 			this.old_options = {};
-			this.old_details = {};
 		},
 
 		// Public functions
@@ -60,13 +59,12 @@
 			var
 				dom = this.dom,
 				options = this.options,
-				details = this.details,
 				transformFunction = friGame.transformFunction,
-				angle = details.angle,
-				scalex = details.scalex,
-				scaley = details.scaley,
-				fliph = details.fliph,
-				flipv = details.flipv,
+				angle = options.angle,
+				scalex = options.scalex,
+				scaley = options.scaley,
+				fliph = options.fliph,
+				flipv = options.flipv,
 				transform = []
 			;
 
@@ -93,14 +91,13 @@
 			var
 				dom = this.dom,
 				options = this.options,
-				details = this.details,
 				animation = options.animation,
 				animation_options = animation.options,
-				angle = details.angle,
-				scalex = details.scalex,
-				scaley = details.scaley,
-				fliph = details.fliph,
-				flipv = details.flipv,
+				angle = options.angle,
+				scalex = options.scalex,
+				scaley = options.scaley,
+				fliph = options.fliph,
+				flipv = options.flipv,
 				cos,
 				sin,
 				filter,
@@ -129,34 +126,32 @@
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
 			newHeight = dom.height();
-			details.posOffsetX = round((newWidth - animation_options.frameWidth) / 2);
-			details.posOffsetY = round((newHeight - animation_options.frameHeight) / 2);
+			options.posOffsetX = round((newWidth - options.width) / 2);
+			options.posOffsetY = round((newHeight - options.height) / 2);
 			dom.css({
-				'left': [String(details.left - details.posOffsetX), 'px'].join(''),
-				'top': [String(details.top - details.posOffsetY), 'px'].join('')
+				'left': [String(options.left - options.posOffsetX), 'px'].join(''),
+				'top': [String(options.top - options.posOffsetY), 'px'].join('')
 			});
 		},
 
 		draw: function () {
 			var
 				options = this.options,
-				details = this.details,
 				old_options = this.old_options,
-				old_details = this.old_details,
-				currentFrame = details.currentFrame,
+				currentFrame = options.currentFrame,
 				animation = options.animation,
 				animation_options,
 				dom = this.dom,
-				left = details.left,
-				top = details.top,
-				multix = details.multix,
-				multiy = details.multiy,
-				angle = details.angle,
-				scalex = details.scalex,
-				scaley = details.scaley,
-				fliph = details.fliph,
-				flipv = details.flipv,
-				hidden = details.hidden,
+				left = options.left,
+				top = options.top,
+				multix = options.multix,
+				multiy = options.multiy,
+				angle = options.angle,
+				scalex = options.scalex,
+				scaley = options.scaley,
+				fliph = options.fliph,
+				flipv = options.flipv,
+				hidden = options.hidden,
 				css_options = {},
 				update_css = false,
 				update_position = false,
@@ -181,29 +176,29 @@
 					this.dom = dom;
 				}
 
-				if (hidden !== old_details.hidden) {
+				if (hidden !== old_options.hidden) {
 					dom.show();
-					old_details.hidden = hidden;
+					old_options.hidden = hidden;
 				}
 
-				if (left !== old_details.left) {
-					css_options.left = [String(left - details.posOffsetX), 'px'].join('');
+				if (left !== old_options.left) {
+					css_options.left = [String(left - options.posOffsetX), 'px'].join('');
 					update_css = true;
 
-					old_details.left = left;
+					old_options.left = left;
 				}
 
-				if (top !== old_details.top) {
-					css_options.top = [String(top - details.posOffsetY), 'px'].join('');
+				if (top !== old_options.top) {
+					css_options.top = [String(top - options.posOffsetY), 'px'].join('');
 					update_css = true;
 
-					old_details.top = top;
+					old_options.top = top;
 				}
 
 				if (animation !== old_options.animation) {
 					$.extend(css_options, {
-						'width': [String(animation_options.frameWidth), 'px'].join(''),
-						'height': [String(animation_options.frameHeight), 'px'].join(''),
+						'width': [String(options.width), 'px'].join(''),
+						'height': [String(options.height), 'px'].join(''),
 						'background-image': ['url("', animation_options.imageURL, '")'].join('')
 					});
 					update_css = true;
@@ -216,14 +211,14 @@
 					old_options.animation = animation;
 				}
 
-				if ((multix !== old_details.multix)  || (multiy !== old_details.multiy)) {
+				if ((multix !== old_options.multix)  || (multiy !== old_options.multiy)) {
 					update_position = true;
 
-					old_details.multix = multix;
-					old_details.multiy = multiy;
+					old_options.multix = multix;
+					old_options.multiy = multiy;
 				}
 
-				if (update_position || ((details.idleCounter === 0) && (animation_options.numberOfFrame !== 1))) {
+				if (update_position || ((options.idleCounter === 0) && (animation_options.numberOfFrame !== 1))) {
 					css_options['background-position'] = [
 						String(-(animation_options.offsetx + multix + (currentFrame * animation_options.deltax))),
 						'px ',
@@ -239,11 +234,11 @@
 
 				if	(
 						update_transform
-					||	(angle !== old_details.angle)
-					||	(scalex !== old_details.scalex)
-					||	(scaley !== old_details.scaley)
-					||	(fliph !== old_details.fliph)
-					||	(flipv !== old_details.flipv)
+					||	(angle !== old_options.angle)
+					||	(scalex !== old_options.scalex)
+					||	(scaley !== old_options.scaley)
+					||	(fliph !== old_options.fliph)
+					||	(flipv !== old_options.flipv)
 					) {
 					this.transform();
 
@@ -255,9 +250,9 @@
 				}
 			} else {
 				if (dom) {
-					if (hidden && (hidden !== old_details.hidden)) {
+					if (hidden && (hidden !== old_options.hidden)) {
 						dom.hide();
-						old_details.hidden = hidden;
+						old_options.hidden = hidden;
 					}
 
 					if ((!animation) && (animation !== old_options.animation)) {
@@ -295,7 +290,6 @@
 			friGame.PrototypeSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
-			this.old_details = {};
 
 			if (!parent) {
 				dom = this.makeDOM(name, options.parentDOM);
@@ -333,9 +327,7 @@
 		makeDOM: function (name, parent_dom) {
 			var
 				options = this.options,
-				details = this.details,
 				old_options = this.old_options,
-				old_details = this.old_details,
 				left,
 				top,
 				width,
@@ -344,12 +336,12 @@
 				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom)
 			;
 
-			left = details.left;
-			top = details.top;
+			left = options.left;
+			top = options.top;
 			width = options.width;
 			height = options.height;
-			old_details.left = left;
-			old_details.top = top;
+			old_options.left = left;
+			old_options.top = top;
 			old_options.width = width;
 			old_options.height = height;
 
@@ -381,15 +373,13 @@
 		draw: function () {
 			var
 				options = this.options,
-				details = this.details,
 				old_options = this.old_options,
-				old_details = this.old_details,
 				dom = this.dom,
-				left = details.left,
-				top = details.top,
+				left = options.left,
+				top = options.top,
 				width = options.width,
 				height = options.height,
-				hidden = details.hidden,
+				hidden = options.hidden,
 				css_options = {},
 				update_css = false
 			;
@@ -399,23 +389,23 @@
 					dom = this.makeDOM(this.name, this.parent.dom);
 				}
 
-				if (hidden !== old_details.hidden) {
+				if (hidden !== old_options.hidden) {
 					dom.show();
-					old_details.hidden = hidden;
+					old_options.hidden = hidden;
 				}
 
-				if (left !== old_details.left) {
+				if (left !== old_options.left) {
 					css_options.left = [String(left), 'px'].join('');
 					update_css = true;
 
-					old_details.left = left;
+					old_options.left = left;
 				}
 
-				if (top !== old_details.top) {
+				if (top !== old_options.top) {
 					css_options.top = [String(top), 'px'].join('');
 					update_css = true;
 
-					old_details.top = top;
+					old_options.top = top;
 				}
 
 				if (width !== old_options.width) {
@@ -439,9 +429,9 @@
 				friGame.PrototypeSpriteGroup.draw.apply(this, arguments);
 			} else {
 				if (dom) {
-					if (hidden && (hidden !== old_details.hidden)) {
+					if (hidden && (hidden !== old_options.hidden)) {
 						dom.hide();
-						old_details.hidden = hidden;
+						old_options.hidden = hidden;
 					}
 				}
 			}
