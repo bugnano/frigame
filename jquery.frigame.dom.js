@@ -35,10 +35,10 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
-	$.extend(friGame.PrototypeSprite, {
+	friGame.PrototypeDOMSprite = Object.create(friGame.PrototypeSprite);
+	$.extend(friGame.PrototypeDOMSprite, {
 		init: function (name, options, parent) {
-			friGame.PrototypeBaseSprite.init.apply(this, arguments);
+			friGame.PrototypeSprite.init.apply(this, arguments);
 
 			this.old_options = {};
 			this.old_details = {};
@@ -51,7 +51,7 @@
 				this.dom.remove();
 			}
 
-			friGame.PrototypeBaseSprite.remove.apply(this, arguments);
+			friGame.PrototypeSprite.remove.apply(this, arguments);
 		},
 
 		// Implementation details
@@ -269,20 +269,30 @@
 		}
 	});
 
+	friGame.Sprite = function () {
+		var
+			sprite = Object.create(friGame.PrototypeDOMSprite)
+		;
+
+		sprite.init.apply(sprite, arguments);
+
+		return sprite;
+	};
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
-	$.extend(friGame.PrototypeSpriteGroup, {
+	friGame.PrototypeDOMSpriteGroup = Object.create(friGame.PrototypeSpriteGroup);
+	$.extend(friGame.PrototypeDOMSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				dom
 			;
 
-			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
+			friGame.PrototypeSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
 			this.old_details = {};
@@ -311,7 +321,7 @@
 		// Public functions
 
 		remove: function () {
-			friGame.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
+			friGame.PrototypeSpriteGroup.remove.apply(this, arguments);
 
 			if (this.dom) {
 				this.dom.remove();
@@ -426,7 +436,7 @@
 					dom.css(css_options);
 				}
 
-				friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
+				friGame.PrototypeSpriteGroup.draw.apply(this, arguments);
 			} else {
 				if (dom) {
 					if (hidden && (hidden !== old_details.hidden)) {
@@ -437,5 +447,15 @@
 			}
 		}
 	});
+
+	friGame.SpriteGroup = function () {
+		var
+			group = Object.create(friGame.PrototypeDOMSpriteGroup)
+		;
+
+		group.init.apply(group, arguments);
+
+		return group;
+	};
 }(jQuery));
 

@@ -543,7 +543,7 @@ if (!Date.now) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeBaseSprite = {
+	friGame.PrototypeSprite = {
 		default_options: {
 			// Public options
 			animation: null,
@@ -922,23 +922,13 @@ if (!Date.now) {
 		}
 	};
 
-	friGame.Sprite = function () {
-		var
-			sprite = Object.create(friGame.PrototypeSprite)
-		;
-
-		sprite.init.apply(sprite, arguments);
-
-		return sprite;
-	};
-
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeBaseSpriteGroup = {
+	friGame.PrototypeSpriteGroup = {
 		default_options: {
 			// Public options
 			posx: 0,
@@ -1149,16 +1139,6 @@ if (!Date.now) {
 		}
 	};
 
-	friGame.SpriteGroup = function () {
-		var
-			group = Object.create(friGame.PrototypeSpriteGroup)
-		;
-
-		group.init.apply(group, arguments);
-
-		return group;
-	};
-
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -1230,7 +1210,7 @@ if (!Date.now) {
 			;
 
 			for (i = 0; i < len_animations; i += 1) {
-				if (animations[i].details.img.complete) {
+				if (animations[i].options.img.complete) {
 					completed += 1;
 				}
 			}

@@ -37,8 +37,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
-	$.extend(friGame.PrototypeSprite, {
+	friGame.PrototypeCanvasSprite = Object.create(friGame.PrototypeSprite);
+	$.extend(friGame.PrototypeCanvasSprite, {
 		draw: function () {
 			var
 				options = this.options,
@@ -91,14 +91,24 @@
 		}
 	});
 
+	friGame.Sprite = function () {
+		var
+			sprite = Object.create(friGame.PrototypeCanvasSprite)
+		;
+
+		sprite.init.apply(sprite, arguments);
+
+		return sprite;
+	};
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSpriteGroup);
-	$.extend(friGame.PrototypeSpriteGroup, {
+	friGame.PrototypeCanvasSpriteGroup = Object.create(friGame.PrototypeSpriteGroup);
+	$.extend(friGame.PrototypeCanvasSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				dom,
@@ -106,7 +116,7 @@
 				height
 			;
 
-			friGame.PrototypeBaseSpriteGroup.init.apply(this, arguments);
+			friGame.PrototypeSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
 				width = String(options.width);
@@ -136,7 +146,7 @@
 		// Public functions
 
 		remove: function () {
-			friGame.PrototypeBaseSpriteGroup.remove.apply(this, arguments);
+			friGame.PrototypeSpriteGroup.remove.apply(this, arguments);
 
 			if (this.dom) {
 				this.dom.remove();
@@ -170,7 +180,7 @@
 					ctx.translate(left, top);
 				}
 
-				friGame.PrototypeBaseSpriteGroup.draw.apply(this, arguments);
+				friGame.PrototypeSpriteGroup.draw.apply(this, arguments);
 
 				if (context_saved) {
 					ctx.restore();
@@ -178,6 +188,16 @@
 			}
 		}
 	});
+
+	friGame.SpriteGroup = function () {
+		var
+			group = Object.create(friGame.PrototypeCanvasSpriteGroup)
+		;
+
+		group.init.apply(group, arguments);
+
+		return group;
+	};
 
 	// ******************************************************************** //
 	// ******************************************************************** //
