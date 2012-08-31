@@ -95,41 +95,25 @@ if (!Date.now) {
 		drawDone: true,
 
 		PrototypeRect: {
-			default_options: {
-				// Public options
-				left: 0,
-				right: 0,
-				centerx: 0,
-				top: 0,
-				bottom: 0,
-				centery: 0,
-				width: 0,
-				height: 0,
-				halfWidth: 0,
-				halfHeight: 0,
-				radius: 0
-			},
-
 			init: function (options) {
-				$.extend(this, this.default_options);
+				// Set default options
+				this.options = {
+					// Public options
+					left: 0,
+					right: 0,
+					centerx: 0,
+					top: 0,
+					bottom: 0,
+					centery: 0,
+					width: 0,
+					height: 0,
+					halfWidth: 0,
+					halfHeight: 0,
+					radius: 0
+				};
 
-				this.options = Object.create(this.default_options);
-
-				if (options.centerx !== undefined) {
-					this.last_x = 'centerx';
-				} else if (options.right !== undefined) {
-					this.last_x = 'right';
-				} else {
-					this.last_x = 'left';
-				}
-
-				if (options.centery !== undefined) {
-					this.last_y = 'centery';
-				} else if (options.bottom !== undefined) {
-					this.last_y = 'bottom';
-				} else {
-					this.last_y = 'top';
-				}
+				this.last_x = 'left';
+				this.last_y = 'top';
 
 				this.resize(options);
 			},
@@ -142,42 +126,42 @@ if (!Date.now) {
 					change_radius
 				;
 
-				if (new_options.radius !== undefined) {
-					my_options.radius = round(new_options.radius);
-
-					my_options.width = my_options.radius * 2;
-					my_options.halfWidth = my_options.radius;
-					my_options.height = my_options.width;
-					my_options.halfHeight = my_options.halfWidth;
+				if (new_options.width !== undefined) {
+					my_options.width = round(new_options.width);
+					my_options.halfWidth = round(new_options.width / 2);
+					change_radius = true;
+				} else if (new_options.halfWidth !== undefined) {
+					my_options.width = round(new_options.halfWidth * 2);
+					my_options.halfWidth = round(new_options.halfWidth);
+					change_radius = true;
 				} else {
-					if (new_options.width !== undefined) {
-						my_options.width = round(new_options.width);
-						my_options.halfWidth = round(new_options.width / 2);
-						change_radius = true;
-					} else if (new_options.halfWidth !== undefined) {
-						my_options.width = round(new_options.halfWidth * 2);
-						my_options.halfWidth = round(new_options.halfWidth);
-						change_radius = true;
-					} else {
-						// No width is being redefined
-						change_radius = false;
-					}
+					// No width is being redefined
+					change_radius = false;
+				}
 
-					if (new_options.height !== undefined) {
-						my_options.height = round(new_options.height);
-						my_options.halfHeight = round(new_options.height / 2);
-						change_radius = true;
-					} else if (new_options.halfHeight !== undefined) {
-						my_options.height = round(new_options.halfHeight * 2);
-						my_options.halfHeight = round(new_options.halfHeight);
-						change_radius = true;
-					} else {
-						// No height is being redefined
-						change_radius = false;
-					}
+				if (new_options.height !== undefined) {
+					my_options.height = round(new_options.height);
+					my_options.halfHeight = round(new_options.height / 2);
+					change_radius = true;
+				} else if (new_options.halfHeight !== undefined) {
+					my_options.height = round(new_options.halfHeight * 2);
+					my_options.halfHeight = round(new_options.halfHeight);
+					change_radius = true;
+				} else {
+					// No height is being redefined
+					change_radius = false;
+				}
 
-					if (change_radius) {
-						my_options.radius = Math.max(my_options.halfWidth, my_options.halfHeight);
+				if (change_radius) {
+					my_options.radius = Math.max(my_options.halfWidth, my_options.halfHeight);
+				} else {
+					if (new_options.radius !== undefined) {
+						my_options.radius = round(new_options.radius);
+
+						my_options.width = my_options.radius * 2;
+						my_options.halfWidth = my_options.radius;
+						my_options.height = my_options.width;
+						my_options.halfHeight = my_options.halfWidth;
 					}
 				}
 
@@ -188,41 +172,49 @@ if (!Date.now) {
 				var
 					my_options = this.options,
 					new_options = options || {},
-					round = Math.round
+					round = Math.round,
+					last_x,
+					last_y
 				;
+
+				// STEP 1: Memorize the last option that has been redefined
 
 				if (new_options.centerx !== undefined) {
 					my_options.centerx = round(new_options.centerx);
-					this.last_x = 'centerx';
+					last_x = 'centerx';
 				} else if (new_options.right !== undefined) {
 					my_options.right = round(new_options.right);
-					this.last_x = 'right';
+					last_x = 'right';
 				} else if (new_options.left !== undefined) {
 					my_options.left = round(new_options.left);
-					this.last_x = 'left';
+					last_x = 'left';
 				} else {
 					// No x is being redefined
-					$.noop();
+					last_x = this.last_x;
 				}
 
 				if (new_options.centery !== undefined) {
 					my_options.centery = round(new_options.centery);
-					this.last_y = 'centery';
+					last_y = 'centery';
 				} else if (new_options.bottom !== undefined) {
 					my_options.bottom = round(new_options.bottom);
-					this.last_y = 'bottom';
+					last_y = 'bottom';
 				} else if (new_options.top !== undefined) {
 					my_options.top = round(new_options.top);
-					this.last_y = 'top';
+					last_y = 'top';
 				} else {
 					// No y is being redefined
-					$.noop();
+					last_y = this.last_y;
 				}
 
-				if (this.last_x === 'centerx') {
+				// STEP 2: Adjust the other parameters according to the last defined option
+				// NOTE: The parameters are adjusted even if no x or y is being redefined because
+				// the rect width and height might have changed
+
+				if (last_x === 'centerx') {
 					my_options.left = my_options.centerx - my_options.halfWidth;
 					my_options.right = my_options.left + my_options.width;
-				} else if (this.last_x === 'right') {
+				} else if (last_x === 'right') {
 					my_options.left = my_options.right - my_options.width;
 					my_options.centerx = my_options.left + my_options.halfWidth;
 				} else {
@@ -230,16 +222,19 @@ if (!Date.now) {
 					my_options.right = my_options.left + my_options.width;
 				}
 
-				if (this.last_y === 'centery') {
+				if (last_y === 'centery') {
 					my_options.top = my_options.centery - my_options.halfHeight;
 					my_options.bottom = my_options.top + my_options.height;
-				} else if (this.last_y === 'bottom') {
+				} else if (last_y === 'bottom') {
 					my_options.top = my_options.bottom - my_options.height;
 					my_options.centery = my_options.top + my_options.halfHeight;
 				} else {
 					my_options.centery = my_options.top + my_options.halfHeight;
 					my_options.bottom = my_options.top + my_options.height;
 				}
+
+				this.last_x = last_x;
+				this.last_y = last_y;
 
 				return this;
 			},
@@ -282,6 +277,70 @@ if (!Date.now) {
 
 			halfHeight: function () {
 				return this.options.halfHeight;
+			},
+
+			radius: function () {
+				return this.options.radius;
+			},
+
+			collidePointRect: function (x, y) {
+				var
+					options = this.options
+				;
+
+				return	(
+						((x >= options.left) && (x < options.right))
+					&&	((y >= options.top) && (y < options.bottom))
+				);
+			},
+
+			collideRect: function (otherRect) {
+				var
+					my_options = this.options,
+					other_options = otherRect.options,
+					my_left = my_options.left,
+					my_right = my_options.right,
+					my_top = my_options.top,
+					my_bottom = my_options.bottom,
+					other_left = other_options.left,
+					other_right = other_options.right,
+					other_top = other_options.top,
+					other_bottom = other_options.bottom
+				;
+
+				return	(
+							(
+								((my_left >= other_left) && (my_left < other_right))
+							||	((other_left >= my_left) && (other_left < my_right))
+							)
+						&&	(
+								((my_top >= other_top) && (my_top < other_bottom))
+							||	((other_top >= my_top) && (other_top < my_bottom))
+							)
+				);
+			},
+
+			collidePointCircle: function (x, y) {
+				var
+					my_options = this.options,
+					dx = x - my_options.centerx,
+					dy = y - my_options.centery,
+					radius = my_options.radius
+				;
+
+				return (((dx * dx) + (dy * dy)) < (radius * radius));
+			},
+
+			collideCircle: function (otherRect) {
+				var
+					my_options = this.options,
+					other_options = otherRect.options,
+					dx = other_options.centerx - my_options.centerx,
+					dy = other_options.centery - my_options.centery,
+					radii = my_options.radius + other_options.radius
+				;
+
+				return (((dx * dx) + (dy * dy)) < (radii * radii));
 			}
 		},
 
