@@ -126,11 +126,11 @@
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
 			newHeight = dom.height();
-			options.posOffsetX = round((newWidth - options.width) / 2);
-			options.posOffsetY = round((newHeight - options.height) / 2);
+			options.posOffsetX = round((newWidth - this.width) / 2);
+			options.posOffsetY = round((newHeight - this.height) / 2);
 			dom.css({
-				'left': [String(options.left - options.posOffsetX), 'px'].join(''),
-				'top': [String(options.top - options.posOffsetY), 'px'].join('')
+				'left': [String(this.left - options.posOffsetX), 'px'].join(''),
+				'top': [String(this.top - options.posOffsetY), 'px'].join('')
 			});
 		},
 
@@ -142,8 +142,8 @@
 				animation = options.animation,
 				animation_options,
 				dom = this.dom,
-				left = options.left,
-				top = options.top,
+				left = this.left,
+				top = this.top,
 				multix = options.multix,
 				multiy = options.multiy,
 				angle = options.angle,
@@ -197,8 +197,8 @@
 
 				if (animation !== old_options.animation) {
 					$.extend(css_options, {
-						'width': [String(options.width), 'px'].join(''),
-						'height': [String(options.height), 'px'].join(''),
+						'width': [String(this.width), 'px'].join(''),
+						'height': [String(this.height), 'px'].join(''),
 						'background-image': ['url("', animation_options.imageURL, '")'].join('')
 					});
 					update_css = true;
@@ -336,10 +336,10 @@
 				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom)
 			;
 
-			left = options.left;
-			top = options.top;
-			width = options.width;
-			height = options.height;
+			left = this.left;
+			top = this.top;
+			width = this.width;
+			height = this.height;
 			old_options.left = left;
 			old_options.top = top;
 			old_options.width = width;
@@ -375,10 +375,10 @@
 				options = this.options,
 				old_options = this.old_options,
 				dom = this.dom,
-				left = options.left,
-				top = options.top,
-				width = options.width,
-				height = options.height,
+				left = this.left,
+				top = this.top,
+				width = this.width,
+				height = this.height,
 				hidden = options.hidden,
 				css_options = {},
 				update_css = false

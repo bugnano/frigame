@@ -96,20 +96,9 @@ if (!Date.now) {
 
 	friGame.PrototypeRect = {
 		init: function (options) {
-			var
-				my_options
-			;
-
-			if (this.options) {
-				my_options = this.options;
-			} else {
-				my_options = {};
-				this.options = my_options;
-			}
-
 			// Set default options
-			$.extend(my_options, {
-				// Public options
+			$.extend(this, {
+				// Public read-only properties
 				left: 0,
 				right: 0,
 				centerx: 0,
@@ -120,11 +109,12 @@ if (!Date.now) {
 				height: 0,
 				halfWidth: 0,
 				halfHeight: 0,
-				radius: 0
-			});
+				radius: 0,
 
-			this.last_x = 'left';
-			this.last_y = 'top';
+				// Implementation details
+				last_x: 'left',
+				last_y: 'top'
+			});
 
 			if (this.resize) {
 				this.resize(options);
@@ -133,7 +123,6 @@ if (!Date.now) {
 
 		resize: function (options) {
 			var
-				my_options = this.options,
 				new_options = options || {},
 				round = Math.round,
 				change_radius
@@ -141,12 +130,12 @@ if (!Date.now) {
 
 			// width MUST have priority over halfWidth
 			if (new_options.width !== undefined) {
-				my_options.width = round(new_options.width);
-				my_options.halfWidth = round(new_options.width / 2);
+				this.width = round(new_options.width);
+				this.halfWidth = round(new_options.width / 2);
 				change_radius = true;
 			} else if (new_options.halfWidth !== undefined) {
-				my_options.width = round(new_options.halfWidth * 2);
-				my_options.halfWidth = round(new_options.halfWidth);
+				this.width = round(new_options.halfWidth * 2);
+				this.halfWidth = round(new_options.halfWidth);
 				change_radius = true;
 			} else {
 				// No width is being redefined
@@ -155,12 +144,12 @@ if (!Date.now) {
 
 			// height MUST have priority over halfHeight
 			if (new_options.height !== undefined) {
-				my_options.height = round(new_options.height);
-				my_options.halfHeight = round(new_options.height / 2);
+				this.height = round(new_options.height);
+				this.halfHeight = round(new_options.height / 2);
 				change_radius = true;
 			} else if (new_options.halfHeight !== undefined) {
-				my_options.height = round(new_options.halfHeight * 2);
-				my_options.halfHeight = round(new_options.halfHeight);
+				this.height = round(new_options.halfHeight * 2);
+				this.halfHeight = round(new_options.halfHeight);
 				change_radius = true;
 			} else {
 				// No height is being redefined
@@ -168,16 +157,16 @@ if (!Date.now) {
 			}
 
 			if (change_radius) {
-				my_options.radius = Math.max(my_options.halfWidth, my_options.halfHeight);
+				this.radius = Math.max(this.halfWidth, this.halfHeight);
 			} else {
 				// Check if the radius is redefined only if width or height are not redefined
 				if (new_options.radius !== undefined) {
-					my_options.radius = round(new_options.radius);
+					this.radius = round(new_options.radius);
 
-					my_options.width = my_options.radius * 2;
-					my_options.halfWidth = my_options.radius;
-					my_options.height = my_options.width;
-					my_options.halfHeight = my_options.halfWidth;
+					this.width = this.radius * 2;
+					this.height = this.width;
+					this.halfWidth = this.radius;
+					this.halfHeight = this.halfWidth;
 				}
 			}
 
@@ -190,7 +179,6 @@ if (!Date.now) {
 
 		move: function (options) {
 			var
-				my_options = this.options,
 				new_options = options || {},
 				round = Math.round,
 				last_x,
@@ -200,13 +188,13 @@ if (!Date.now) {
 			// STEP 1: Memorize the last option that has been redefined
 
 			if (new_options.centerx !== undefined) {
-				my_options.centerx = round(new_options.centerx);
+				this.centerx = round(new_options.centerx);
 				last_x = 'centerx';
 			} else if (new_options.right !== undefined) {
-				my_options.right = round(new_options.right);
+				this.right = round(new_options.right);
 				last_x = 'right';
 			} else if (new_options.left !== undefined) {
-				my_options.left = round(new_options.left);
+				this.left = round(new_options.left);
 				last_x = 'left';
 			} else {
 				// No x is being redefined
@@ -214,13 +202,13 @@ if (!Date.now) {
 			}
 
 			if (new_options.centery !== undefined) {
-				my_options.centery = round(new_options.centery);
+				this.centery = round(new_options.centery);
 				last_y = 'centery';
 			} else if (new_options.bottom !== undefined) {
-				my_options.bottom = round(new_options.bottom);
+				this.bottom = round(new_options.bottom);
 				last_y = 'bottom';
 			} else if (new_options.top !== undefined) {
-				my_options.top = round(new_options.top);
+				this.top = round(new_options.top);
 				last_y = 'top';
 			} else {
 				// No y is being redefined
@@ -232,25 +220,25 @@ if (!Date.now) {
 			// the rect width and height might have changed
 
 			if (last_x === 'centerx') {
-				my_options.left = my_options.centerx - my_options.halfWidth;
-				my_options.right = my_options.left + my_options.width;
+				this.left = this.centerx - this.halfWidth;
+				this.right = this.left + this.width;
 			} else if (last_x === 'right') {
-				my_options.left = my_options.right - my_options.width;
-				my_options.centerx = my_options.left + my_options.halfWidth;
+				this.left = this.right - this.width;
+				this.centerx = this.left + this.halfWidth;
 			} else {
-				my_options.centerx = my_options.left + my_options.halfWidth;
-				my_options.right = my_options.left + my_options.width;
+				this.centerx = this.left + this.halfWidth;
+				this.right = this.left + this.width;
 			}
 
 			if (last_y === 'centery') {
-				my_options.top = my_options.centery - my_options.halfHeight;
-				my_options.bottom = my_options.top + my_options.height;
+				this.top = this.centery - this.halfHeight;
+				this.bottom = this.top + this.height;
 			} else if (last_y === 'bottom') {
-				my_options.top = my_options.bottom - my_options.height;
-				my_options.centery = my_options.top + my_options.halfHeight;
+				this.top = this.bottom - this.height;
+				this.centery = this.top + this.halfHeight;
 			} else {
-				my_options.centery = my_options.top + my_options.halfHeight;
-				my_options.bottom = my_options.top + my_options.height;
+				this.centery = this.top + this.halfHeight;
+				this.bottom = this.top + this.height;
 			}
 
 			this.last_x = last_x;
@@ -259,73 +247,23 @@ if (!Date.now) {
 			return this;
 		},
 
-		left: function () {
-			return this.options.left;
-		},
-
-		right: function () {
-			return this.options.right;
-		},
-
-		centerx: function () {
-			return this.options.centerx;
-		},
-
-		top: function () {
-			return this.options.top;
-		},
-
-		bottom: function () {
-			return this.options.bottom;
-		},
-
-		centery: function () {
-			return this.options.centery;
-		},
-
-		width: function () {
-			return this.options.width;
-		},
-
-		height: function () {
-			return this.options.height;
-		},
-
-		halfWidth: function () {
-			return this.options.halfWidth;
-		},
-
-		halfHeight: function () {
-			return this.options.halfHeight;
-		},
-
-		radius: function () {
-			return this.options.radius;
-		},
-
 		collidePointRect: function (x, y) {
-			var
-				options = this.options
-			;
-
 			return	(
-					((x >= options.left) && (x < options.right))
-				&&	((y >= options.top) && (y < options.bottom))
+					((x >= this.left) && (x < this.right))
+				&&	((y >= this.top) && (y < this.bottom))
 			);
 		},
 
 		collideRect: function (otherRect) {
 			var
-				my_options = this.options,
-				other_options = otherRect.options,
-				my_left = my_options.left,
-				my_right = my_options.right,
-				my_top = my_options.top,
-				my_bottom = my_options.bottom,
-				other_left = other_options.left,
-				other_right = other_options.right,
-				other_top = other_options.top,
-				other_bottom = other_options.bottom
+				my_left = this.left,
+				my_right = this.right,
+				my_top = this.top,
+				my_bottom = this.bottom,
+				other_left = otherRect.left,
+				other_right = otherRect.right,
+				other_top = otherRect.top,
+				other_bottom = otherRect.bottom
 			;
 
 			return	(
@@ -342,10 +280,9 @@ if (!Date.now) {
 
 		collidePointCircle: function (x, y) {
 			var
-				my_options = this.options,
-				dx = x - my_options.centerx,
-				dy = y - my_options.centery,
-				radius = my_options.radius
+				dx = x - this.centerx,
+				dy = y - this.centery,
+				radius = this.radius
 			;
 
 			return (((dx * dx) + (dy * dy)) < (radius * radius));
@@ -353,11 +290,9 @@ if (!Date.now) {
 
 		collideCircle: function (otherRect) {
 			var
-				my_options = this.options,
-				other_options = otherRect.options,
-				dx = other_options.centerx - my_options.centerx,
-				dy = other_options.centery - my_options.centery,
-				radii = my_options.radius + other_options.radius
+				dx = otherRect.centerx - this.centerx,
+				dy = otherRect.centery - this.centery,
+				radii = this.radius + otherRect.radius
 			;
 
 			return (((dx * dx) + (dy * dy)) < (radii * radii));
@@ -569,8 +504,12 @@ if (!Date.now) {
 				posOffsetY: 0
 			});
 
+			// A public userData property can be useful to the game
+			this.userData = null;
+
 			friGame.sprites[name] = this;
 
+			// name and parent are public read-only properties
 			this.name = name;
 			this.parent = parent;
 
@@ -957,7 +896,6 @@ if (!Date.now) {
 
 		resize: function (options) {
 			var
-				my_options = this.options,
 				new_options = {},
 				set_new_options = false,
 				parent = this.parent
@@ -968,14 +906,14 @@ if (!Date.now) {
 
 			if (parent) {
 				// A width of 0 means the same width as the parent
-				if (!my_options.width) {
-					new_options.width = parent.options.width;
+				if (!this.width) {
+					new_options.width = parent.width;
 					set_new_options = true;
 				}
 
 				// A height of 0 means the same height as the parent
-				if (!my_options.height) {
-					new_options.height = parent.options.height;
+				if (!this.height) {
+					new_options.height = parent.height;
 					set_new_options = true;
 				}
 

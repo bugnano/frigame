@@ -282,7 +282,7 @@
 				animation_options = animation.options;
 
 				friGame.mvPushMatrix();
-				mat4.translate(mvMatrix, [options.centerx, options.centery, 0]);
+				mat4.translate(mvMatrix, [this.centerx, this.centery, 0]);
 				if (angle) {
 					mat4.rotate(mvMatrix, angle, [0, 0, 1]);
 				}
@@ -424,8 +424,8 @@
 		draw: function () {
 			var
 				options = this.options,
-				left = options.left,
-				top = options.top,
+				left = this.left,
+				top = this.top,
 				hidden = options.hidden,
 				gl = friGame.gl,
 				mvMatrix = friGame.mvMatrix,

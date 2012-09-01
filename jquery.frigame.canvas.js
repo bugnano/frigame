@@ -49,8 +49,8 @@
 				fliph = options.fliph,
 				flipv = options.flipv,
 				animation_options,
-				width = options.width,
-				height = options.height,
+				width = this.width,
+				height = this.height,
 				currentFrame = options.currentFrame,
 				ctx = friGame.ctx
 			;
@@ -60,7 +60,7 @@
 
 				ctx.save();
 
-				ctx.translate(options.centerx, options.centery);
+				ctx.translate(this.centerx, this.centery);
 
 				if (angle) {
 					ctx.rotate(angle);
@@ -77,8 +77,8 @@
 					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay),
 					width,
 					height,
-					-(options.halfWidth),
-					-(options.halfHeight),
+					-(this.halfWidth),
+					-(this.halfHeight),
 					width,
 					height
 				);
@@ -155,15 +155,15 @@
 		draw: function () {
 			var
 				options = this.options,
-				left = options.left,
-				top = options.top,
+				left = this.left,
+				top = this.top,
 				hidden = options.hidden,
 				ctx = friGame.ctx,
 				context_saved = false
 			;
 
 			if (!this.parent) {
-				friGame.ctx.clearRect(0, 0, options.width, options.height);
+				friGame.ctx.clearRect(0, 0, this.width, this.height);
 			}
 
 			if (this.layers.length && !hidden) {

@@ -239,12 +239,14 @@
 
 
 		// Player space shipannimations:
-		playerAnimation.idle = new $.gameQuery.Animation({imageURL: 'player_spaceship.png'});
-		playerAnimation.explode = new $.gameQuery.Animation({imageURL: 'player_explode.png', numberOfFrame: 4, delta: 26, rate: 60, type: $.gameQuery.ANIMATION_VERTICAL});
-		playerAnimation.up = new $.gameQuery.Animation({imageURL: 'boosterup.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.gameQuery.ANIMATION_HORIZONTAL});
-		playerAnimation.down = new $.gameQuery.Animation({imageURL: 'boosterdown.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.gameQuery.ANIMATION_HORIZONTAL});
-		playerAnimation.boost = new $.gameQuery.Animation({imageURL: 'booster1.png' , numberOfFrame: 6, delta: 14, rate: 60, type: $.gameQuery.ANIMATION_VERTICAL});
-		playerAnimation.booster = new $.gameQuery.Animation({imageURL: 'booster2.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.gameQuery.ANIMATION_VERTICAL});
+		$.extend(playerAnimation, {
+			idle: new $.gameQuery.Animation({imageURL: 'player_spaceship.png'}),
+			explode: new $.gameQuery.Animation({imageURL: 'player_explode.png', numberOfFrame: 4, delta: 26, rate: 60, type: $.gameQuery.ANIMATION_VERTICAL}),
+			up: new $.gameQuery.Animation({imageURL: 'boosterup.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.gameQuery.ANIMATION_HORIZONTAL}),
+			down: new $.gameQuery.Animation({imageURL: 'boosterdown.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.gameQuery.ANIMATION_HORIZONTAL}),
+			boost: new $.gameQuery.Animation({imageURL: 'booster1.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.gameQuery.ANIMATION_VERTICAL}),
+			booster: new $.gameQuery.Animation({imageURL: 'booster2.png', numberOfFrame: 6, delta: 14, rate: 60, type: $.gameQuery.ANIMATION_VERTICAL})
+		});
 
 		//  List of enemies animations :
 		// 1st kind of enemy:
@@ -267,10 +269,12 @@
 		});
 
 		// Weapon missile:
-		missile.player = new $.gameQuery.Animation({imageURL: 'player_missile.png', numberOfFrame: 6, delta: 10, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL});
-		missile.enemies = new $.gameQuery.Animation({imageURL: 'enemy_missile.png', numberOfFrame: 6, delta: 15, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL});
-		missile.playerexplode = new $.gameQuery.Animation({imageURL: 'player_missile_explode.png' , numberOfFrame: 8, delta: 23, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL + $.gameQuery.ANIMATION_CALLBACK});
-		missile.enemiesexplode = new $.gameQuery.Animation({imageURL: 'enemy_missile_explode.png' , numberOfFrame: 6, delta: 15, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL + $.gameQuery.ANIMATION_CALLBACK});
+		$.extend(missile, {
+			player: new $.gameQuery.Animation({imageURL: 'player_missile.png', numberOfFrame: 6, delta: 10, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL}),
+			enemies: new $.gameQuery.Animation({imageURL: 'enemy_missile.png', numberOfFrame: 6, delta: 15, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL}),
+			playerexplode: new $.gameQuery.Animation({imageURL: 'player_missile_explode.png', numberOfFrame: 8, delta: 23, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL + $.gameQuery.ANIMATION_CALLBACK}),
+			enemiesexplode: new $.gameQuery.Animation({imageURL: 'enemy_missile_explode.png', numberOfFrame: 6, delta: 15, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL + $.gameQuery.ANIMATION_CALLBACK})
+		});
 
 		// Initialize the game:
 		$('#playground').playground({height: PLAYGROUND_HEIGHT, width: PLAYGROUND_WIDTH, keyTracker: true});
@@ -332,25 +336,25 @@
 				//Update the movement of the ship:
 				if (!playerHit) {
 					$('#player')[0].player.update();
-					if (jQuery.gameQuery.keyTracker[65]) { //this is left! (a)
+					if ($.gameQuery.keyTracker[65]) { //this is left! (a)
 						nextpos = parseInt($('#player').css('left'), 10) - 5;
 						if (nextpos > 0) {
 							$('#player').css('left', ['', String(nextpos), 'px'].join(''));
 						}
 					}
-					if (jQuery.gameQuery.keyTracker[68]) { //this is right! (d)
+					if ($.gameQuery.keyTracker[68]) { //this is right! (d)
 						nextpos = parseInt($('#player').css('left'), 10) + 5;
 						if (nextpos < PLAYGROUND_WIDTH - 100) {
 							$('#player').css('left', ['', String(nextpos), 'px'].join(''));
 						}
 					}
-					if (jQuery.gameQuery.keyTracker[87]) { //this is up! (w)
+					if ($.gameQuery.keyTracker[87]) { //this is up! (w)
 						nextpos = parseInt($('#player').css('top'), 10) - 3;
 						if (nextpos > 0) {
 							$('#player').css('top', ['', String(nextpos), 'px'].join(''));
 						}
 					}
-					if (jQuery.gameQuery.keyTracker[83]) { //this is down! (s)
+					if ($.gameQuery.keyTracker[83]) { //this is down! (s)
 						nextpos = parseInt($('#player').css('top'), 10) + 3;
 						if (nextpos < PLAYGROUND_HEIGHT - 30) {
 							$('#player').css('top', ['', String(nextpos), 'px'].join(''));
