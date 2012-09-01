@@ -52,7 +52,7 @@
 	// Game objects:
 	G.PrototypePlayer = {
 		init: function () {
-			this.parentNode = $.friGame.groups.player;
+			this.parentNode = $.friGame.sprites.player;
 			this.node = $.friGame.sprites.playerBody;
 			this.nodeBooster = $.friGame.sprites.playerBooster;
 			this.nodeBoostUp = $.friGame.sprites.playerBoostUp;
@@ -410,7 +410,7 @@
 							playerleft = G.thePlayer.left();
 							playertop = G.thePlayer.top();
 							name = ['playerMissle_', String(Math.ceil(Math.random() * 1000))].join('');
-							$.friGame.groups.playerMissileLayer.addSprite(name, {animation: missile.player, left: playerleft + 90, top: playertop + 14});
+							$.friGame.sprites.playerMissileLayer.addSprite(name, {animation: missile.player, left: playerleft + 90, top: playertop + 14});
 							G.playerMissiles[name] = $.friGame.sprites[name];
 							break;
 						case 65: //this is left! (a)
@@ -540,7 +540,7 @@
 									enemyleft = this.node.left();
 									enemytop = this.node.top();
 									missilename = ['enemiesMissile_', String(Math.ceil(Math.random() * 1000))].join('');
-									$.friGame.groups.enemiesMissileLayer.addSprite(missilename, {animation: missile.enemies, left: enemyleft, top: enemytop + 20});
+									$.friGame.sprites.enemiesMissileLayer.addSprite(missilename, {animation: missile.enemies, left: enemyleft, top: enemytop + 20});
 									G.enemiesMissiles[missilename] = $.friGame.sprites[missilename];
 								}
 							}
@@ -617,16 +617,16 @@
 					if (!bossMode && !gameOver) {
 						if (Math.random() < 0.4) {
 							name = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-							$.friGame.groups.actors.addSprite(name, {animation: G.PrototypeMinion.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
+							$.friGame.sprites.actors.addSprite(name, {animation: G.PrototypeMinion.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
 							G.enemies[name] = G.Minion($.friGame.sprites[name]);
 						} else if (Math.random() < 0.5) {
 							name = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-							$.friGame.groups.actors.addSprite(name, {animation: G.PrototypeBrainy.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
+							$.friGame.sprites.actors.addSprite(name, {animation: G.PrototypeBrainy.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
 							G.enemies[name] = G.Brainy($.friGame.sprites[name]);
 						} else if (Math.random() > 0.8) {
 							bossMode = true;
 							bossName = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
-							$.friGame.groups.actors.addSprite(bossName, {animation: G.PrototypeBossy.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
+							$.friGame.sprites.actors.addSprite(bossName, {animation: G.PrototypeBossy.idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT});
 							G.enemies[bossName] = G.Bossy($.friGame.sprites[bossName]);
 						}
 					} else {

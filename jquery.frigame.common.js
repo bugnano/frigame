@@ -78,7 +78,6 @@ if (!Date.now) {
 	$.extend(friGame, {
 		// Public options
 		sprites: {},
-		groups: {},
 
 		// Implementation details
 
@@ -541,12 +540,10 @@ if (!Date.now) {
 
 	friGame.PrototypeBaseSprite = Object.create(friGame.PrototypeRect);
 	$.extend(friGame.PrototypeBaseSprite, {
-		init: function (options) {
+		init: function (name, options, parent) {
 			var
 				my_options
 			;
-
-			friGame.PrototypeRect.init.call(this, options);
 
 			if (this.options) {
 				my_options = this.options;
@@ -571,9 +568,41 @@ if (!Date.now) {
 				posOffsetX: 0,
 				posOffsetY: 0
 			});
+
+			friGame.sprites[name] = this;
+
+			this.name = name;
+			this.parent = parent;
+
+			// Call PrototypeRect.init after setting this.parent
+			friGame.PrototypeRect.init.call(this, options);
 		},
 
 		// Public functions
+
+		remove: function () {
+			var
+				parent = this.parent,
+				parent_layers,
+				len_parent_layers,
+				name = this.name,
+				i
+			;
+
+			if (parent) {
+				parent_layers = parent.layers;
+				len_parent_layers = parent_layers.length;
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === name) {
+						parent_layers.splice(i, 1);
+						break;
+					}
+				}
+			}
+
+			delete friGame.sprites[name];
+		},
+
 
 		rotate: function (angle) {
 			if (angle === undefined) {
@@ -705,13 +734,7 @@ if (!Date.now) {
 				multiy: 0
 			});
 
-			friGame.sprites[name] = this;
-
-			this.name = name;
-			this.parent = parent;
-
-			// Call PrototypeBaseSprite.init after setting this.parent
-			friGame.PrototypeBaseSprite.init.call(this, options);
+			friGame.PrototypeBaseSprite.init.apply(this, arguments);
 
 			// If the animation has not been defined, force
 			// the animation to null in order to resize and move
@@ -795,25 +818,6 @@ if (!Date.now) {
 		},
 
 		resize: null,	// Sprites cannot be explicitly resized
-
-		remove: function () {
-			var
-				parent = this.parent,
-				parent_layers = parent.layers,
-				len_parent_layers = parent_layers.length,
-				name = this.name,
-				i
-			;
-
-			for (i = 0; i < len_parent_layers; i += 1) {
-				if (parent_layers[i].name === name) {
-					parent_layers.splice(i, 1);
-					break;
-				}
-			}
-
-			delete friGame.sprites[name];
-		},
 
 		// Implementation details
 
@@ -931,17 +935,25 @@ if (!Date.now) {
 				// Implementation details
 			});
 
-			friGame.groups[name] = this;
-
 			this.layers = [];
-			this.name = name;
-			this.parent = parent;
 
-			// Call PrototypeBaseSprite.init after setting this.parent
-			friGame.PrototypeBaseSprite.init.call(this, options);
+			friGame.PrototypeBaseSprite.init.apply(this, arguments);
 		},
 
 		// Public functions
+
+		remove: function () {
+			var
+				layers = this.layers
+			;
+
+			while (layers.length) {
+				layers[0].obj.remove();
+			}
+
+			friGame.PrototypeBaseSprite.remove.apply(this, arguments);
+		},
+
 
 		resize: function (options) {
 			var
@@ -1007,32 +1019,24 @@ if (!Date.now) {
 			return parent;
 		},
 
-		remove: function () {
+		children: function (callback) {
 			var
 				layers = this.layers,
-				parent = this.parent,
-				parent_layers,
-				len_parent_layers,
-				name = this.name,
+				len_layers = layers.length,
+				layer,
 				i
 			;
 
-			while (layers.length) {
-				layers[0].obj.remove();
-			}
-
-			if (parent) {
-				parent_layers = parent.layers;
-				len_parent_layers = parent_layers.length;
-				for (i = 0; i < len_parent_layers; i += 1) {
-					if (parent_layers[i].name === name) {
-						parent_layers.splice(i, 1);
-						break;
+			if (callback) {
+				for (i = 0; i < len_layers; i += 1) {
+					layer = layers[i];
+					if (layer) {
+						callback.call(layer.obj, layer.name);
 					}
 				}
 			}
 
-			delete friGame.groups[name];
+			return this;
 		},
 
 		// Implementation details
@@ -1075,7 +1079,7 @@ if (!Date.now) {
 
 		playground: function (parentDOM) {
 			var
-				scenegraph = friGame.groups.scenegraph,
+				scenegraph = friGame.sprites.scenegraph,
 				dom
 			;
 
@@ -1176,7 +1180,7 @@ if (!Date.now) {
 				remove_callbacks = [],
 				len_remove_callbacks,
 				i,
-				scenegraph = friGame.groups.scenegraph
+				scenegraph = friGame.sprites.scenegraph
 			;
 
 			if (scenegraph) {
@@ -1207,7 +1211,7 @@ if (!Date.now) {
 		},
 
 		draw: function () {
-			friGame.groups.scenegraph.draw();
+			friGame.sprites.scenegraph.draw();
 			friGame.drawDone = true;
 		}
 	});
