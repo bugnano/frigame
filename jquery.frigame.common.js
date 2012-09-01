@@ -679,10 +679,9 @@ if (!Date.now) {
 	$.extend(friGame.PrototypeSprite, {
 		init: function (name, options, parent) {
 			var
-				my_options
+				my_options,
+				new_options = options || {}
 			;
-
-			friGame.PrototypeBaseSprite.init.call(this, options);
 
 			if (this.options) {
 				my_options = this.options;
@@ -711,7 +710,17 @@ if (!Date.now) {
 			this.name = name;
 			this.parent = parent;
 
-			this.setAnimation(options);
+			// Call PrototypeBaseSprite.init after setting this.parent
+			friGame.PrototypeBaseSprite.init.call(this, options);
+
+			// If the animation has not been defined, force
+			// the animation to null in order to resize and move
+			// the sprite inside setAnimation
+			if (new_options.animation === undefined) {
+				new_options.animation = null;
+			}
+
+			this.setAnimation(new_options);
 		},
 
 		// Public functions
@@ -908,8 +917,6 @@ if (!Date.now) {
 				my_options
 			;
 
-			friGame.PrototypeBaseSprite.init.call(this, options);
-
 			if (this.options) {
 				my_options = this.options;
 			} else {
@@ -929,6 +936,9 @@ if (!Date.now) {
 			this.layers = [];
 			this.name = name;
 			this.parent = parent;
+
+			// Call PrototypeBaseSprite.init after setting this.parent
+			friGame.PrototypeBaseSprite.init.call(this, options);
 		},
 
 		// Public functions
@@ -1144,10 +1154,6 @@ if (!Date.now) {
 				for (i = 0; i < len_animations; i += 1) {
 					animations[i].onLoad();
 				}
-
-				$.each(friGame.sprites, function () {
-					this.setAnimation(this.options);
-				});
 
 				if (friGame.loadCallback) {
 					delete friGame.loadCallback;
