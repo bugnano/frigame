@@ -461,10 +461,10 @@
 						collided.each(function () {
 							if ($(this)[0].enemy.damage()) {
 								if (G.PrototypeBossy.isPrototypeOf(this.enemy)) {
-										$(this).setAnimation(enemies[2].explode, function (node) {
-											$(node).remove();
-										});
-										$(this).css('width', 150);
+									$(this).setAnimation(enemies[2].explode, function (node) {
+										$(node).remove();
+									});
+									$(this).css('width', 150);
 								} else if (G.PrototypeBrainy.isPrototypeOf(this.enemy)) {
 									$(this).setAnimation(enemies[1].explode, function (node) {
 										$(node).remove();
