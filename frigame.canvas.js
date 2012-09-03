@@ -1,4 +1,4 @@
-/*global jQuery */
+/*global jQuery, friGame */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
@@ -26,19 +26,15 @@
 // Uses the safeDrawImage function taken from:
 // Akihabara Copyright (c) 2010 Francesco Cottone, http://www.kesiev.com/, licensed under the MIT
 
-(function ($) {
-	var
-		friGame = $.friGame
-	;
-
+(function ($, fg) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeCanvasSprite = Object.create(friGame.PrototypeSprite);
-	$.extend(friGame.PrototypeCanvasSprite, {
+	fg.PCanvasSprite = Object.create(fg.PSprite);
+	$.extend(fg.PCanvasSprite, {
 		draw: function () {
 			var
 				options = this.options,
@@ -52,7 +48,7 @@
 				width = this.width,
 				height = this.height,
 				currentFrame = options.currentFrame,
-				ctx = friGame.ctx
+				ctx = fg.ctx
 			;
 
 			if (animation && !options.hidden) {
@@ -70,7 +66,7 @@
 					ctx.scale(fliph * scalex, flipv * scaley);
 				}
 
-				friGame.safeDrawImage(
+				fg.safeDrawImage(
 					ctx,
 					animation_options.img,
 					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
@@ -88,9 +84,9 @@
 		}
 	});
 
-	friGame.Sprite = function () {
+	fg.Sprite = function () {
 		var
-			sprite = Object.create(friGame.PrototypeCanvasSprite)
+			sprite = Object.create(fg.PCanvasSprite)
 		;
 
 		sprite.init.apply(sprite, arguments);
@@ -104,8 +100,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeCanvasSpriteGroup = Object.create(friGame.PrototypeSpriteGroup);
-	$.extend(friGame.PrototypeCanvasSpriteGroup, {
+	fg.PCanvasSpriteGroup = Object.create(fg.PSpriteGroup);
+	$.extend(fg.PCanvasSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				dom,
@@ -113,7 +109,7 @@
 				height
 			;
 
-			friGame.PrototypeSpriteGroup.init.apply(this, arguments);
+			fg.PSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
 				width = String(options.width);
@@ -136,14 +132,14 @@
 
 				this.dom = dom;
 
-				friGame.ctx = document.getElementById(name).getContext('2d');
+				fg.ctx = document.getElementById(name).getContext('2d');
 			}
 		},
 
 		// Public functions
 
 		remove: function () {
-			friGame.PrototypeSpriteGroup.remove.apply(this, arguments);
+			fg.PSpriteGroup.remove.apply(this, arguments);
 
 			if (this.dom) {
 				this.dom.remove();
@@ -158,12 +154,12 @@
 				left = this.left,
 				top = this.top,
 				hidden = options.hidden,
-				ctx = friGame.ctx,
+				ctx = fg.ctx,
 				context_saved = false
 			;
 
 			if (!this.parent) {
-				friGame.ctx.clearRect(0, 0, this.width, this.height);
+				fg.ctx.clearRect(0, 0, this.width, this.height);
 			}
 
 			if (this.layers.length && !hidden) {
@@ -176,7 +172,7 @@
 					ctx.translate(left, top);
 				}
 
-				friGame.PrototypeSpriteGroup.draw.apply(this, arguments);
+				fg.PSpriteGroup.draw.apply(this, arguments);
 
 				if (context_saved) {
 					ctx.restore();
@@ -185,9 +181,9 @@
 		}
 	});
 
-	friGame.SpriteGroup = function () {
+	fg.SpriteGroup = function () {
 		var
-			group = Object.create(friGame.PrototypeCanvasSpriteGroup)
+			group = Object.create(fg.PCanvasSpriteGroup)
 		;
 
 		group.init.apply(group, arguments);
@@ -201,7 +197,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.safeDrawImage = function (tox, img, sx, sy, sw, sh, dx, dy, dw, dh) {
+	fg.safeDrawImage = function (tox, img, sx, sy, sw, sh, dx, dy, dw, dh) {
 		if ((!img) || (!tox)) {
 			return;
 		}
@@ -232,5 +228,5 @@
 			tox.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 		}
 	};
-}(jQuery));
+}(jQuery, friGame));
 

@@ -1,4 +1,4 @@
-/*global jQuery */
+/*global jQuery, friGame */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
@@ -24,21 +24,17 @@
 // Uses ideas and APIs inspired by:
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
-(function ($) {
-	var
-		friGame = $.friGame
-	;
-
+(function ($, fg) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeDOMSprite = Object.create(friGame.PrototypeSprite);
-	$.extend(friGame.PrototypeDOMSprite, {
+	fg.PDOMSprite = Object.create(fg.PSprite);
+	$.extend(fg.PDOMSprite, {
 		init: function (name, options, parent) {
-			friGame.PrototypeSprite.init.apply(this, arguments);
+			fg.PSprite.init.apply(this, arguments);
 
 			this.old_options = {};
 		},
@@ -50,7 +46,7 @@
 				this.dom.remove();
 			}
 
-			friGame.PrototypeSprite.remove.apply(this, arguments);
+			fg.PSprite.remove.apply(this, arguments);
 		},
 
 		// Implementation details
@@ -59,7 +55,7 @@
 			var
 				dom = this.dom,
 				options = this.options,
-				transformFunction = friGame.transformFunction,
+				transformFunction = fg.transformFunction,
 				angle = options.angle,
 				scalex = options.scalex,
 				scaley = options.scaley,
@@ -78,7 +74,7 @@
 				}
 
 				dom.css(transformFunction, transform.join(''));
-			} else if (friGame.filterFunction) {
+			} else if (fg.filterFunction) {
 				this.ieFilter();
 			} else {
 				$.noop();
@@ -121,7 +117,7 @@
 				filter = '';
 			}
 
-			dom.css(friGame.filterFunction, filter);
+			dom.css(fg.filterFunction, filter);
 
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
@@ -264,9 +260,9 @@
 		}
 	});
 
-	friGame.Sprite = function () {
+	fg.Sprite = function () {
 		var
-			sprite = Object.create(friGame.PrototypeDOMSprite)
+			sprite = Object.create(fg.PDOMSprite)
 		;
 
 		sprite.init.apply(sprite, arguments);
@@ -280,14 +276,14 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeDOMSpriteGroup = Object.create(friGame.PrototypeSpriteGroup);
-	$.extend(friGame.PrototypeDOMSpriteGroup, {
+	fg.PDOMSpriteGroup = Object.create(fg.PSpriteGroup);
+	$.extend(fg.PDOMSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				dom
 			;
 
-			friGame.PrototypeSpriteGroup.init.apply(this, arguments);
+			fg.PSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
 
@@ -295,17 +291,17 @@
 				dom = this.makeDOM(name, options.parentDOM);
 
 				if (dom.css('-moz-transform')) {
-					friGame.transformFunction = '-moz-transform';
+					fg.transformFunction = '-moz-transform';
 				} else if (dom.css('-o-transform')) {
-					friGame.transformFunction = '-o-transform';
+					fg.transformFunction = '-o-transform';
 				} else if ((dom.css('msTransform') !== null) && (dom.css('msTransform') !== undefined)) {
-					friGame.transformFunction = 'msTransform';
+					fg.transformFunction = 'msTransform';
 				} else if ((dom.css('transform') !== null) && (dom.css('transform') !== undefined)) {
-					friGame.transformFunction = 'transform';
+					fg.transformFunction = 'transform';
 				} else if ((dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)) {
-					friGame.transformFunction = '-webkit-transform';
+					fg.transformFunction = '-webkit-transform';
 				} else if (dom.css('filter') !== undefined) {
-					friGame.filterFunction = 'filter';
+					fg.filterFunction = 'filter';
 				} else {
 					$.noop();
 				}
@@ -315,7 +311,7 @@
 		// Public functions
 
 		remove: function () {
-			friGame.PrototypeSpriteGroup.remove.apply(this, arguments);
+			fg.PSpriteGroup.remove.apply(this, arguments);
 
 			if (this.dom) {
 				this.dom.remove();
@@ -426,7 +422,7 @@
 					dom.css(css_options);
 				}
 
-				friGame.PrototypeSpriteGroup.draw.apply(this, arguments);
+				fg.PSpriteGroup.draw.apply(this, arguments);
 			} else {
 				if (dom) {
 					if (hidden && (hidden !== old_options.hidden)) {
@@ -438,14 +434,14 @@
 		}
 	});
 
-	friGame.SpriteGroup = function () {
+	fg.SpriteGroup = function () {
 		var
-			group = Object.create(friGame.PrototypeDOMSpriteGroup)
+			group = Object.create(fg.PDOMSpriteGroup)
 		;
 
 		group.init.apply(group, arguments);
 
 		return group;
 	};
-}(jQuery));
+}(jQuery, friGame));
 

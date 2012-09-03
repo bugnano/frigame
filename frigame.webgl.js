@@ -1,4 +1,4 @@
-/*global jQuery, Float32Array, mat4 */
+/*global jQuery, friGame, Float32Array, mat4 */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
@@ -24,22 +24,18 @@
 // Uses ideas and APIs inspired by:
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
-(function ($) {
-	var
-		friGame = $.friGame
-	;
-
+(function ($, fg) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeWebGLAnimation = Object.create(friGame.PrototypeAnimation);
-	$.extend(friGame.PrototypeWebGLAnimation, {
+	fg.PWebGLAnimation = Object.create(fg.PAnimation);
+	$.extend(fg.PWebGLAnimation, {
 		initBuffers: function () {
 			var
-				gl = friGame.gl,
+				gl = fg.gl,
 				options = this.options,
 				halfWidth = options.halfWidth,
 				halfHeight = options.halfHeight,
@@ -68,7 +64,7 @@
 
 		initTexture: function () {
 			var
-				gl = friGame.gl,
+				gl = fg.gl,
 				options = this.options,
 				img = options.img,
 				img_width = img.width,
@@ -98,9 +94,9 @@
 		}
 	});
 
-	friGame.Animation = function () {
+	fg.Animation = function () {
 		var
-			animation = Object.create(friGame.PrototypeWebGLAnimation)
+			animation = Object.create(fg.PWebGLAnimation)
 		;
 
 		animation.init.apply(animation, arguments);
@@ -114,9 +110,9 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.getShader = function (str, id) {
+	fg.getShader = function (str, id) {
 		var
-			gl = friGame.gl,
+			gl = fg.gl,
 			shader
 		;
 
@@ -136,9 +132,9 @@
 		return shader;
 	};
 
-	friGame.initShaders = function () {
+	fg.initShaders = function () {
         var
-			gl = friGame.gl,
+			gl = fg.gl,
 			fragmentShader,
 			vertexShader,
 			shaderProgram
@@ -148,7 +144,7 @@
 			return;
 		}
 
-        fragmentShader = friGame.getShader([
+        fragmentShader = fg.getShader([
 			'#ifdef GL_ES',
 			'precision highp float;',
 			'#endif',
@@ -162,7 +158,7 @@
 			'}'
 		].join('\n'), gl.FRAGMENT_SHADER);
 
-        vertexShader = friGame.getShader([
+        vertexShader = fg.getShader([
 			'attribute vec3 aVertexPosition;',
 			'attribute vec2 aTextureCoord;',
 
@@ -204,12 +200,12 @@
 		shaderProgram.uTextureSize = gl.getUniformLocation(shaderProgram, 'uTextureSize');
 		shaderProgram.uTextureOffset = gl.getUniformLocation(shaderProgram, 'uTextureOffset');
 
-		friGame.shaderProgram = shaderProgram;
+		fg.shaderProgram = shaderProgram;
 	};
 
-	friGame.initBuffers = function () {
+	fg.initBuffers = function () {
         var
-			gl = friGame.gl,
+			gl = fg.gl,
 			textureCoords,
 			textureCoordBuffer
 		;
@@ -231,25 +227,25 @@
 		textureCoordBuffer.itemSize = 2;
 		textureCoordBuffer.numItems = 4;
 
-		friGame.textureCoordBuffer = textureCoordBuffer;
+		fg.textureCoordBuffer = textureCoordBuffer;
 	};
 
-	friGame.mvPushMatrix = function () {
+	fg.mvPushMatrix = function () {
 		var
 			copy = mat4.create()
 		;
 
-		mat4.set(friGame.mvMatrix, copy);
-		friGame.mvMatrixStack.push(copy);
+		mat4.set(fg.mvMatrix, copy);
+		fg.mvMatrixStack.push(copy);
 	};
 
-	friGame.mvPopMatrix = function () {
+	fg.mvPopMatrix = function () {
 		var
-			mvMatrixStack = friGame.mvMatrixStack
+			mvMatrixStack = fg.mvMatrixStack
 		;
 
 		if (mvMatrixStack.length) {
-			friGame.mvMatrix = mvMatrixStack.pop();
+			fg.mvMatrix = mvMatrixStack.pop();
 		}
 	};
 
@@ -259,8 +255,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeWebGLSprite = Object.create(friGame.PrototypeSprite);
-	$.extend(friGame.PrototypeWebGLSprite, {
+	fg.PWebGLSprite = Object.create(fg.PSprite);
+	$.extend(fg.PWebGLSprite, {
 		draw: function () {
 			var
 				options = this.options,
@@ -272,16 +268,16 @@
 				flipv = options.flipv,
 				animation_options,
 				currentFrame = options.currentFrame,
-				gl = friGame.gl,
-				shaderProgram = friGame.shaderProgram,
-				mvMatrix = friGame.mvMatrix,
-				pMatrix = friGame.pMatrix
+				gl = fg.gl,
+				shaderProgram = fg.shaderProgram,
+				mvMatrix = fg.mvMatrix,
+				pMatrix = fg.pMatrix
 			;
 
 			if (animation && !options.hidden) {
 				animation_options = animation.options;
 
-				friGame.mvPushMatrix();
+				fg.mvPushMatrix();
 				mat4.translate(mvMatrix, [this.centerx, this.centery, 0]);
 				if (angle) {
 					mat4.rotate(mvMatrix, angle, [0, 0, 1]);
@@ -293,8 +289,8 @@
 				gl.bindBuffer(gl.ARRAY_BUFFER, animation.vertexPositionBuffer);
 				gl.vertexAttribPointer(shaderProgram.aVertexPosition, animation.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-				gl.bindBuffer(gl.ARRAY_BUFFER, friGame.textureCoordBuffer);
-				gl.vertexAttribPointer(shaderProgram.aTextureCoord, friGame.textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				gl.bindBuffer(gl.ARRAY_BUFFER, fg.textureCoordBuffer);
+				gl.vertexAttribPointer(shaderProgram.aTextureCoord, fg.textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 				gl.activeTexture(gl.TEXTURE0);
 				gl.bindTexture(gl.TEXTURE_2D, animation.texture);
@@ -312,14 +308,14 @@
 
 				gl.drawArrays(gl.TRIANGLE_STRIP, 0, animation.vertexPositionBuffer.numItems);
 
-				friGame.mvPopMatrix();
+				fg.mvPopMatrix();
 			}
 		}
 	});
 
-	friGame.Sprite = function () {
+	fg.Sprite = function () {
 		var
-			sprite = Object.create(friGame.PrototypeWebGLSprite)
+			sprite = Object.create(fg.PWebGLSprite)
 		;
 
 		sprite.init.apply(sprite, arguments);
@@ -333,8 +329,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeWebGLSpriteGroup = Object.create(friGame.PrototypeSpriteGroup);
-	$.extend(friGame.PrototypeWebGLSpriteGroup, {
+	fg.PWebGLSpriteGroup = Object.create(fg.PSpriteGroup);
+	$.extend(fg.PWebGLSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				gl,
@@ -343,7 +339,7 @@
 				height,
 				str_width,
 				str_height,
-				animations = friGame.animations,
+				animations = fg.animations,
 				len_animations = animations.length,
 				i,
 				mvMatrix = mat4.create(),
@@ -351,7 +347,7 @@
 				pMatrix = mat4.create()
 			;
 
-			friGame.PrototypeSpriteGroup.init.apply(this, arguments);
+			fg.PSpriteGroup.init.apply(this, arguments);
 
 			if (!parent) {
 				width = options.width;
@@ -384,17 +380,17 @@
 				}
 
 				if (gl) {
-					friGame.gl = gl;
-					friGame.initShaders();
-					friGame.initBuffers();
+					fg.gl = gl;
+					fg.initShaders();
+					fg.initBuffers();
 					for (i = 0; i < len_animations; i += 1) {
 						animations[i].initBuffers();
 						animations[i].initTexture();
 					}
 
-					friGame.mvMatrix = mvMatrix;
-					friGame.mvMatrixStack = mvMatrixStack;
-					friGame.pMatrix = pMatrix;
+					fg.mvMatrix = mvMatrix;
+					fg.mvMatrixStack = mvMatrixStack;
+					fg.pMatrix = pMatrix;
 
 					gl.clearColor(0, 0, 0, 0);
 					gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -414,7 +410,7 @@
 		// Public functions
 
 		remove: function () {
-			friGame.PrototypeSpriteGroup.remove.apply(this, arguments);
+			fg.PSpriteGroup.remove.apply(this, arguments);
 
 			if (this.dom) {
 				this.dom.remove();
@@ -429,8 +425,8 @@
 				left = this.left,
 				top = this.top,
 				hidden = options.hidden,
-				gl = friGame.gl,
-				mvMatrix = friGame.mvMatrix,
+				gl = fg.gl,
+				mvMatrix = fg.mvMatrix,
 				context_saved = false
 			;
 
@@ -441,30 +437,30 @@
 			if (this.layers.length && !hidden) {
 				if (left || top) {
 					if (!context_saved) {
-						friGame.mvPushMatrix();
+						fg.mvPushMatrix();
 						context_saved = true;
 					}
 
 					mat4.translate(mvMatrix, [left, top, 0]);
 				}
 
-				friGame.PrototypeSpriteGroup.draw.apply(this, arguments);
+				fg.PSpriteGroup.draw.apply(this, arguments);
 
 				if (context_saved) {
-					friGame.mvPopMatrix();
+					fg.mvPopMatrix();
 				}
 			}
 		}
 	});
 
-	friGame.SpriteGroup = function () {
+	fg.SpriteGroup = function () {
 		var
-			group = Object.create(friGame.PrototypeWebGLSpriteGroup)
+			group = Object.create(fg.PWebGLSpriteGroup)
 		;
 
 		group.init.apply(group, arguments);
 
 		return group;
 	};
-}(jQuery));
+}(jQuery, friGame));
 

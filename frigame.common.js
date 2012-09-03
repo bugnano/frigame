@@ -1,4 +1,4 @@
-/*global jQuery */
+/*global jQuery, friGame */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
@@ -54,14 +54,11 @@ if (!Date.now) {
 	};
 }
 
-(function ($) {
-	var
-		friGame = {}
-	;
+// The friGame namespace
+var friGame = {};
 
-	$.friGame = friGame;
-
-	$.extend(friGame, {
+(function ($, fg) {
+	$.extend(fg, {
 		// Public constants
 
 		// constants for the different type of an animation
@@ -75,7 +72,7 @@ if (!Date.now) {
 		refreshRate: 30
 	});
 
-	$.extend(friGame, {
+	$.extend(fg, {
 		// Public options
 		sprites: {},
 
@@ -94,7 +91,7 @@ if (!Date.now) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeRect = {
+	fg.PRect = {
 		init: function (options) {
 			// Set default options
 			$.extend(this, {
@@ -299,9 +296,9 @@ if (!Date.now) {
 		}
 	};
 
-	friGame.Rect = function () {
+	fg.Rect = function () {
 		var
-			rect = Object.create(friGame.PrototypeRect)
+			rect = Object.create(fg.PRect)
 		;
 
 		rect.init.apply(rect, arguments);
@@ -315,7 +312,7 @@ if (!Date.now) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeAnimation = {
+	fg.PAnimation = {
 		init: function (imageURL, options) {
 			var
 				my_options,
@@ -333,7 +330,7 @@ if (!Date.now) {
 			$.extend(my_options, {
 				// Public options
 				numberOfFrame: 1,
-				rate: friGame.refreshRate,
+				rate: fg.refreshRate,
 				type: 0,
 				offsetx: 0,
 				offsety: 0,
@@ -355,24 +352,24 @@ if (!Date.now) {
 
 			options = $.extend(my_options, options);
 
-			options.rate = Math.round(options.rate / friGame.refreshRate);
+			options.rate = Math.round(options.rate / fg.refreshRate);
 			if (options.rate === 0) {
 				options.rate = 1;
 			}
 
 			my_options.imageURL = imageURL;
 
-			if (friGame.images[imageURL]) {
-				img = friGame.images[imageURL];
+			if (fg.images[imageURL]) {
+				img = fg.images[imageURL];
 			} else {
 				img = new Image();
 				img.src = imageURL;
-				friGame.images[imageURL] = img;
+				fg.images[imageURL] = img;
 			}
 
 			my_options.img = img;
 
-			friGame.animations.push(this);
+			fg.animations.push(this);
 		},
 
 		// Public functions
@@ -394,7 +391,7 @@ if (!Date.now) {
 				round = Math.round
 			;
 
-			if (options.type & friGame.ANIMATION_HORIZONTAL) {
+			if (options.type & fg.ANIMATION_HORIZONTAL) {
 				// On horizontal animations the frameWidth parameter is optional
 				if (!options.frameWidth) {
 					options.frameWidth = round((img.width - options.offsetx) / options.numberOfFrame);
@@ -409,7 +406,7 @@ if (!Date.now) {
 				options.deltay = 0;
 				options.multix = 0;
 				options.multiy = options.frameHeight;
-			} else if (options.type & friGame.ANIMATION_VERTICAL) {
+			} else if (options.type & fg.ANIMATION_VERTICAL) {
 				// On multi vertical animations the frameWidth parameter is required
 				if (!options.frameWidth) {
 					options.frameWidth = img.width - options.offsetx;
@@ -447,19 +444,19 @@ if (!Date.now) {
 			options.halfWidth = round(options.frameWidth / 2);
 			options.halfHeight = round(options.frameHeight / 2);
 
-			if (options.type & friGame.ANIMATION_ONCE) {
+			if (options.type & fg.ANIMATION_ONCE) {
 				options.once = true;
 			}
 
-			if (options.type & friGame.ANIMATION_PINGPONG) {
+			if (options.type & fg.ANIMATION_PINGPONG) {
 				options.pingpong = true;
 			}
 		}
 	};
 
-	friGame.Animation = function () {
+	fg.Animation = function () {
 		var
-			animation = Object.create(friGame.PrototypeAnimation)
+			animation = Object.create(fg.PAnimation)
 		;
 
 		animation.init.apply(animation, arguments);
@@ -473,8 +470,8 @@ if (!Date.now) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeBaseSprite = Object.create(friGame.PrototypeRect);
-	$.extend(friGame.PrototypeBaseSprite, {
+	fg.PBaseSprite = Object.create(fg.PRect);
+	$.extend(fg.PBaseSprite, {
 		init: function (name, options, parent) {
 			var
 				my_options
@@ -507,14 +504,14 @@ if (!Date.now) {
 			// A public userData property can be useful to the game
 			this.userData = null;
 
-			friGame.sprites[name] = this;
+			fg.sprites[name] = this;
 
 			// name and parent are public read-only properties
 			this.name = name;
 			this.parent = parent;
 
-			// Call PrototypeRect.init after setting this.parent
-			friGame.PrototypeRect.init.call(this, options);
+			// Call PRect.init after setting this.parent
+			fg.PRect.init.call(this, options);
 		},
 
 		// Public functions
@@ -539,7 +536,7 @@ if (!Date.now) {
 				}
 			}
 
-			delete friGame.sprites[name];
+			delete fg.sprites[name];
 		},
 
 
@@ -643,8 +640,8 @@ if (!Date.now) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeSprite = Object.create(friGame.PrototypeBaseSprite);
-	$.extend(friGame.PrototypeSprite, {
+	fg.PSprite = Object.create(fg.PBaseSprite);
+	$.extend(fg.PSprite, {
 		init: function (name, options, parent) {
 			var
 				my_options,
@@ -673,7 +670,7 @@ if (!Date.now) {
 				multiy: 0
 			});
 
-			friGame.PrototypeBaseSprite.init.apply(this, arguments);
+			fg.PBaseSprite.init.apply(this, arguments);
 
 			// If the animation has not been defined, force
 			// the animation to null in order to resize and move
@@ -715,7 +712,7 @@ if (!Date.now) {
 				}
 
 				// Call the resize method with all the options in order to update the position
-				friGame.PrototypeBaseSprite.resize.call(this, new_options);
+				fg.PBaseSprite.resize.call(this, new_options);
 
 				// If the animation gets redefined, set default index of 0
 				if ((my_options.animationIndex !== 0) && (!index_redefined)) {
@@ -853,8 +850,8 @@ if (!Date.now) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	friGame.PrototypeSpriteGroup = Object.create(friGame.PrototypeBaseSprite);
-	$.extend(friGame.PrototypeSpriteGroup, {
+	fg.PSpriteGroup = Object.create(fg.PBaseSprite);
+	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				my_options
@@ -876,7 +873,7 @@ if (!Date.now) {
 
 			this.layers = [];
 
-			friGame.PrototypeBaseSprite.init.apply(this, arguments);
+			fg.PBaseSprite.init.apply(this, arguments);
 		},
 
 		// Public functions
@@ -890,7 +887,7 @@ if (!Date.now) {
 				layers[0].obj.remove();
 			}
 
-			friGame.PrototypeBaseSprite.remove.apply(this, arguments);
+			fg.PBaseSprite.remove.apply(this, arguments);
 		},
 
 
@@ -902,7 +899,7 @@ if (!Date.now) {
 			;
 
 			// Set the new options
-			friGame.PrototypeBaseSprite.resize.call(this, options);
+			fg.PBaseSprite.resize.call(this, options);
 
 			if (parent) {
 				// A width of 0 means the same width as the parent
@@ -918,7 +915,7 @@ if (!Date.now) {
 				}
 
 				if (set_new_options) {
-					friGame.PrototypeBaseSprite.resize.call(this, new_options);
+					fg.PBaseSprite.resize.call(this, new_options);
 				}
 			}
 
@@ -927,7 +924,7 @@ if (!Date.now) {
 
 		addSprite: function (name, options) {
 			var
-				sprite = friGame.Sprite(name, options, this)
+				sprite = fg.Sprite(name, options, this)
 			;
 
 			this.layers.push({name: name, obj: sprite});
@@ -937,7 +934,7 @@ if (!Date.now) {
 
 		addGroup: function (name, options) {
 			var
-				group = friGame.SpriteGroup(name, options, this)
+				group = fg.SpriteGroup(name, options, this)
 			;
 
 			this.layers.push({name: name, obj: group});
@@ -1012,12 +1009,12 @@ if (!Date.now) {
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	$.extend(friGame, {
+	$.extend(fg, {
 		// Public functions
 
 		playground: function (parentDOM) {
 			var
-				scenegraph = friGame.sprites.scenegraph,
+				scenegraph = fg.sprites.scenegraph,
 				dom
 			;
 
@@ -1028,7 +1025,7 @@ if (!Date.now) {
 					dom = $('#playground');
 				}
 
-				scenegraph = friGame.SpriteGroup('scenegraph', {width: dom.width(), height: dom.height(), parentDOM: dom}, null);
+				scenegraph = fg.SpriteGroup('scenegraph', {width: dom.width(), height: dom.height(), parentDOM: dom}, null);
 
 				// The scenegraph cannot be resized or moved
 				scenegraph.resize = null;
@@ -1040,28 +1037,28 @@ if (!Date.now) {
 
 		startGame: function (callback, rate) {
 			if (rate) {
-				friGame.refreshRate = rate;
+				fg.refreshRate = rate;
 			}
 
-			friGame.completeCallback = callback;
-			friGame.idPreload = setInterval(friGame.preload, 100);
+			fg.completeCallback = callback;
+			fg.idPreload = setInterval(fg.preload, 100);
 
 			return this;
 		},
 
 		stopGame: function () {
-			clearInterval(friGame.idRefresh);
+			clearInterval(fg.idRefresh);
 
 			return this;
 		},
 
 		registerCallback: function (callback, rate) {
-			rate = Math.round(rate / friGame.refreshRate);
+			rate = Math.round(rate / fg.refreshRate);
 			if (rate === 0) {
 				rate = 1;
 			}
 
-			friGame.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
+			fg.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
 
 			return this;
 		},
@@ -1070,7 +1067,7 @@ if (!Date.now) {
 
 		preload: function () {
 			var
-				animations = friGame.animations,
+				animations = fg.animations,
 				len_animations = animations.length,
 				completed = 0,
 				i
@@ -1082,51 +1079,51 @@ if (!Date.now) {
 				}
 			}
 
-			if (friGame.loadCallback) {
+			if (fg.loadCallback) {
 				if (len_animations !== 0) {
-					friGame.loadCallback(completed / len_animations);
+					fg.loadCallback(completed / len_animations);
 				} else {
-					friGame.loadCallback(1);
+					fg.loadCallback(1);
 				}
 			}
 
 			if (completed === len_animations) {
-				clearInterval(friGame.idPreload);
+				clearInterval(fg.idPreload);
 
 				for (i = 0; i < len_animations; i += 1) {
 					animations[i].onLoad();
 				}
 
-				if (friGame.loadCallback) {
-					delete friGame.loadCallback;
+				if (fg.loadCallback) {
+					delete fg.loadCallback;
 				}
 
-				if (friGame.completeCallback) {
-					friGame.completeCallback();
+				if (fg.completeCallback) {
+					fg.completeCallback();
 				}
 
-				friGame.idRefresh = setInterval(friGame.refresh, friGame.refreshRate);
+				fg.idRefresh = setInterval(fg.refresh, fg.refreshRate);
 			}
 		},
 
 		refresh: function () {
 			var
-				callbacks = friGame.callbacks,
+				callbacks = fg.callbacks,
 				len_callbacks = callbacks.length,
 				callback,
 				retval,
 				remove_callbacks = [],
 				len_remove_callbacks,
 				i,
-				scenegraph = friGame.sprites.scenegraph
+				scenegraph = fg.sprites.scenegraph
 			;
 
 			if (scenegraph) {
 				scenegraph.update();
 
-				if (friGame.drawDone) {
-					friGame.drawDone = false;
-					window.requestAnimFrame(friGame.draw);
+				if (fg.drawDone) {
+					fg.drawDone = false;
+					window.requestAnimFrame(fg.draw);
 				}
 			}
 
@@ -1135,7 +1132,7 @@ if (!Date.now) {
 				callback.idleCounter += 1;
 				if (callback.idleCounter >= callback.rate) {
 					callback.idleCounter = 0;
-					retval = callback.callback.call(friGame);
+					retval = callback.callback.call(fg);
 					if (retval) {
 						remove_callbacks.unshift(i);
 					}
@@ -1149,9 +1146,9 @@ if (!Date.now) {
 		},
 
 		draw: function () {
-			friGame.sprites.scenegraph.draw();
-			friGame.drawDone = true;
+			fg.sprites.scenegraph.draw();
+			fg.drawDone = true;
 		}
 	});
-}(jQuery));
+}(jQuery, friGame));
 

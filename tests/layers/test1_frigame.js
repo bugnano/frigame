@@ -1,11 +1,12 @@
 $(function () {
 	var
-		background = $.friGame.Animation('ruler.png'),
-		animation = $.friGame.Animation('sh.png', {type: $.friGame.ANIMATION_HORIZONTAL, numberOfFrame: 4, rate: 300})
+		fg = friGame,
+		background = fg.Animation('ruler.png'),
+		animation = fg.Animation('sh.png', {type: fg.ANIMATION_HORIZONTAL, numberOfFrame: 4, rate: 300})
 	;
 
-	$.friGame.startGame(function () {
-		$.friGame.playground()
+	fg.startGame(function () {
+		fg.playground()
 			.addGroup('background', {width: 1, height: 1})
 				.addSprite('ruler', {animation: background})
 			.end()

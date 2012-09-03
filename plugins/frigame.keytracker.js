@@ -1,4 +1,4 @@
-/*global jQuery */
+/*global jQuery, friGame */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
@@ -24,27 +24,23 @@
 // Uses ideas and APIs inspired by:
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
-(function ($) {
-	var
-		friGame = $.friGame
-	;
-
+(function ($, fg) {
 	// TO DO -- It would be useful to define some constants that map to the keyCode
 
-	friGame.keyTracker = {};
+	fg.keyTracker = {};
 
 	// keyTracker inside a registerCallback in order to have effect only after startGame
-	$.friGame.registerCallback(function () {
+	fg.registerCallback(function () {
 		$(document).keydown(function (e) {
-			friGame.keyTracker[e.which] = true;
+			fg.keyTracker[e.which] = true;
 		});
 
 		$(document).keyup(function (e) {
-			friGame.keyTracker[e.which] = false;
+			fg.keyTracker[e.which] = false;
 		});
 
 		// return true in order to stop the callback
 		return true;
 	}, 0);
-}(jQuery));
+}(jQuery, friGame));
 
