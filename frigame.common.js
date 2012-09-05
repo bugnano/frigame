@@ -78,12 +78,84 @@ var friGame = {};
 
 		// Implementation details
 
-		images: {},
-		animations: [],
 		callbacks: [],
 
 		drawDone: true
 	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	fg.resourceManager = {
+		// Public options
+
+		// Implementation details
+		idPreload: null,
+		images: {},
+		animations: [],
+		loadCallback: null,
+		startCallbacks: [],
+		completeCallback: null,
+
+		// Public functions
+
+		// Implementation details
+
+		preload: function () {
+			var
+				resourceManager = fg.resourceManager,
+				animations = resourceManager.animations,
+				len_animations = animations.length,
+				completed = 0,
+				loadCallback = resourceManager.loadCallback,
+				start_callbacks = resourceManager.startCallbacks,
+				len_start_callbacks = start_callbacks.length,
+				i
+			;
+
+			for (i = 0; i < len_animations; i += 1) {
+				if (animations[i].complete()) {
+					completed += 1;
+				}
+			}
+
+			if (loadCallback) {
+				if (len_animations !== 0) {
+					loadCallback(completed / len_animations);
+				} else {
+					loadCallback(1);
+				}
+			}
+
+			if (completed === len_animations) {
+				if (loadCallback) {
+					resourceManager.loadCallback = null;
+				}
+
+				clearInterval(resourceManager.idPreload);
+				resourceManager.idPreload = null;
+
+				for (i = 0; i < len_animations; i += 1) {
+					animations[i].onLoad();
+				}
+
+				for (i = 0; i < len_start_callbacks; i += 1) {
+					start_callbacks[i]();
+				}
+				start_callbacks.splice(0, len_start_callbacks);
+
+				if (resourceManager.completeCallback) {
+					resourceManager.completeCallback();
+					resourceManager.completeCallback = null;
+				}
+
+				fg.idRefresh = setInterval(fg.refresh, fg.refreshRate);
+			}
+		}
+	};
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -316,7 +388,8 @@ var friGame = {};
 		init: function (imageURL, options) {
 			var
 				my_options,
-				img
+				img,
+				resourceManager = fg.resourceManager
 			;
 
 			if (this.options) {
@@ -359,17 +432,17 @@ var friGame = {};
 
 			my_options.imageURL = imageURL;
 
-			if (fg.images[imageURL]) {
-				img = fg.images[imageURL];
+			if (resourceManager.images[imageURL]) {
+				img = resourceManager.images[imageURL];
 			} else {
 				img = new Image();
 				img.src = imageURL;
-				fg.images[imageURL] = img;
+				resourceManager.images[imageURL] = img;
 			}
 
 			my_options.img = img;
 
-			fg.animations.push(this);
+			resourceManager.animations.push(this);
 		},
 
 		// Public functions
@@ -383,6 +456,10 @@ var friGame = {};
 		},
 
 		// Implementation details
+
+		complete: function () {
+			return this.options.img.complete;
+		},
 
 		onLoad: function () {
 			var
@@ -1035,13 +1112,25 @@ var friGame = {};
 			return scenegraph;
 		},
 
+		loadCallback: function (callback) {
+			fg.resourceManager.loadCallback = callback;
+		},
+
+		startCallback: function (callback) {
+			fg.resourceManager.startCallbacks.push(callback);
+		},
+
 		startGame: function (callback, rate) {
+			var
+				resourceManager = fg.resourceManager
+			;
+
 			if (rate) {
 				fg.refreshRate = rate;
 			}
 
-			fg.completeCallback = callback;
-			fg.idPreload = setInterval(fg.preload, 100);
+			resourceManager.completeCallback = callback;
+			resourceManager.idPreload = setInterval(resourceManager.preload, 100);
 
 			return this;
 		},
@@ -1064,47 +1153,6 @@ var friGame = {};
 		},
 
 		// Implementation details
-
-		preload: function () {
-			var
-				animations = fg.animations,
-				len_animations = animations.length,
-				completed = 0,
-				i
-			;
-
-			for (i = 0; i < len_animations; i += 1) {
-				if (animations[i].options.img.complete) {
-					completed += 1;
-				}
-			}
-
-			if (fg.loadCallback) {
-				if (len_animations !== 0) {
-					fg.loadCallback(completed / len_animations);
-				} else {
-					fg.loadCallback(1);
-				}
-			}
-
-			if (completed === len_animations) {
-				clearInterval(fg.idPreload);
-
-				for (i = 0; i < len_animations; i += 1) {
-					animations[i].onLoad();
-				}
-
-				if (fg.loadCallback) {
-					delete fg.loadCallback;
-				}
-
-				if (fg.completeCallback) {
-					fg.completeCallback();
-				}
-
-				fg.idRefresh = setInterval(fg.refresh, fg.refreshRate);
-			}
-		},
 
 		refresh: function () {
 			var

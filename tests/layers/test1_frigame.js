@@ -11,9 +11,15 @@ $(function () {
 				.addSprite('ruler', {animation: background})
 			.end()
 			.addGroup('group1')
-				.addSprite('sprite1', {animation: animation, left: 48, top: 16})
+				.addSprite('sprite1', {animation: animation, left: 16, top: 32})
+				.addSprite('sprite2', {animation: animation, left: 112, top: 64})
 			.end()
 		;
+
+		fg.sprites.group1.move({left: 64, top: 128});
+		fg.sprites.group1.resize({width: fg.sprites.group1.width - 64, height: fg.sprites.group1.height - 128});
+		fg.sprites.sprite1.rotate((45 * Math.PI) / 180);
+		fg.sprites.sprite2.scale(2);
 	});
 });
 

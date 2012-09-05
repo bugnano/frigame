@@ -283,9 +283,9 @@
 		});
 
 		// this sets the id of the loading bar:
-		fg.loadCallback = function (percent) {
+		fg.loadCallback(function (percent) {
 			$('#loadingBar').width(400 * percent);
-		};
+		});
 
 		//initialize the start button
 		$('#startbutton').click(function () {
