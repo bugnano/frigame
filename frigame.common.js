@@ -74,6 +74,9 @@ var friGame = {};
 
 	$.extend(fg, {
 		// Public options
+
+		cssClass: 'friGame',
+
 		sprites: {},
 
 		// Implementation details

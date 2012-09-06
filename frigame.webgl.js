@@ -145,16 +145,14 @@
 		}
 
         fragmentShader = fg.getShader([
-			'#ifdef GL_ES',
-			'precision highp float;',
-			'#endif',
+			'precision mediump float;',
 
 			'varying vec2 vTextureCoord;',
 
 			'uniform sampler2D uSampler;',
 
 			'void main(void) {',
-			'	gl_FragColor = texture2D(uSampler, vTextureCoord);',
+				'gl_FragColor = texture2D(uSampler, vTextureCoord);',
 			'}'
 		].join('\n'), gl.FRAGMENT_SHADER);
 
@@ -171,8 +169,8 @@
 			'uniform vec2 uTextureSize;',
 
 			'void main(void) {',
-			'	gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);',
-			'	vTextureCoord = uTextureOffset + (uTextureSize * aTextureCoord);',
+				'gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);',
+				'vTextureCoord = uTextureOffset + (uTextureSize * aTextureCoord);',
 			'}'
 		].join('\n'), gl.VERTEX_SHADER);
 
@@ -262,10 +260,8 @@
 				options = this.options,
 				animation = options.animation,
 				angle = options.angle,
-				scalex = options.scalex,
-				scaley = options.scaley,
-				fliph = options.fliph,
-				flipv = options.flipv,
+				scaleh = options.scaleh,
+				scalev = options.scalev,
 				animation_options,
 				currentFrame = options.currentFrame,
 				gl = fg.gl,
@@ -278,12 +274,15 @@
 				animation_options = animation.options;
 
 				fg.mvPushMatrix();
+
 				mat4.translate(mvMatrix, [this.centerx, this.centery, 0]);
+
 				if (angle) {
 					mat4.rotate(mvMatrix, angle, [0, 0, 1]);
 				}
-				if ((scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
-					mat4.scale(mvMatrix, [fliph * scalex, flipv * scaley, 1]);
+
+				if ((scaleh !== 1) || (scalev !== 1)) {
+					mat4.scale(mvMatrix, [scaleh, scalev, 1]);
 				}
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, animation.vertexPositionBuffer);
@@ -339,7 +338,8 @@
 				height,
 				str_width,
 				str_height,
-				animations = fg.animations,
+				canvas,
+				animations = fg.resourceManager.animations,
 				len_animations = animations.length,
 				i,
 				mvMatrix = mat4.create(),
@@ -356,30 +356,28 @@
 				str_height = String(height);
 
 				dom = $(['<canvas id="', name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).appendTo(options.parentDOM);
+				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 				dom.css({
-					'position': 'absolute',
 					'left': '0px',
 					'top': '0px',
 					'width': [str_width, 'px'].join(''),
 					'height': [str_height, 'px'].join(''),
-					'margin': '0px',
-					'padding': '0px',
-					'border': 'none',
-					'outline': 'none',
-					'background': 'none',
 					'overflow': 'hidden'
 				});
 
 				this.dom = dom;
 
 				try {
-					gl = document.getElementById(name).getContext('experimental-webgl');
-					gl.viewportWidth = width;
-					gl.viewportHeight = height;
+					// Try to grab the standard context. If it fails, fallback to experimental.
+					canvas = dom.get(0);
+					gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 				} catch (e) {
 				}
 
 				if (gl) {
+					gl.viewportWidth = width;
+					gl.viewportHeight = height;
+
 					fg.gl = gl;
 					fg.initShaders();
 					fg.initBuffers();
@@ -422,12 +420,12 @@
 		draw: function () {
 			var
 				options = this.options,
-				left = this.left,
-				top = this.top,
+				angle = options.angle,
+				scaleh = options.scaleh,
+				scalev = options.scalev,
 				hidden = options.hidden,
 				gl = fg.gl,
-				mvMatrix = fg.mvMatrix,
-				context_saved = false
+				mvMatrix = fg.mvMatrix
 			;
 
 			if (!this.parent) {
@@ -435,20 +433,23 @@
 			}
 
 			if (this.layers.length && !hidden) {
-				if (left || top) {
-					if (!context_saved) {
-						fg.mvPushMatrix();
-						context_saved = true;
-					}
+				fg.mvPushMatrix();
 
-					mat4.translate(mvMatrix, [left, top, 0]);
+				mat4.translate(mvMatrix, [this.centerx, this.centery, 0]);
+
+				if (angle) {
+					mat4.rotate(mvMatrix, angle, [0, 0, 1]);
 				}
+
+				if ((scaleh !== 1) || (scalev !== 1)) {
+					mat4.scale(mvMatrix, [scaleh, scalev, 1]);
+				}
+
+				mat4.translate(mvMatrix, [-this.halfWidth, -this.halfHeight, 0]);
 
 				fg.PSpriteGroup.draw.apply(this, arguments);
 
-				if (context_saved) {
-					fg.mvPopMatrix();
-				}
+				fg.mvPopMatrix();
 			}
 		}
 	});

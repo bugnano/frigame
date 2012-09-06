@@ -40,10 +40,8 @@
 				options = this.options,
 				animation = options.animation,
 				angle = options.angle,
-				scalex = options.scalex,
-				scaley = options.scaley,
-				fliph = options.fliph,
-				flipv = options.flipv,
+				scaleh = options.scaleh,
+				scalev = options.scalev,
 				animation_options,
 				width = this.width,
 				height = this.height,
@@ -62,8 +60,8 @@
 					ctx.rotate(angle);
 				}
 
-				if ((scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
-					ctx.scale(fliph * scalex, flipv * scaley);
+				if ((scaleh !== 1) || (scalev !== 1)) {
+					ctx.scale(scaleh, scalev);
 				}
 
 				fg.safeDrawImage(
@@ -116,23 +114,18 @@
 				height = String(options.height);
 
 				dom = $(['<canvas id="', name, '" width ="', width, '" height="', height, '"></canvas>'].join('')).appendTo(options.parentDOM);
+				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 				dom.css({
-					'position': 'absolute',
 					'left': '0px',
 					'top': '0px',
 					'width': [width, 'px'].join(''),
 					'height': [height, 'px'].join(''),
-					'margin': '0px',
-					'padding': '0px',
-					'border': 'none',
-					'outline': 'none',
-					'background': 'none',
 					'overflow': 'hidden'
 				});
 
 				this.dom = dom;
 
-				fg.ctx = document.getElementById(name).getContext('2d');
+				fg.ctx = dom.get(0).getContext('2d');
 			}
 		},
 
@@ -151,11 +144,11 @@
 		draw: function () {
 			var
 				options = this.options,
-				left = this.left,
-				top = this.top,
+				angle = options.angle,
+				scaleh = options.scaleh,
+				scalev = options.scalev,
 				hidden = options.hidden,
-				ctx = fg.ctx,
-				context_saved = false
+				ctx = fg.ctx
 			;
 
 			if (!this.parent) {
@@ -163,20 +156,23 @@
 			}
 
 			if (this.layers.length && !hidden) {
-				if (left || top) {
-					if (!context_saved) {
-						ctx.save();
-						context_saved = true;
-					}
+				ctx.save();
 
-					ctx.translate(left, top);
+				ctx.translate(this.centerx, this.centery);
+
+				if (angle) {
+					ctx.rotate(angle);
 				}
+
+				if ((scaleh !== 1) || (scalev !== 1)) {
+					ctx.scale(scaleh, scalev);
+				}
+
+				ctx.translate(-this.halfWidth, -this.halfHeight);
 
 				fg.PSpriteGroup.draw.apply(this, arguments);
 
-				if (context_saved) {
-					ctx.restore();
-				}
+				ctx.restore();
 			}
 		}
 	});

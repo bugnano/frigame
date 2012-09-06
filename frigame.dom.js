@@ -188,15 +188,7 @@
 
 				if (!dom) {
 					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
-
-					dom.css({
-						'position': 'absolute',
-						'margin': '0px',
-						'padding': '0px',
-						'border': 'none',
-						'outline': 'none',
-						'background': 'none'	// Reset background properties set by external CSS
-					});
+					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					this.dom = dom;
 				}
@@ -293,7 +285,10 @@
 					}
 
 					if ((!animation) && (animation !== old_options.animation)) {
-						dom.css('background', 'none');
+						dom.css({
+							'background-image': '',
+							'background-position': ''
+						});
 						old_options.animation = animation;
 					}
 				}
@@ -358,9 +353,10 @@
 				top,
 				width,
 				height,
-				overflow,
 				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom)
 			;
+
+			dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 			left = this.left;
 			top = this.top;
@@ -371,25 +367,16 @@
 			old_options.width = width;
 			old_options.height = height;
 
-			if (!this.parent) {
-				overflow = 'hidden';
-			} else {
-				overflow = 'visible';
-			}
-
 			dom.css({
-				'position': 'absolute',
 				'left': [String(left), 'px'].join(''),
 				'top': [String(top), 'px'].join(''),
 				'width': [String(width), 'px'].join(''),
-				'height': [String(height), 'px'].join(''),
-				'margin': '0px',
-				'padding': '0px',
-				'border': 'none',
-				'outline': 'none',
-				'background': 'none',
-				'overflow': overflow
+				'height': [String(height), 'px'].join('')
 			});
+
+			if (!this.parent) {
+				dom.css('overflow', 'hidden');
+			}
 
 			this.dom = dom;
 
@@ -405,9 +392,16 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
+				angle = options.angle,
+				scaleh = options.scaleh,
+				scalev = options.scalev,
 				hidden = options.hidden,
 				css_options = {},
-				update_css = false
+				update_css = false,
+				support = fg.support,
+				transformFunction = support.transformFunction,
+				ieFilter = support.ieFilter,
+				apply_ie_filters = false
 			;
 
 			if (this.layers.length && !hidden) {
@@ -421,14 +415,14 @@
 				}
 
 				if (left !== old_options.left) {
-					css_options.left = [String(left), 'px'].join('');
+					css_options.left = [String(left - options.posOffsetX), 'px'].join('');
 					update_css = true;
 
 					old_options.left = left;
 				}
 
 				if (top !== old_options.top) {
-					css_options.top = [String(top), 'px'].join('');
+					css_options.top = [String(top - options.posOffsetY), 'px'].join('');
 					update_css = true;
 
 					old_options.top = top;
@@ -438,18 +432,59 @@
 					css_options.width = [String(width), 'px'].join('');
 					update_css = true;
 
-					old_options.width = top;
+					if (ieFilter) {
+						if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+							// For transformed objects force the update of the ie filters in order
+							// to have the position adjusted according to the transformed width and height
+							apply_ie_filters = true;
+						}
+					}
+
+					old_options.width = width;
 				}
 
 				if (height !== old_options.height) {
 					css_options.height = [String(height), 'px'].join('');
 					update_css = true;
 
-					old_options.width = top;
+					if (ieFilter) {
+						if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+							// For transformed objects force the update of the ie filters in order
+							// to have the position adjusted according to the transformed width and height
+							apply_ie_filters = true;
+						}
+					}
+
+					old_options.width = height;
+				}
+
+				if	(
+						(angle !== old_options.angle)
+					||	(scaleh !== old_options.scaleh)
+					||	(scalev !== old_options.scalev)
+					) {
+					if (transformFunction) {
+						css_options[transformFunction] = this.transform();
+						update_css = true;
+					} else if (ieFilter) {
+						this.ieTransform();
+						update_css = true;
+						apply_ie_filters = true;
+					} else {
+						$.noop();	// Transforms not supported
+					}
+
+					old_options.angle = angle;
+					old_options.scaleh = scaleh;
+					old_options.scalev = scalev;
 				}
 
 				if (update_css) {
 					dom.css(css_options);
+				}
+
+				if (ieFilter && apply_ie_filters) {
+					this.applyIeFilters();
 				}
 
 				fg.PSpriteGroup.draw.apply(this, arguments);
