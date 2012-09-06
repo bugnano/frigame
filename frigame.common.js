@@ -573,6 +573,9 @@ var friGame = {};
 				flipv: 1,
 				hidden: false,
 
+				scaleh: 1,
+				scalev: 1,
+
 				// ieFilter specific
 				posOffsetX: 0,
 				posOffsetY: 0
@@ -628,65 +631,94 @@ var friGame = {};
 		},
 
 		scale: function (sx, sy) {
+			var
+				options = this.options
+			;
+
 			if (sx === undefined) {
-				return this.options.scalex;
+				return options.scalex;
 			}
 
-			this.options.scalex = sx;
+			options.scalex = sx;
+			options.scaleh = sx * options.fliph;
 
 			if (sy === undefined) {
 				// If sy isn't specified, it is assumed to be equal to sx.
-				this.options.scaley = sx;
+				options.scaley = sx;
+				options.scalev = sx * options.flipv;
 			} else {
-				this.options.scaley = sy;
+				options.scaley = sy;
+				options.scalev = sy * options.flipv;
 			}
 
 			return this;
 		},
 
 		scalex: function (sx) {
+			var
+				options = this.options
+			;
+
 			if (sx === undefined) {
-				return this.options.scalex;
+				return options.scalex;
 			}
 
-			this.options.scalex = sx;
+			options.scalex = sx;
+			options.scaleh = sx * options.fliph;
 
 			return this;
 		},
 
 		scaley: function (sy) {
+			var
+				options = this.options
+			;
+
 			if (sy === undefined) {
-				return this.options.scaley;
+				return options.scaley;
 			}
 
-			this.options.scaley = sy;
+			options.scaley = sy;
+			options.scalev = sy * options.flipv;
 
 			return this;
 		},
 
 		fliph: function (flip) {
+			var
+				options = this.options
+			;
+
 			if (flip === undefined) {
-				return (this.options.fliph < 0);
+				return (options.fliph < 0);
 			}
 
 			if (flip) {
-				this.options.fliph = -1;
+				options.fliph = -1;
+				options.scaleh = -(options.scalex);
 			} else {
-				this.options.fliph = 1;
+				options.fliph = 1;
+				options.scaleh = options.scalex;
 			}
 
 			return this;
 		},
 
 		flipv: function (flip) {
+			var
+				options = this.options
+			;
+
 			if (flip === undefined) {
-				return (this.options.flipv < 0);
+				return (options.flipv < 0);
 			}
 
 			if (flip) {
-				this.options.flipv = -1;
+				options.flipv = -1;
+				options.scalev = -(options.scaley);
 			} else {
-				this.options.flipv = 1;
+				options.flipv = 1;
+				options.scalev = options.scaley;
 			}
 
 			return this;

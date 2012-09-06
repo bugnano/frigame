@@ -1,4 +1,4 @@
-/*global jQuery, friGame */
+/*global Modernizr, btoa, jQuery, friGame */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
@@ -31,6 +31,113 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
+	fg.support = {
+		ieFilter: false,
+		transformFunction: '',
+		opacity: Modernizr.opacity,
+		rgba: Modernizr.rgba,
+		svg: Modernizr.svg
+	};
+
+	if (Modernizr.csstransforms) {
+		fg.support.transformFunction = Modernizr.prefixed('transform');
+	}
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	$.extend(fg.PBaseSprite, {
+		// Implementation details
+
+		transform: function () {
+			var
+				options = this.options,
+				angle = options.angle,
+				scaleh = options.scaleh,
+				scalev = options.scalev,
+				transform = []
+			;
+
+			if (angle) {
+				transform.push.apply(transform, ['rotate(', String(angle), 'rad)']);
+			}
+
+			if ((scaleh !== 1) || (scalev !== 1)) {
+				transform.push.apply(transform, ['scale(', String(scaleh), ',', String(scalev), ')']);
+			}
+
+			return transform.join('');
+		},
+
+		ieFilters: {
+			matrix: '',
+			alpha: '',
+			gradient: ''
+		},
+
+		ieTransform: function () {
+			var
+				options = this.options,
+				angle = options.angle,
+				scaleh = options.scaleh,
+				scalev = options.scalev,
+				cos,
+				sin,
+				filter
+			;
+
+			// Apply the transformation matrix
+			if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+				cos = Math.cos(angle);
+				sin = Math.sin(angle);
+				filter = [
+					'progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * scaleh),
+					',M12=', String(-sin * scalev),
+					',M21=', String(sin * scaleh),
+					',M22=', String(cos * scalev),
+					',SizingMethod="auto expand",FilterType="nearest neighbor")'
+				].join('');
+			} else {
+				filter = '';
+			}
+
+			this.ieFilters.matrix = filter;
+		},
+
+		applyIeFilters: function () {
+			var
+				dom = this.dom,
+				options = this.options,
+				filters = this.ieFilters,
+				newWidth,
+				newHeight,
+				round = Math.round
+			;
+
+			// Step 1: Apply the filters
+			dom.css('filter', [filters.matrix, filters.alpha, filters.gradient].join(''));
+
+			// Step 2: Adjust the element position according to the new width and height
+			newWidth = dom.width();
+			newHeight = dom.height();
+			options.posOffsetX = round((newWidth - this.width) / 2);
+			options.posOffsetY = round((newHeight - this.height) / 2);
+			dom.css({
+				'left': [String(this.left - options.posOffsetX), 'px'].join(''),
+				'top': [String(this.top - options.posOffsetY), 'px'].join('')
+			});
+		}
+	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
 	fg.PDOMSprite = Object.create(fg.PSprite);
 	$.extend(fg.PDOMSprite, {
 		init: function (name, options, parent) {
@@ -51,85 +158,6 @@
 
 		// Implementation details
 
-		transform: function () {
-			var
-				dom = this.dom,
-				options = this.options,
-				transformFunction = fg.transformFunction,
-				angle = options.angle,
-				scalex = options.scalex,
-				scaley = options.scaley,
-				fliph = options.fliph,
-				flipv = options.flipv,
-				transform = []
-			;
-
-			if (transformFunction) {
-				if (angle) {
-					transform.push.apply(transform, ['rotate(', String(angle), 'rad)']);
-				}
-
-				if ((scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
-					transform.push.apply(transform, ['scale(', String(fliph * scalex), ',', String(flipv * scaley), ')']);
-				}
-
-				dom.css(transformFunction, transform.join(''));
-			} else if (fg.filterFunction) {
-				this.ieFilter();
-			} else {
-				$.noop();
-			}
-
-			return this;
-		},
-
-		ieFilter: function () {
-			var
-				dom = this.dom,
-				options = this.options,
-				animation = options.animation,
-				animation_options = animation.options,
-				angle = options.angle,
-				scalex = options.scalex,
-				scaley = options.scaley,
-				fliph = options.fliph,
-				flipv = options.flipv,
-				cos,
-				sin,
-				filter,
-				newWidth,
-				newHeight,
-				round = Math.round
-			;
-
-			// Step 1: Apply the transformation matrix
-			if ((angle) || (scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
-				cos = Math.cos(angle);
-				sin = Math.sin(angle);
-				filter = [
-					'progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * fliph * scalex),
-					',M12=', String(-sin * flipv * scaley),
-					',M21=', String(sin * fliph * scalex),
-					',M22=', String(cos * flipv * scaley),
-					',SizingMethod="auto expand",FilterType="nearest neighbor")'
-				].join('');
-			} else {
-				filter = '';
-			}
-
-			dom.css(fg.filterFunction, filter);
-
-			// Step 2: Adjust the element position according to the new width and height
-			newWidth = dom.width();
-			newHeight = dom.height();
-			options.posOffsetX = round((newWidth - this.width) / 2);
-			options.posOffsetY = round((newHeight - this.height) / 2);
-			dom.css({
-				'left': [String(this.left - options.posOffsetX), 'px'].join(''),
-				'top': [String(this.top - options.posOffsetY), 'px'].join('')
-			});
-		},
-
 		draw: function () {
 			var
 				options = this.options,
@@ -143,15 +171,16 @@
 				multix = options.multix,
 				multiy = options.multiy,
 				angle = options.angle,
-				scalex = options.scalex,
-				scaley = options.scaley,
-				fliph = options.fliph,
-				flipv = options.flipv,
+				scaleh = options.scaleh,
+				scalev = options.scalev,
 				hidden = options.hidden,
 				css_options = {},
 				update_css = false,
 				update_position = false,
-				update_transform = false
+				support = fg.support,
+				transformFunction = support.transformFunction,
+				ieFilter = support.ieFilter,
+				apply_ie_filters = false
 			;
 
 			if (animation && !hidden) {
@@ -200,8 +229,12 @@
 					update_css = true;
 					update_position = true;
 
-					if ((angle) || (scalex !== 1) || (scaley !== 1) || (fliph !== 1) || (flipv !== 1)) {
-						update_transform = true;
+					if (ieFilter) {
+						if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+							// For transformed objects force the update of the ie filters in order
+							// to have the position adjusted according to the transformed width and height
+							apply_ie_filters = true;
+						}
 					}
 
 					old_options.animation = animation;
@@ -224,25 +257,33 @@
 					update_css = true;
 				}
 
+				if	(
+						(angle !== old_options.angle)
+					||	(scaleh !== old_options.scaleh)
+					||	(scalev !== old_options.scalev)
+					) {
+					if (transformFunction) {
+						css_options[transformFunction] = this.transform();
+						update_css = true;
+					} else if (ieFilter) {
+						this.ieTransform();
+						update_css = true;
+						apply_ie_filters = true;
+					} else {
+						$.noop();	// Transforms not supported
+					}
+
+					old_options.angle = angle;
+					old_options.scaleh = scaleh;
+					old_options.scalev = scalev;
+				}
+
 				if (update_css) {
 					dom.css(css_options);
 				}
 
-				if	(
-						update_transform
-					||	(angle !== old_options.angle)
-					||	(scalex !== old_options.scalex)
-					||	(scaley !== old_options.scaley)
-					||	(fliph !== old_options.fliph)
-					||	(flipv !== old_options.flipv)
-					) {
-					this.transform();
-
-					old_options.angle = angle;
-					old_options.scalex = scalex;
-					old_options.scaley = scaley;
-					old_options.fliph = fliph;
-					old_options.flipv = flipv;
+				if (ieFilter && apply_ie_filters) {
+					this.applyIeFilters();
 				}
 			} else {
 				if (dom) {
@@ -289,21 +330,10 @@
 
 			if (!parent) {
 				dom = this.makeDOM(name, options.parentDOM);
-
-				if (dom.css('-moz-transform')) {
-					fg.transformFunction = '-moz-transform';
-				} else if (dom.css('-o-transform')) {
-					fg.transformFunction = '-o-transform';
-				} else if ((dom.css('msTransform') !== null) && (dom.css('msTransform') !== undefined)) {
-					fg.transformFunction = 'msTransform';
-				} else if ((dom.css('transform') !== null) && (dom.css('transform') !== undefined)) {
-					fg.transformFunction = 'transform';
-				} else if ((dom.css('-webkit-transform') !== null) && (dom.css('-webkit-transform') !== undefined)) {
-					fg.transformFunction = '-webkit-transform';
-				} else if (dom.css('filter') !== undefined) {
-					fg.filterFunction = 'filter';
+				if (dom.get(0).filters) {
+					fg.support.ieFilter = true;
 				} else {
-					$.noop();
+					fg.support.ieFilter = false;
 				}
 			}
 		},
