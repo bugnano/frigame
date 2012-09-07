@@ -72,12 +72,6 @@
 			return transform.join('');
 		},
 
-		ieFilters: {
-			matrix: '',
-			alpha: '',
-			gradient: ''
-		},
-
 		ieTransform: function () {
 			var
 				options = this.options,
@@ -160,6 +154,7 @@
 			fg.PSprite.init.apply(this, arguments);
 
 			this.old_options = {};
+
 		},
 
 		// Public functions
@@ -208,6 +203,14 @@
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					this.dom = dom;
+
+					if (ieFilter) {
+						this.ieFilters = {
+							matrix: '',
+							alpha: '',
+							gradient: ''
+						};
+					}
 				}
 
 				if (hidden !== old_options.hidden) {
@@ -374,6 +377,11 @@
 
 				if (dom.get(0).filters) {
 					fg.support.ieFilter = true;
+					this.ieFilters = {
+						matrix: '',
+						alpha: '',
+						gradient: ''
+					};
 				} else {
 					fg.support.ieFilter = false;
 				}
@@ -420,6 +428,14 @@
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					this.dom = dom;
+
+					if (ieFilter) {
+						this.ieFilters = {
+							matrix: '',
+							alpha: '',
+							gradient: ''
+						};
+					}
 				}
 
 				if (hidden !== old_options.hidden) {
