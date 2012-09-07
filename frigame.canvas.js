@@ -42,6 +42,8 @@
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
+				alpha = options.alpha,
+				old_alpha,
 				animation_options,
 				width = this.width,
 				height = this.height,
@@ -64,6 +66,12 @@
 					ctx.scale(scaleh, scalev);
 				}
 
+				old_alpha = fg.globalAlpha;
+				if (alpha !== 1) {
+					fg.globalAlpha *= alpha;
+					ctx.globalAlpha = fg.globalAlpha;
+				}
+
 				fg.safeDrawImage(
 					ctx,
 					animation_options.img,
@@ -78,6 +86,8 @@
 				);
 
 				ctx.restore();
+
+				fg.globalAlpha = old_alpha;
 			}
 		}
 	});
@@ -113,7 +123,7 @@
 				width = String(options.width);
 				height = String(options.height);
 
-				dom = $(['<canvas id="', name, '" width ="', width, '" height="', height, '"></canvas>'].join('')).appendTo(options.parentDOM);
+				dom = $(['<canvas id="', name, '" width ="', width, '" height="', height, '"></canvas>'].join('')).prependTo(options.parentDOM);
 				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 				dom.css({
 					'left': '0px',
@@ -144,35 +154,70 @@
 		draw: function () {
 			var
 				options = this.options,
+				left = this.left,
+				top = this.top,
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
-				hidden = options.hidden,
+				alpha = options.alpha,
+				old_alpha,
+				alpha_changed,
+				context_saved,
 				ctx = fg.ctx
 			;
 
 			if (!this.parent) {
 				fg.ctx.clearRect(0, 0, this.width, this.height);
+				fg.globalAlpha = 1;
 			}
 
-			if (this.layers.length && !hidden) {
-				ctx.save();
+			if (this.layers.length && !options.hidden) {
+				if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+					ctx.save();
+					context_saved = true;
 
-				ctx.translate(this.centerx, this.centery);
+					ctx.translate(this.centerx, this.centery);
 
-				if (angle) {
-					ctx.rotate(angle);
+					if (angle) {
+						ctx.rotate(angle);
+					}
+
+					if ((scaleh !== 1) || (scalev !== 1)) {
+						ctx.scale(scaleh, scalev);
+					}
+
+					ctx.translate(-this.halfWidth, -this.halfHeight);
+				} else if (left || top) {
+					ctx.save();
+					context_saved = true;
+
+					ctx.translate(left, top);
+				} else {
+					context_saved = false;
 				}
 
-				if ((scaleh !== 1) || (scalev !== 1)) {
-					ctx.scale(scaleh, scalev);
+				old_alpha = fg.globalAlpha;
+				if (alpha !== 1) {
+					// Don't save the entire context only for alpha changes
+					fg.globalAlpha *= alpha;
+					ctx.globalAlpha = fg.globalAlpha;
+					alpha_changed = true;
+				} else {
+					alpha_changed = false;
 				}
-
-				ctx.translate(-this.halfWidth, -this.halfHeight);
 
 				fg.PSpriteGroup.draw.apply(this, arguments);
 
-				ctx.restore();
+				if (context_saved) {
+					// ctx.restore restores also the globalAlpha value
+					ctx.restore();
+				} else {
+					if (alpha_changed) {
+						ctx.globalAlpha = old_alpha;
+					}
+				}
+
+				fg.globalAlpha = old_alpha;
 			}
 		}
 	});

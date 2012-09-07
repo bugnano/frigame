@@ -107,6 +107,22 @@
 			this.ieFilters.matrix = filter;
 		},
 
+		ieAlpha: function () {
+			var
+				alpha = this.options.alpha,
+				filter
+			;
+
+			// Apply the transformation matrix
+			if (alpha !== 1) {
+				filter = ['progid:DXImageTransform.Microsoft.Alpha(opacity=', String(Math.round(alpha * 100)), ')'].join('');
+			} else {
+				filter = '';
+			}
+
+			this.ieFilters.alpha = filter;
+		},
+
 		applyIeFilters: function () {
 			var
 				dom = this.dom,
@@ -173,6 +189,7 @@
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
+				alpha = options.alpha,
 				hidden = options.hidden,
 				css_options = {},
 				update_css = false,
@@ -270,6 +287,25 @@
 					old_options.scalev = scalev;
 				}
 
+				if (alpha !== old_options.alpha) {
+					if (support.opacity) {
+						if (alpha !== 1) {
+							css_options.opacity = String(alpha);
+						} else {
+							css_options.opacity = '';
+						}
+						update_css = true;
+					} else if (ieFilter) {
+						this.ieAlpha();
+						update_css = true;
+						apply_ie_filters = true;
+					} else {
+						$.noop();	// Opacity not supported
+					}
+
+					old_options.alpha = alpha;
+				}
+
 				if (update_css) {
 					dom.css(css_options);
 				}
@@ -324,7 +360,18 @@
 			this.old_options = {};
 
 			if (!parent) {
-				dom = this.makeDOM(name, options.parentDOM);
+				dom = $(['<div id="', name, '"></div>'].join('')).prependTo(options.parentDOM);
+				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
+				dom.css({
+					'left': '0px',
+					'top': '0px',
+					'width': [String(options.width), 'px'].join(''),
+					'height': [String(options.height), 'px'].join(''),
+					'overflow': 'hidden'
+				});
+
+				this.dom = dom;
+
 				if (dom.get(0).filters) {
 					fg.support.ieFilter = true;
 				} else {
@@ -345,44 +392,6 @@
 
 		// Implementation details
 
-		makeDOM: function (name, parent_dom) {
-			var
-				options = this.options,
-				old_options = this.old_options,
-				left,
-				top,
-				width,
-				height,
-				dom = $(['<div id="', name, '"></div>'].join('')).appendTo(parent_dom)
-			;
-
-			dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
-
-			left = this.left;
-			top = this.top;
-			width = this.width;
-			height = this.height;
-			old_options.left = left;
-			old_options.top = top;
-			old_options.width = width;
-			old_options.height = height;
-
-			dom.css({
-				'left': [String(left), 'px'].join(''),
-				'top': [String(top), 'px'].join(''),
-				'width': [String(width), 'px'].join(''),
-				'height': [String(height), 'px'].join('')
-			});
-
-			if (!this.parent) {
-				dom.css('overflow', 'hidden');
-			}
-
-			this.dom = dom;
-
-			return dom;
-		},
-
 		draw: function () {
 			var
 				options = this.options,
@@ -395,6 +404,7 @@
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
+				alpha = options.alpha,
 				hidden = options.hidden,
 				css_options = {},
 				update_css = false,
@@ -406,7 +416,10 @@
 
 			if (this.layers.length && !hidden) {
 				if (!this.dom) {
-					dom = this.makeDOM(this.name, this.parent.dom);
+					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
+					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
+
+					this.dom = dom;
 				}
 
 				if (hidden !== old_options.hidden) {
@@ -477,6 +490,25 @@
 					old_options.angle = angle;
 					old_options.scaleh = scaleh;
 					old_options.scalev = scalev;
+				}
+
+				if (alpha !== old_options.alpha) {
+					if (support.opacity) {
+						if (alpha !== 1) {
+							css_options.opacity = String(alpha);
+						} else {
+							css_options.opacity = '';
+						}
+						update_css = true;
+					} else if (ieFilter) {
+						this.ieAlpha();
+						update_css = true;
+						apply_ie_filters = true;
+					} else {
+						$.noop();	// Opacity not supported
+					}
+
+					old_options.alpha = alpha;
 				}
 
 				if (update_css) {

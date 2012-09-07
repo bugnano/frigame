@@ -574,6 +574,7 @@ var friGame = {};
 				scaley: 1,
 				fliph: 1,
 				flipv: 1,
+				alpha: 1,
 				hidden: false,
 
 				scaleh: 1,
@@ -723,6 +724,16 @@ var friGame = {};
 				options.flipv = 1;
 				options.scalev = options.scaley;
 			}
+
+			return this;
+		},
+
+		opacity: function (alpha) {
+			if (alpha === undefined) {
+				return this.options.alpha;
+			}
+
+			this.options.alpha = alpha;
 
 			return this;
 		},

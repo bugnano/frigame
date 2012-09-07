@@ -31,8 +31,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PWebGLAnimation = Object.create(fg.PAnimation);
-	$.extend(fg.PWebGLAnimation, {
+	$.extend(fg.PAnimation, {
 		initBuffers: function () {
 			var
 				gl = fg.gl,
@@ -94,16 +93,6 @@
 		}
 	});
 
-	fg.Animation = function () {
-		var
-			animation = Object.create(fg.PWebGLAnimation)
-		;
-
-		animation.init.apply(animation, arguments);
-
-		return animation;
-	};
-
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -149,10 +138,13 @@
 
 			'varying vec2 vTextureCoord;',
 
+			'uniform float uAlpha;',
+
 			'uniform sampler2D uSampler;',
 
 			'void main(void) {',
-				'gl_FragColor = texture2D(uSampler, vTextureCoord);',
+				'vec4 textureColor = texture2D(uSampler, vTextureCoord);',
+				'gl_FragColor = vec4(textureColor.rgb, textureColor.a * uAlpha);',
 			'}'
 		].join('\n'), gl.FRAGMENT_SHADER);
 
@@ -197,6 +189,8 @@
 
 		shaderProgram.uTextureSize = gl.getUniformLocation(shaderProgram, 'uTextureSize');
 		shaderProgram.uTextureOffset = gl.getUniformLocation(shaderProgram, 'uTextureOffset');
+
+		shaderProgram.alphaUniform = gl.getUniformLocation(shaderProgram, 'uAlpha');
 
 		fg.shaderProgram = shaderProgram;
 	};
@@ -262,6 +256,8 @@
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
+				alpha = options.alpha,
+				old_alpha,
 				animation_options,
 				currentFrame = options.currentFrame,
 				gl = fg.gl,
@@ -285,6 +281,9 @@
 					mat4.scale(mvMatrix, [scaleh, scalev, 1]);
 				}
 
+				old_alpha = fg.globalAlpha;
+				fg.globalAlpha *= alpha;
+
 				gl.bindBuffer(gl.ARRAY_BUFFER, animation.vertexPositionBuffer);
 				gl.vertexAttribPointer(shaderProgram.aVertexPosition, animation.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -305,9 +304,13 @@
 				gl.uniformMatrix4fv(shaderProgram.uPMatrix, false, pMatrix);
 				gl.uniformMatrix4fv(shaderProgram.uMVMatrix, false, mvMatrix);
 
+				gl.uniform1f(shaderProgram.alphaUniform, fg.globalAlpha);
+
 				gl.drawArrays(gl.TRIANGLE_STRIP, 0, animation.vertexPositionBuffer.numItems);
 
 				fg.mvPopMatrix();
+
+				fg.globalAlpha = old_alpha;
 			}
 		}
 	});
@@ -355,7 +358,7 @@
 				str_width = String(width);
 				str_height = String(height);
 
-				dom = $(['<canvas id="', name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).appendTo(options.parentDOM);
+				dom = $(['<canvas id="', name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).prependTo(options.parentDOM);
 				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 				dom.css({
 					'left': '0px',
@@ -370,7 +373,7 @@
 				try {
 					// Try to grab the standard context. If it fails, fallback to experimental.
 					canvas = dom.get(0);
-					gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+					gl = canvas.getContext('webgl', {alpha: false}) || canvas.getContext('experimental-webgl', {alpha: false});
 				} catch (e) {
 				}
 
@@ -420,36 +423,59 @@
 		draw: function () {
 			var
 				options = this.options,
+				left = this.left,
+				top = this.top,
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
-				hidden = options.hidden,
+				alpha = options.alpha,
+				old_alpha,
+				context_saved,
 				gl = fg.gl,
 				mvMatrix = fg.mvMatrix
 			;
 
 			if (!this.parent) {
 				gl.clear(gl.COLOR_BUFFER_BIT);
+				fg.globalAlpha = 1;
 			}
 
-			if (this.layers.length && !hidden) {
-				fg.mvPushMatrix();
+			if (this.layers.length && !options.hidden) {
+				if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+					fg.mvPushMatrix();
+					context_saved = true;
 
-				mat4.translate(mvMatrix, [this.centerx, this.centery, 0]);
+					mat4.translate(mvMatrix, [this.centerx, this.centery, 0]);
 
-				if (angle) {
-					mat4.rotate(mvMatrix, angle, [0, 0, 1]);
+					if (angle) {
+						mat4.rotate(mvMatrix, angle, [0, 0, 1]);
+					}
+
+					if ((scaleh !== 1) || (scalev !== 1)) {
+						mat4.scale(mvMatrix, [scaleh, scalev, 1]);
+					}
+
+					mat4.translate(mvMatrix, [-this.halfWidth, -this.halfHeight, 0]);
+				} else if (left || top) {
+					fg.mvPushMatrix();
+					context_saved = true;
+
+					mat4.translate(mvMatrix, [left, top, 0]);
+				} else {
+					context_saved = false;
 				}
 
-				if ((scaleh !== 1) || (scalev !== 1)) {
-					mat4.scale(mvMatrix, [scaleh, scalev, 1]);
-				}
-
-				mat4.translate(mvMatrix, [-this.halfWidth, -this.halfHeight, 0]);
+				old_alpha = fg.globalAlpha;
+				fg.globalAlpha *= alpha;
 
 				fg.PSpriteGroup.draw.apply(this, arguments);
 
-				fg.mvPopMatrix();
+				if (context_saved) {
+					fg.mvPopMatrix();
+				}
+
+				fg.globalAlpha = old_alpha;
+
 			}
 		}
 	});
