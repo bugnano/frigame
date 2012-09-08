@@ -266,7 +266,7 @@
 				pMatrix = fg.pMatrix
 			;
 
-			if (animation && !options.hidden) {
+			if (animation && alpha && !options.hidden) {
 				animation_options = animation.options;
 
 				fg.mvPushMatrix();
@@ -440,7 +440,7 @@
 				fg.globalAlpha = 1;
 			}
 
-			if (this.layers.length && !options.hidden) {
+			if (this.layers.length && alpha && !options.hidden) {
 				if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
 					fg.mvPushMatrix();
 					context_saved = true;
@@ -475,7 +475,6 @@
 				}
 
 				fg.globalAlpha = old_alpha;
-
 			}
 		}
 	});

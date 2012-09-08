@@ -51,7 +51,7 @@
 				ctx = fg.ctx
 			;
 
-			if (animation && !options.hidden) {
+			if (animation && alpha && !options.hidden) {
 				animation_options = animation.options;
 
 				ctx.save();
@@ -171,7 +171,7 @@
 				fg.globalAlpha = 1;
 			}
 
-			if (this.layers.length && !options.hidden) {
+			if (this.layers.length && alpha && !options.hidden) {
 				if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
 					ctx.save();
 					context_saved = true;

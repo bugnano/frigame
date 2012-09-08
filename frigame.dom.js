@@ -195,7 +195,7 @@
 				apply_ie_filters = false
 			;
 
-			if (animation && !hidden) {
+			if (animation && alpha && !options.hidden) {
 				animation_options = animation.options;
 
 				if (!dom) {
@@ -291,6 +291,10 @@
 				}
 
 				if (alpha !== old_options.alpha) {
+					if (!old_options.alpha) {
+						dom.show();
+					}
+
 					if (support.opacity) {
 						if (alpha !== 1) {
 							css_options.opacity = String(alpha);
@@ -329,6 +333,11 @@
 							'background-position': ''
 						});
 						old_options.animation = animation;
+					}
+
+					if ((!alpha) && (alpha !== old_options.alpha)) {
+						dom.hide();
+						old_options.alpha = alpha;
 					}
 				}
 			}
@@ -422,7 +431,7 @@
 				apply_ie_filters = false
 			;
 
-			if (this.layers.length && !hidden) {
+			if (this.layers.length && alpha && !options.hidden) {
 				if (!this.dom) {
 					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
@@ -509,6 +518,10 @@
 				}
 
 				if (alpha !== old_options.alpha) {
+					if (!old_options.alpha) {
+						dom.show();
+					}
+
 					if (support.opacity) {
 						if (alpha !== 1) {
 							css_options.opacity = String(alpha);
@@ -541,6 +554,11 @@
 					if (hidden && (hidden !== old_options.hidden)) {
 						dom.hide();
 						old_options.hidden = hidden;
+					}
+
+					if ((!alpha) && (alpha !== old_options.alpha)) {
+						dom.hide();
+						old_options.alpha = alpha;
 					}
 				}
 			}
