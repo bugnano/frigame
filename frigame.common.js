@@ -1,5 +1,5 @@
 /*global jQuery,  */
-/*jslint bitwise: true, sloppy: true, white: true, browser: true */
+/*jslint bitwise: true, forin: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
 
@@ -67,6 +67,9 @@ var friGame = {};
 		ANIMATION_ONCE: 4,			// played only once (else looping indefinitly)
 		ANIMATION_PINGPONG: 32,		// at the last frame of the animation it reverses
 
+		GRADIENT_VERTICAL: 0,
+		GRADIENT_HORIZONTAL: 1,
+
 		// Implementation details
 
 		refreshRate: 30
@@ -84,6 +87,68 @@ var friGame = {};
 		idUpdate: null,
 		drawDone: true
 	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	// Return a new object with only the keys defined in the keys array parameter
+	fg.pick = function (obj, keys) {
+		var
+			len_keys = keys.length,
+			result = {},
+			key,
+			i
+		;
+
+		for (i = 0; i < len_keys; i += 1) {
+			key = keys[i];
+			if (obj[key] !== undefined) {
+				result[key] = obj[key];
+			}
+		}
+
+		return result;
+	};
+
+	// Perform a member to member comparison of two objects to determine if they are equal
+	fg.isEqual = function (a, b) {
+		var
+			key,
+			num_keys_a = 0,
+			num_keys_b = 0,
+			result = true
+		;
+
+		for (key in a) {
+			if (a[key] === undefined) {
+				if (b[key] !== undefined) {
+					result = false;
+					break;
+				}
+			} else {
+				num_keys_a += 1;
+				if (a[key] !== b[key]) {
+					result = false;
+					break;
+				}
+			}
+		}
+
+		if (result) {
+			for (key in b) {
+				if (b[key] !== undefined) {
+					num_keys_b += 1;
+				}
+			}
+
+			result = num_keys_a === num_keys_b;
+		}
+
+		return result;
+	};
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -549,6 +614,72 @@ var friGame = {};
 		animation.init.apply(animation, arguments);
 
 		return animation;
+	};
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	fg.PGradient = {
+		init: function (startColor, endColor, type) {
+			var
+				my_options,
+				img,
+				round = Math.floor
+			;
+
+			this.startColor = {
+				r: 0,
+				g: 0,
+				b: 0,
+				a: 1
+			};
+
+			if (startColor) {
+				startColor = $.extend(this.startColor, fg.pick(startColor, ['r', 'g', 'b', 'a']));
+				startColor.r = round(startColor.r);
+				startColor.g = round(startColor.g);
+				startColor.b = round(startColor.b);
+			}
+
+			if (endColor) {
+				this.endColor = {
+					r: 0,
+					g: 0,
+					b: 0,
+					a: 1
+				};
+
+				endColor = $.extend(this.endColor, fg.pick(endColor, ['r', 'g', 'b', 'a']));
+				endColor.r = round(endColor.r);
+				endColor.g = round(endColor.g);
+				endColor.b = round(endColor.b);
+
+				if (fg.isEqual(this.startColor, this.endColor)) {
+					this.endColor = this.startColor;
+				}
+			} else {
+				this.endColor = this.startColor;
+			}
+
+			if (type !== undefined) {
+				this.type = type;
+			} else {
+				this.type = fg.GRADIENT_VERTICAL;
+			}
+		}
+	};
+
+	fg.Gradient = function () {
+		var
+			gradient = Object.create(fg.PGradient)
+		;
+
+		gradient.init.apply(gradient, arguments);
+
+		return gradient;
 	};
 
 	// ******************************************************************** //

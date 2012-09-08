@@ -43,6 +43,142 @@
 		fg.support.transformFunction = Modernizr.prefixed('transform');
 	}
 
+	if (Modernizr.backgroundsize) {
+		fg.support.backgroundsize = Modernizr.prefixed('backgroundSize');
+	}
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	fg.nextGradientId = 0;
+
+	$.extend(fg.PGradient, {
+		initDOM: function () {
+			var
+				startColor = this.startColor,
+				endColor = this.endColor,
+				str_a,
+				str_r,
+				str_g,
+				str_b,
+				start_color_string,
+				end_color_string,
+				type,
+				x2,
+				y2,
+				svg,
+				support = fg.support
+			;
+
+			if (startColor === endColor) {
+				// Solid color
+				if (startColor.a === 1) {
+					this.css_options = {
+						'background-color': ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('')
+					};
+				} else {
+					if (support.rgba) {
+						this.css_options = {
+							'background-color': ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('')
+						};
+					} else if (support.ieFilter) {
+						// Alpha supported through proprietary filter
+						str_a = ['0', Math.round(startColor.a * 255).toString(16).toUpperCase()].join('');
+						str_r = ['0', startColor.r.toString(16).toUpperCase()].join('');
+						str_g = ['0', startColor.g.toString(16).toUpperCase()].join('');
+						str_b = ['0', startColor.b.toString(16).toUpperCase()].join('');
+						start_color_string = ['#', str_a.slice(str_a.length - 2), str_r.slice(str_r.length - 2), str_g.slice(str_g.length - 2), str_b.slice(str_b.length - 2)].join('');
+
+						this.ie_filter = ['progid:DXImageTransform.Microsoft.Gradient(GradientType=0,startColorstr="', start_color_string, '",endColorstr="', start_color_string, '")'].join('');
+					} else {
+						// Alpha not supported, use a simple rgb color
+						this.css_options = {
+							'background-color': ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('')
+						};
+					}
+				}
+			} else {
+				// Gradient
+				if (support.svg) {
+					start_color_string = ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('');
+					end_color_string = ['rgb(', String(endColor.r), ',', String(endColor.g), ',', String(endColor.b), ')'].join('');
+
+					if (this.type === fg.GRADIENT_HORIZONTAL) {
+						x2 = 100;
+						y2 = 0;
+					} else {
+						x2 = 0;
+						y2 = 100;
+					}
+
+					svg = [
+						'<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1 1" preserveAspectRatio="none">',
+							'<defs>',
+								'<linearGradient id="friGameGradient', String(fg.nextGradientId), '" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="', String(x2), '%" y2="', String(y2), '%">',
+									'<stop offset="0%" stop-color="', start_color_string, '" stop-opacity="', String(startColor.a), '" />',
+									'<stop offset="100%" stop-color="', end_color_string, '" stop-opacity="', String(endColor.a), '" />',
+								'</linearGradient>',
+							'</defs>',
+
+							'<rect x="0" y="0" width="1" height="1" fill="url(#friGameGradient', String(fg.nextGradientId), ')" />',
+						'</svg>'
+					].join('');
+					fg.nextGradientId += 1;
+
+					this.css_options = {
+						'background-image': ['url("data:image/svg+xml;base64,', btoa(svg), '")'].join('')
+					};
+
+					if (support.backgroundsize) {
+						this.css_options[support.backgroundsize] = '100% 100%';
+					}
+				} else if (support.ieFilter) {
+					// Gradient supported through proprietary filter
+					str_a = ['0', Math.round(startColor.a * 255).toString(16).toUpperCase()].join('');
+					str_r = ['0', startColor.r.toString(16).toUpperCase()].join('');
+					str_g = ['0', startColor.g.toString(16).toUpperCase()].join('');
+					str_b = ['0', startColor.b.toString(16).toUpperCase()].join('');
+					start_color_string = ['#', str_a.slice(str_a.length - 2), str_r.slice(str_r.length - 2), str_g.slice(str_g.length - 2), str_b.slice(str_b.length - 2)].join('');
+
+					str_a = ['0', Math.round(endColor.a * 255).toString(16).toUpperCase()].join('');
+					str_r = ['0', endColor.r.toString(16).toUpperCase()].join('');
+					str_g = ['0', endColor.g.toString(16).toUpperCase()].join('');
+					str_b = ['0', endColor.b.toString(16).toUpperCase()].join('');
+					end_color_string = ['#', str_a.slice(str_a.length - 2), str_r.slice(str_r.length - 2), str_g.slice(str_g.length - 2), str_b.slice(str_b.length - 2)].join('');
+
+					if (this.type === fg.GRADIENT_HORIZONTAL) {
+						type = 1;
+					} else {
+						type = 0;
+					}
+
+					this.ie_filter = ['progid:DXImageTransform.Microsoft.Gradient(GradientType=', type, ',startColorstr="', start_color_string, '",endColorstr="', end_color_string, '")'].join('');
+				} else {
+					// Fallback to solid color
+					if (startColor.a === 1) {
+						this.css_options = {
+							'background-color': ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('')
+						};
+					} else {
+						if (support.rgba) {
+							this.css_options = {
+								'background-color': ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('')
+							};
+						} else {
+							// Alpha not supported, use a simple rgb color
+							this.css_options = {
+								'background-color': ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('')
+							};
+						}
+					}
+				}
+			}
+		}
+	});
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
