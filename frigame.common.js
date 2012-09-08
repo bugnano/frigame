@@ -1160,7 +1160,8 @@ var friGame = {};
 	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
-				my_options
+				my_options,
+				new_options = options || {}
 			;
 
 			if (this.options) {
@@ -1173,6 +1174,7 @@ var friGame = {};
 			// Set default options
 			$.extend(my_options, {
 				// Public options
+				background: null
 
 				// Implementation details
 			});
@@ -1180,9 +1182,31 @@ var friGame = {};
 			this.layers = [];
 
 			fg.PBaseSprite.init.apply(this, arguments);
+
+			// If the background has not been defined, force
+			// the background to null in order to be
+			// symmetric with the sprite and setAnimation
+			if (new_options.background === undefined) {
+				new_options.background = null;
+			}
+
+			this.setBackground(new_options);
 		},
 
 		// Public functions
+
+		setBackground: function (options) {
+			var
+				my_options = this.options,
+				new_options = options || {}
+			;
+
+			if (new_options.background !== undefined) {
+				my_options.background = new_options.background;
+			}
+
+			return this;
+		},
 
 		remove: function () {
 			var

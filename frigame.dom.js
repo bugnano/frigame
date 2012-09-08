@@ -43,10 +43,6 @@
 		fg.support.transformFunction = Modernizr.prefixed('transform');
 	}
 
-	if (Modernizr.backgroundsize) {
-		fg.support.backgroundsize = Modernizr.prefixed('backgroundSize');
-	}
-
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -129,12 +125,9 @@
 					fg.nextGradientId += 1;
 
 					this.css_options = {
-						'background-image': ['url("data:image/svg+xml;base64,', btoa(svg), '")'].join('')
+						'background-image': ['url("data:image/svg+xml;base64,', btoa(svg), '")'].join(''),
+						'background-size': '100% 100%'
 					};
-
-					if (support.backgroundsize) {
-						this.css_options[support.backgroundsize] = '100% 100%';
-					}
 				} else if (support.ieFilter) {
 					// Gradient supported through proprietary filter
 					str_a = ['0', Math.round(startColor.a * 255).toString(16).toUpperCase()].join('');
@@ -175,6 +168,26 @@
 						}
 					}
 				}
+			}
+
+			this.dom_initialized = true;
+		},
+
+		getBackground: function (css_options, ie_filters) {
+			var
+				apply_ie_filters = false
+			;
+			if (!this.dom_initialized) {
+				this.initDOM();
+			}
+
+			if (this.css_options) {
+				$.extend(css_options, this.css_options);
+			}
+
+			if (this.ie_filter) {
+				ie_filters.gradient = this.ie_filter;
+				apply_ie_filters = true;
 			}
 		}
 	});
@@ -243,7 +256,7 @@
 				filter
 			;
 
-			// Apply the transformation matrix
+			// Apply the opacity
 			if (alpha !== 1) {
 				filter = ['progid:DXImageTransform.Microsoft.Alpha(opacity=', String(Math.round(alpha * 100)), ')'].join('');
 			} else {
@@ -554,6 +567,7 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
+				background = options.background,
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
@@ -564,6 +578,7 @@
 				support = fg.support,
 				transformFunction = support.transformFunction,
 				ieFilter = support.ieFilter,
+				ie_filters = ieFilter && this.ieFilters,
 				apply_ie_filters = false
 			;
 
@@ -580,6 +595,8 @@
 							alpha: '',
 							gradient: ''
 						};
+
+						ie_filters = this.ieFilters;
 					}
 				}
 
@@ -630,6 +647,28 @@
 					}
 
 					old_options.width = height;
+				}
+
+				if (background !== old_options.background) {
+					// Reset all the background options before applying the new background
+					css_options['background-color'] = '';
+					css_options['background-image'] = '';
+					css_options['background-size'] = '';
+
+					if (ie_filters && ie_filters.gradient) {
+						ie_filters.gradient = '';
+						apply_ie_filters = true;
+					}
+
+					if (background) {
+						if (background.getBackground(css_options, ie_filters)) {
+							apply_ie_filters = true;
+						}
+					}
+
+					update_css = true;
+
+					old_options.background = background;
 				}
 
 				if	(
