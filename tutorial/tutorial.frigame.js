@@ -84,14 +84,14 @@
 			this.shield = 3;
 
 			this.respawnTime = Date.now();
-			//$(this.node).fadeTo(0, 0.5);	// TO DO -- Fading has not been implemented yet
+			this.node.fadeTo(0, 0.5);
 			return false;
 		},
 
 		update: function () {
 			if ((this.respawnTime > 0) && ((Date.now() - this.respawnTime) > 3000)) {
 				this.grace = false;
-				//$(this.node).fadeTo(500, 1);	// TO DO -- Fading has not been implemented yet
+				this.node.fadeTo(500, 1);
 				this.respawnTime = -1;
 			}
 		}
@@ -325,7 +325,7 @@
 				$('#overlay').append('<div id="shieldHUD"style="color: white; width: 100px; position: absolute; font-family: verdana, sans-serif;"></div><div id="lifeHUD"style="color: white; width: 100px; position: absolute; right: 0px; font-family: verdana, sans-serif;"></div>');
 
 				// this is the function that control most of the game logic
-				fg.registerCallback(function () {
+				fg.playground().registerCallback(function () {
 					var
 						nextpos,
 						posy,
@@ -372,8 +372,10 @@
 									gameOver = true;
 									$('#playground').append('<div style="position: absolute; top: 50px; width: 700px; color: white; font-family: verdana, sans-serif;"><center><h1>Game Over</h1><br><a style="cursor: pointer;" id="restartbutton">Click here to restart the game!</a></center></div>');
 									$('#restartbutton').click(restartgame);
-									//$('#actors,#playerMissileLayer,#enemiesMissileLayer').fadeTo(1000, 0);	// TO DO -- Fading has not been implemented yet
-									//$('#background').fadeTo(5000, 0);	// TO DO -- Fading has not been implemented yet
+									$.each(['actors', 'playerMissileLayer', 'enemiesMissileLayer'], function(index, value) {
+										fg.sprites[value].fadeTo(1000, 0)
+									});
+									fg.sprites.background.fadeTo(5000, 0);
 								} else {
 									fg.sprites.explosion.remove();
 									fg.sprites.player.children(function () {
@@ -521,7 +523,7 @@
 				}, REFRESH_RATE);
 
 				//This function manage the creation of the enemies
-				fg.registerCallback(function () {
+				fg.playground().registerCallback(function () {
 					var
 						name
 					;
@@ -552,7 +554,7 @@
 				}, 1000); //once per seconds is enough for this
 
 				//This is for the background animation
-				fg.registerCallback(function () {
+				fg.playground().registerCallback(function () {
 					//Offset all the pane:
 					var
 						newPos

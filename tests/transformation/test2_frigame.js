@@ -17,7 +17,7 @@ $(function () {
 			.addSprite('aScaleRotate', {animation: animation, left: 240, top: 16})
 		;
 
-		fg.registerCallback(function () {
+		fg.playground().registerCallback(function () {
 			fg.sprites.aRotateScale.rotate(angle_rad).scale(2);
 			fg.sprites.scaleARotate.scale(2).rotate(-angle_rad);
 			fg.sprites.rotateAScale.rotate(Math.PI / 4).scale(Math.cos(angle_rad) * 2);

@@ -29,8 +29,8 @@
 
 	fg.keyTracker = {};
 
-	// keyTracker inside a registerCallback in order to have effect only after startGame
-	fg.registerCallback(function () {
+	// keyTracker inside a startCallback in order to have effect only after startGame
+	fg.startCallback(function () {
 		$(document).keydown(function (e) {
 			fg.keyTracker[e.which] = true;
 		});
@@ -38,9 +38,6 @@
 		$(document).keyup(function (e) {
 			fg.keyTracker[e.which] = false;
 		});
-
-		// return true in order to stop the callback
-		return true;
-	}, 0);
+	});
 }(jQuery, friGame));
 

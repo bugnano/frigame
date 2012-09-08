@@ -1,4 +1,4 @@
-/*global jQuery, friGame */
+/*global jQuery,  */
 /*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
@@ -81,8 +81,7 @@ var friGame = {};
 
 		// Implementation details
 
-		callbacks: [],
-
+		idUpdate: null,
 		drawDone: true
 	});
 
@@ -155,7 +154,9 @@ var friGame = {};
 					resourceManager.completeCallback = null;
 				}
 
-				fg.idRefresh = setInterval(fg.refresh, fg.refreshRate);
+				if (fg.idUpdate === null) {
+					fg.idUpdate = setInterval(fg.update, fg.refreshRate);
+				}
 			}
 		}
 	};
@@ -600,6 +601,9 @@ var friGame = {};
 			this.name = name;
 			this.parent = parent;
 
+			// Implementation details
+			this.callbacks = [];
+
 			// Call PRect.init after setting this.parent
 			fg.PRect.init.call(this, options);
 		},
@@ -758,9 +762,49 @@ var friGame = {};
 
 		hidden: function () {
 			return this.options.hidden;
-		}
+		},
+
+		registerCallback: function (callback, rate) {
+			rate = Math.round(rate / fg.refreshRate);
+			if (rate === 0) {
+				rate = 1;
+			}
+
+			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
+
+			return this;
+		},
 
 		// Implementation details
+
+		update: function () {
+			var
+				callbacks = this.callbacks,
+				len_callbacks = callbacks.length,
+				callback,
+				retval,
+				remove_callbacks = [],
+				len_remove_callbacks,
+				i
+			;
+
+			for (i = 0; i < len_callbacks; i += 1) {
+				callback = callbacks[i];
+				callback.idleCounter += 1;
+				if (callback.idleCounter >= callback.rate) {
+					callback.idleCounter = 0;
+					retval = callback.callback.call(this);
+					if (retval) {
+						remove_callbacks.unshift(i);
+					}
+				}
+			}
+
+			len_remove_callbacks = remove_callbacks.length;
+			for (i = 0; i < len_remove_callbacks; i += 1) {
+				callbacks.splice(i, 1);
+			}
+		}
 	});
 
 	// ******************************************************************** //
@@ -894,6 +938,8 @@ var friGame = {};
 				animation_options,
 				currentFrame = options.currentFrame
 			;
+
+			fg.PBaseSprite.update.call(this);
 
 			if (!this.endAnimation) {
 				if (animation) {
@@ -1112,6 +1158,8 @@ var friGame = {};
 				i
 			;
 
+			fg.PBaseSprite.update.call(this);
+
 			for (i = 0; i < len_layers; i += 1) {
 				if (layers[i]) {
 					layers[i].obj.update();
@@ -1182,39 +1230,25 @@ var friGame = {};
 			}
 
 			resourceManager.completeCallback = callback;
-			resourceManager.idPreload = setInterval(resourceManager.preload, 100);
+
+			if (resourceManager.idPreload === null) {
+				resourceManager.idPreload = setInterval(resourceManager.preload, 100);
+			}
 
 			return this;
 		},
 
 		stopGame: function () {
-			clearInterval(fg.idRefresh);
-
-			return this;
-		},
-
-		registerCallback: function (callback, rate) {
-			rate = Math.round(rate / fg.refreshRate);
-			if (rate === 0) {
-				rate = 1;
-			}
-
-			fg.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
+			clearInterval(fg.idUpdate);
+			fg.idUpdate = null;
 
 			return this;
 		},
 
 		// Implementation details
 
-		refresh: function () {
+		update: function () {
 			var
-				callbacks = fg.callbacks,
-				len_callbacks = callbacks.length,
-				callback,
-				retval,
-				remove_callbacks = [],
-				len_remove_callbacks,
-				i,
 				scenegraph = fg.sprites.scenegraph
 			;
 
@@ -1225,23 +1259,6 @@ var friGame = {};
 					fg.drawDone = false;
 					window.requestAnimFrame(fg.draw);
 				}
-			}
-
-			for (i = 0; i < len_callbacks; i += 1) {
-				callback = callbacks[i];
-				callback.idleCounter += 1;
-				if (callback.idleCounter >= callback.rate) {
-					callback.idleCounter = 0;
-					retval = callback.callback.call(fg);
-					if (retval) {
-						remove_callbacks.unshift(i);
-					}
-				}
-			}
-
-			len_remove_callbacks = remove_callbacks.length;
-			for (i = 0; i < len_remove_callbacks; i += 1) {
-				callbacks.splice(i, 1);
 			}
 		},
 
