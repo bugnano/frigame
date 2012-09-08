@@ -41,7 +41,7 @@ if (!window.requestAnimFrame) {
 			window.mozRequestAnimationFrame ||
 			window.oRequestAnimationFrame ||
 			window.msRequestAnimationFrame ||
-			function (callback, element) {
+			function (callback) {
 				window.setTimeout(callback, 1000 / 60);
 			};
 	}());
@@ -196,7 +196,7 @@ var friGame = {};
 		resize: function (options) {
 			var
 				new_options = options || {},
-				round = Math.round,
+				round = Math.floor,
 				change_radius
 			;
 
@@ -252,14 +252,17 @@ var friGame = {};
 		move: function (options) {
 			var
 				new_options = options || {},
-				round = Math.round,
+				round = Math.floor,
 				last_x,
 				last_y
 			;
 
 			// STEP 1: Memorize the last option that has been redefined
 
-			if (new_options.centerx !== undefined) {
+			if ((new_options.last_x !== undefined) && (new_options[new_options.last_x] !== undefined)) {
+				this[new_options.last_x] = round(new_options[new_options.last_x]);
+				last_x = new_options.last_x;
+			} else if (new_options.centerx !== undefined) {
 				this.centerx = round(new_options.centerx);
 				last_x = 'centerx';
 			} else if (new_options.right !== undefined) {
@@ -273,7 +276,10 @@ var friGame = {};
 				last_x = this.last_x;
 			}
 
-			if (new_options.centery !== undefined) {
+			if ((new_options.last_y !== undefined) && (new_options[new_options.last_y] !== undefined)) {
+				this[new_options.last_y] = round(new_options[new_options.last_y]);
+				last_y = new_options.last_y;
+			} else if (new_options.centery !== undefined) {
 				this.centery = round(new_options.centery);
 				last_y = 'centery';
 			} else if (new_options.bottom !== undefined) {
@@ -468,7 +474,7 @@ var friGame = {};
 			var
 				options = this.options,
 				img = options.img,
-				round = Math.round
+				round = Math.floor
 			;
 
 			if (options.type & fg.ANIMATION_HORIZONTAL) {
