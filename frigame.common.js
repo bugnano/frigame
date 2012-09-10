@@ -1,5 +1,5 @@
 /*global jQuery,  */
-/*jslint bitwise: true, forin: true, sloppy: true, white: true, browser: true */
+/*jslint bitwise: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
 
@@ -108,43 +108,6 @@ var friGame = {};
 			if (obj[key] !== undefined) {
 				result[key] = obj[key];
 			}
-		}
-
-		return result;
-	};
-
-	// Perform a member to member comparison of two objects to determine if they are equal
-	fg.isEqual = function (a, b) {
-		var
-			key,
-			num_keys_a = 0,
-			num_keys_b = 0,
-			result = true
-		;
-
-		for (key in a) {
-			if (a[key] === undefined) {
-				if (b[key] !== undefined) {
-					result = false;
-					break;
-				}
-			} else {
-				num_keys_a += 1;
-				if (a[key] !== b[key]) {
-					result = false;
-					break;
-				}
-			}
-		}
-
-		if (result) {
-			for (key in b) {
-				if (b[key] !== undefined) {
-					num_keys_b += 1;
-				}
-			}
-
-			result = num_keys_a === num_keys_b;
 		}
 
 		return result;
@@ -318,7 +281,7 @@ var friGame = {};
 		move: function (options) {
 			var
 				new_options = options || {},
-				round = Math.floor,
+				round = Math.round,
 				last_x,
 				last_y
 			;
@@ -625,9 +588,9 @@ var friGame = {};
 	fg.PGradient = {
 		init: function (startColor, endColor, type) {
 			var
-				my_options,
-				img,
-				round = Math.floor
+				min = Math.min,
+				max = Math.max,
+				round = Math.round
 			;
 
 			this.startColor = {
@@ -639,9 +602,11 @@ var friGame = {};
 
 			if (startColor) {
 				startColor = $.extend(this.startColor, fg.pick(startColor, ['r', 'g', 'b', 'a']));
-				startColor.r = round(startColor.r);
-				startColor.g = round(startColor.g);
-				startColor.b = round(startColor.b);
+				startColor.r = max(min(round(startColor.r), 255), 0);
+				startColor.g = max(min(round(startColor.g), 255), 0);
+				startColor.b = max(min(round(startColor.b), 255), 0);
+				startColor.a = max(min(startColor.a, 1), 0);
+				this.startColorStr = ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('');
 			}
 
 			if (endColor) {
@@ -653,15 +618,18 @@ var friGame = {};
 				};
 
 				endColor = $.extend(this.endColor, fg.pick(endColor, ['r', 'g', 'b', 'a']));
-				endColor.r = round(endColor.r);
-				endColor.g = round(endColor.g);
-				endColor.b = round(endColor.b);
+				endColor.r = max(min(round(endColor.r), 255), 0);
+				endColor.g = max(min(round(endColor.g), 255), 0);
+				endColor.b = max(min(round(endColor.b), 255), 0);
+				endColor.a = max(min(endColor.a, 1), 0);
+				this.endColorStr = ['rgba(', String(endColor.r), ',', String(endColor.g), ',', String(endColor.b), ',', String(endColor.a), ')'].join('');
 
-				if (fg.isEqual(this.startColor, this.endColor)) {
+				if (this.startColorStr === this.endColorStr) {
 					this.endColor = this.startColor;
 				}
 			} else {
 				this.endColor = this.startColor;
+				this.endColorStr = this.startColorStr;
 			}
 
 			if (type !== undefined) {

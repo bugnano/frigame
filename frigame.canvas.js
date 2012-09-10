@@ -33,6 +33,134 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
+	$.extend(fg.PGradient, {
+		initCanvas: function () {
+			var
+				startColor = this.startColor,
+				endColor = this.endColor
+			;
+
+			if (startColor === endColor) {
+				// Solid color
+				this.fillStyle = this.startColorStr;
+			} else {
+				// Gradient
+				this.gradients = {};
+				this.gradient_groups = {};
+			}
+
+			this.canvas_initialized = true;
+		},
+
+		addGroup: function (group) {
+			var
+				ctx = fg.ctx,
+				width = group.width,
+				height = group.height,
+				dimension,
+				name = group.name,
+				gradients,
+				gradient
+			;
+
+			if (!this.canvas_initialized) {
+				this.initCanvas();
+			}
+
+			gradients = this.gradients;
+			if (gradients) {
+				if (this.type === fg.GRADIENT_HORIZONTAL) {
+					dimension = width;
+					height = 0;
+				} else {
+					dimension = height;
+					width = 0;
+				}
+
+				if (!gradients[dimension]) {
+					// Create a gradient for this dimension
+					gradient = ctx.createLinearGradient(0, 0, width, height);
+					gradient.addColorStop(0, this.startColorStr);
+					gradient.addColorStop(1, this.endColorStr);
+
+					gradients[dimension] = {
+						fillStyle: gradient,
+						groups: {}
+					};
+				}
+
+				// Memorize the groups that have this dimension
+				gradients[dimension].groups[name] = true;
+				this.gradient_groups[name] = dimension;
+			}
+		},
+
+		removeGroup: function (group) {
+			var
+				dimension,
+				name = group.name,
+				gradients,
+				gradient_groups
+			;
+
+			if (!this.canvas_initialized) {
+				this.initCanvas();
+			}
+
+			gradients = this.gradients;
+			if (gradients) {
+				gradient_groups = this.gradient_groups;
+				if (gradient_groups[name] !== undefined) {
+					// Get the gradient dimension according to the group name
+					dimension = gradient_groups[name];
+					delete gradient_groups[name];
+
+					if (gradients[dimension]) {
+						gradient_groups = gradients[dimension].groups;
+						if (gradient_groups[name]) {
+							// Remove the group grom the dimension
+							delete gradient_groups[name];
+							if ($.isEmptyObject(gradient_groups)) {
+								// If no groups are using this dimension, delete the gradient
+								delete gradients[dimension];
+							}
+						}
+					}
+				}
+			}
+		},
+
+		drawBackground: function (ctx, group) {
+			var
+				width = group.width,
+				height = group.height,
+				dimension
+			;
+
+			if (this.fillStyle) {
+				// Solid color
+				ctx.fillStyle = this.fillStyle;
+			} else {
+				// Gradient
+				if (this.type === fg.GRADIENT_HORIZONTAL) {
+					dimension = width;
+				} else {
+					dimension = height;
+				}
+
+				ctx.fillStyle = this.gradients[dimension].fillStyle;
+			}
+
+			ctx.fillRect(0, 0, width, height);
+		}
+	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
 	fg.PCanvasSprite = Object.create(fg.PSprite);
 	$.extend(fg.PCanvasSprite, {
 		draw: function () {
@@ -119,6 +247,8 @@
 
 			fg.PSpriteGroup.init.apply(this, arguments);
 
+			this.old_options = {};
+
 			if (!parent) {
 				width = String(options.width);
 				height = String(options.height);
@@ -142,7 +272,20 @@
 		// Public functions
 
 		remove: function () {
+			var
+				background = this.options.background,
+				old_background = this.old_options.background
+			;
+
 			fg.PSpriteGroup.remove.apply(this, arguments);
+
+			if (old_background) {
+				old_background.removeGroup(this);
+			}
+
+			if (background) {
+				background.removeGroup(this);
+			}
 
 			if (this.dom) {
 				this.dom.remove();
@@ -154,8 +297,13 @@
 		draw: function () {
 			var
 				options = this.options,
+				old_options = this.old_options,
 				left = this.left,
 				top = this.top,
+				width = this.width,
+				height = this.height,
+				background = options.background,
+				old_background = old_options.background,
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
@@ -167,8 +315,33 @@
 			;
 
 			if (!this.parent) {
-				fg.ctx.clearRect(0, 0, this.width, this.height);
+				fg.ctx.clearRect(0, 0, width, height);
 				fg.globalAlpha = 1;
+			}
+
+			if (background !== old_background) {
+				if (old_background) {
+					old_background.removeGroup(this);
+				}
+
+				if (background) {
+					background.addGroup(this);
+				}
+
+				old_options.width = width;
+				old_options.height = height;
+				old_options.background = background;
+			} else {
+				if ((width !== old_options.width) || (height !== old_options.height)) {
+					// Reset the background in order to create a new one with the new width and height
+					if (background) {
+						background.removeGroup(this);
+						background.addGroup(this);
+					}
+
+					old_options.width = width;
+					old_options.height = height;
+				}
 			}
 
 			if (this.layers.length && alpha && !options.hidden) {
@@ -204,6 +377,10 @@
 					alpha_changed = true;
 				} else {
 					alpha_changed = false;
+				}
+
+				if (background) {
+					background.drawBackground(ctx, this);
 				}
 
 				fg.PSpriteGroup.draw.apply(this, arguments);

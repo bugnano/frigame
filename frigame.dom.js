@@ -78,7 +78,7 @@
 				} else {
 					if (support.rgba) {
 						this.css_options = {
-							'background-color': ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('')
+							'background-color': this.startColorStr
 						};
 					} else if (support.ieFilter) {
 						// Alpha supported through proprietary filter
@@ -158,7 +158,7 @@
 					} else {
 						if (support.rgba) {
 							this.css_options = {
-								'background-color': ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('')
+								'background-color': this.startColorStr
 							};
 						} else {
 							// Alpha not supported, use a simple rgb color
@@ -649,28 +649,6 @@
 					old_options.width = height;
 				}
 
-				if (background !== old_options.background) {
-					// Reset all the background options before applying the new background
-					css_options['background-color'] = '';
-					css_options['background-image'] = '';
-					css_options['background-size'] = '';
-
-					if (ie_filters && ie_filters.gradient) {
-						ie_filters.gradient = '';
-						apply_ie_filters = true;
-					}
-
-					if (background) {
-						if (background.getBackground(css_options, ie_filters)) {
-							apply_ie_filters = true;
-						}
-					}
-
-					update_css = true;
-
-					old_options.background = background;
-				}
-
 				if	(
 						(angle !== old_options.angle)
 					||	(scaleh !== old_options.scaleh)
@@ -713,6 +691,28 @@
 					}
 
 					old_options.alpha = alpha;
+				}
+
+				if (background !== old_options.background) {
+					// Reset all the background options before applying the new background
+					css_options['background-color'] = '';
+					css_options['background-image'] = '';
+					css_options['background-size'] = '';
+
+					if (ie_filters && ie_filters.gradient) {
+						ie_filters.gradient = '';
+						apply_ie_filters = true;
+					}
+
+					if (background) {
+						if (background.getBackground(css_options, ie_filters)) {
+							apply_ie_filters = true;
+						}
+					}
+
+					update_css = true;
+
+					old_options.background = background;
 				}
 
 				if (update_css) {
