@@ -118,7 +118,7 @@
 					if (gradients[dimension]) {
 						gradient_groups = gradients[dimension].groups;
 						if (gradient_groups[name]) {
-							// Remove the group grom the dimension
+							// Remove the group from the dimension
 							delete gradient_groups[name];
 							if ($.isEmptyObject(gradient_groups)) {
 								// If no groups are using this dimension, delete the gradient

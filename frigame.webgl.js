@@ -31,7 +31,198 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	$.extend(fg.PAnimation, {
+	$.extend(fg.PGradient, {
+		initColorBuffer: function () {
+			var
+				gl = fg.gl,
+				startColor = this.startColor,
+				endColor = this.endColor,
+				colors,
+				vertexColorBuffer
+			;
+
+			if (!gl) {
+				return;
+			}
+
+			vertexColorBuffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+			if (this.type === fg.GRADIENT_HORIZONTAL) {
+				colors = [
+					(endColor.r / 255), (endColor.g / 255), (endColor.b / 255), endColor.a,
+					(startColor.r / 255), (startColor.g / 255), (startColor.b / 255), startColor.a,
+					(endColor.r / 255), (endColor.g / 255), (endColor.b / 255), endColor.a,
+					(startColor.r / 255), (startColor.g / 255), (startColor.b / 255), startColor.a
+				];
+			} else {
+				colors = [
+					(endColor.r / 255), (endColor.g / 255), (endColor.b / 255), endColor.a,
+					(endColor.r / 255), (endColor.g / 255), (endColor.b / 255), endColor.a,
+					(startColor.r / 255), (startColor.g / 255), (startColor.b / 255), startColor.a,
+					(startColor.r / 255), (startColor.g / 255), (startColor.b / 255), startColor.a
+				];
+			}
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+			vertexColorBuffer.itemSize = 4;
+			vertexColorBuffer.numItems = 4;
+
+			this.vertexColorBuffer = vertexColorBuffer;
+
+			this.gradients = {};
+			this.gradient_groups = {};
+
+			this.color_buffer_initialized = true;
+		},
+
+		addGroup: function (group) {
+			var
+				gl = fg.gl,
+				width = group.width,
+				height = group.height,
+				dimension = [String(width), 'x', String(height)].join(''),
+				name = group.name,
+				gradients,
+				vertices,
+				vertexPositionBuffer
+			;
+
+			if (!gl) {
+				return;
+			}
+
+			if (!this.color_buffer_initialized) {
+				this.initColorBuffer();
+			}
+
+			gradients = this.gradients;
+			if (gradients) {
+				if (!gradients[dimension]) {
+					// Create a gradient for this dimension
+					vertexPositionBuffer = gl.createBuffer();
+					gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+					vertices = [
+						width, height, 0.0,
+						0, height, 0.0,
+						width, 0, 0.0,
+						0, 0, 0.0
+					];
+					gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+					vertexPositionBuffer.itemSize = 3;
+					vertexPositionBuffer.numItems = 4;
+
+					gradients[dimension] = {
+						vertexPositionBuffer: vertexPositionBuffer,
+						groups: {}
+					};
+				}
+
+				// Memorize the groups that have this dimension
+				gradients[dimension].groups[name] = true;
+				this.gradient_groups[name] = dimension;
+			}
+		},
+
+		removeGroup: function (group) {
+			var
+				gl = fg.gl,
+				width = group.width,
+				height = group.height,
+				dimension = [String(width), 'x', String(height)].join(''),
+				name = group.name,
+				gradients,
+				gradient_groups
+			;
+
+			if (!gl) {
+				return;
+			}
+
+			if (!this.color_buffer_initialized) {
+				this.initColorBuffer();
+			}
+
+			gradients = this.gradients;
+			if (gradients) {
+				gradient_groups = this.gradient_groups;
+				if (gradient_groups[name] !== undefined) {
+					// Get the gradient dimension according to the group name
+					dimension = gradient_groups[name];
+					delete gradient_groups[name];
+
+					if (gradients[dimension]) {
+						gradient_groups = gradients[dimension].groups;
+						if (gradient_groups[name]) {
+							// Remove the group from the dimension
+							delete gradient_groups[name];
+							if ($.isEmptyObject(gradient_groups)) {
+								// If no groups are using this dimension, delete the gradient
+								gl.deleteBuffer(gradients[dimension].vertexPositionBuffer);
+								delete gradients[dimension];
+							}
+						}
+					}
+				}
+			}
+		},
+
+		drawBackground: function (gl, group) {
+			var
+				name = group.name,
+				dimension = this.gradient_groups[name],
+				vertexPositionBuffer = this.gradients[dimension].vertexPositionBuffer,
+				vertexColorBuffer = this.vertexColorBuffer,
+				gradientShaderProgram = fg.gradientShaderProgram,
+				mvMatrix = fg.mvMatrix,
+				pMatrix = fg.pMatrix
+			;
+
+			if (fg.lastProgram !== fg.gradientShaderProgram) {
+				gl.useProgram(fg.gradientShaderProgram);
+				fg.lastProgram = fg.gradientShaderProgram;
+			}
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+			gl.vertexAttribPointer(gradientShaderProgram.aVertexPosition, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+			gl.vertexAttribPointer(gradientShaderProgram.aVertexColor, vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.uniformMatrix4fv(gradientShaderProgram.uPMatrix, false, pMatrix);
+			gl.uniformMatrix4fv(gradientShaderProgram.uMVMatrix, false, mvMatrix);
+
+			gl.uniform1f(gradientShaderProgram.uAlpha, fg.globalAlpha);
+
+			gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPositionBuffer.numItems);
+		}
+	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	fg.PWebGLAnimation = Object.create(fg.PAnimation);
+	$.extend(fg.PWebGLAnimation, {
+		onLoad: function () {
+			var
+				options = this.options,
+				img = options.img,
+				img_width = img.width,
+				img_height = img.height
+			;
+
+			fg.PAnimation.onLoad.apply(this, arguments);
+
+			this.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
+			options.offsetx /= img_width;
+			options.multix /= img_width;
+			options.deltax /= img_width;
+			options.offsety /= img_height;
+			options.multiy /= img_height;
+			options.deltay /= img_height;
+		},
+
 		initBuffers: function () {
 			var
 				gl = fg.gl,
@@ -65,9 +256,7 @@
 			var
 				gl = fg.gl,
 				options = this.options,
-				img = options.img,
-				img_width = img.width,
-				img_height = img.height
+				img = options.img
 			;
 
 			if (!gl) {
@@ -82,16 +271,18 @@
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
-
-			this.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
-			options.offsetx /= img_width;
-			options.multix /= img_width;
-			options.deltax /= img_width;
-			options.offsety /= img_height;
-			options.multiy /= img_height;
-			options.deltay /= img_height;
 		}
 	});
+
+	fg.Animation = function () {
+		var
+			animation = Object.create(fg.PWebGLAnimation)
+		;
+
+		animation.init.apply(animation, arguments);
+
+		return animation;
+	};
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -126,12 +317,15 @@
 			gl = fg.gl,
 			fragmentShader,
 			vertexShader,
-			shaderProgram
+			spriteShaderProgram,
+			gradientShaderProgram
 		;
 
 		if (!gl) {
 			return;
 		}
+
+		// Shader programs for sprites
 
         fragmentShader = fg.getShader([
 			'precision mediump float;',
@@ -166,33 +360,84 @@
 			'}'
 		].join('\n'), gl.VERTEX_SHADER);
 
-		shaderProgram = gl.createProgram();
-		gl.attachShader(shaderProgram, vertexShader);
-		gl.attachShader(shaderProgram, fragmentShader);
-		gl.linkProgram(shaderProgram);
+		spriteShaderProgram = gl.createProgram();
+		gl.attachShader(spriteShaderProgram, vertexShader);
+		gl.attachShader(spriteShaderProgram, fragmentShader);
+		gl.linkProgram(spriteShaderProgram);
 
-		if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+		if (!gl.getProgramParameter(spriteShaderProgram, gl.LINK_STATUS)) {
 			return;
 		}
 
-		gl.useProgram(shaderProgram);
+		spriteShaderProgram.aVertexPosition = gl.getAttribLocation(spriteShaderProgram, 'aVertexPosition');
+		gl.enableVertexAttribArray(spriteShaderProgram.aVertexPosition);
 
-		shaderProgram.aVertexPosition = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
-		gl.enableVertexAttribArray(shaderProgram.aVertexPosition);
+		spriteShaderProgram.aTextureCoord = gl.getAttribLocation(spriteShaderProgram, 'aTextureCoord');
+		gl.enableVertexAttribArray(spriteShaderProgram.aTextureCoord);
 
-		shaderProgram.aTextureCoord = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
-		gl.enableVertexAttribArray(shaderProgram.aTextureCoord);
+		spriteShaderProgram.uPMatrix = gl.getUniformLocation(spriteShaderProgram, 'uPMatrix');
+		spriteShaderProgram.uMVMatrix = gl.getUniformLocation(spriteShaderProgram, 'uMVMatrix');
+		spriteShaderProgram.uSampler = gl.getUniformLocation(spriteShaderProgram, 'uSampler');
 
-		shaderProgram.uPMatrix = gl.getUniformLocation(shaderProgram, 'uPMatrix');
-		shaderProgram.uMVMatrix = gl.getUniformLocation(shaderProgram, 'uMVMatrix');
-		shaderProgram.uSampler = gl.getUniformLocation(shaderProgram, 'uSampler');
+		spriteShaderProgram.uTextureSize = gl.getUniformLocation(spriteShaderProgram, 'uTextureSize');
+		spriteShaderProgram.uTextureOffset = gl.getUniformLocation(spriteShaderProgram, 'uTextureOffset');
 
-		shaderProgram.uTextureSize = gl.getUniformLocation(shaderProgram, 'uTextureSize');
-		shaderProgram.uTextureOffset = gl.getUniformLocation(shaderProgram, 'uTextureOffset');
+		spriteShaderProgram.uAlpha = gl.getUniformLocation(spriteShaderProgram, 'uAlpha');
 
-		shaderProgram.alphaUniform = gl.getUniformLocation(shaderProgram, 'uAlpha');
+		fg.spriteShaderProgram = spriteShaderProgram;
 
-		fg.shaderProgram = shaderProgram;
+		// Shader programs for gradients
+
+        fragmentShader = fg.getShader([
+			'precision mediump float;',
+
+			'varying vec4 vColor;',
+
+			'uniform float uAlpha;',
+
+			'void main(void) {',
+				'gl_FragColor = vec4(vColor.rgb, vColor.a * uAlpha);',
+			'}'
+		].join('\n'), gl.FRAGMENT_SHADER);
+
+        vertexShader = fg.getShader([
+			'attribute vec3 aVertexPosition;',
+			'attribute vec4 aVertexColor;',
+
+			'uniform mat4 uMVMatrix;',
+			'uniform mat4 uPMatrix;',
+
+			'varying vec4 vColor;',
+
+			'void main(void) {',
+				'gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);',
+				'vColor = aVertexColor;',
+			'}'
+		].join('\n'), gl.VERTEX_SHADER);
+
+		gradientShaderProgram = gl.createProgram();
+		gl.attachShader(gradientShaderProgram, vertexShader);
+		gl.attachShader(gradientShaderProgram, fragmentShader);
+		gl.linkProgram(gradientShaderProgram);
+
+		if (!gl.getProgramParameter(gradientShaderProgram, gl.LINK_STATUS)) {
+			return;
+		}
+
+		gradientShaderProgram.aVertexPosition = gl.getAttribLocation(gradientShaderProgram, 'aVertexPosition');
+		gl.enableVertexAttribArray(gradientShaderProgram.aVertexPosition);
+
+		gradientShaderProgram.aVertexColor = gl.getAttribLocation(gradientShaderProgram, 'aVertexColor');
+		gl.enableVertexAttribArray(gradientShaderProgram.aVertexColor);
+
+		gradientShaderProgram.uPMatrix = gl.getUniformLocation(gradientShaderProgram, 'uPMatrix');
+		gradientShaderProgram.uMVMatrix = gl.getUniformLocation(gradientShaderProgram, 'uMVMatrix');
+
+		gradientShaderProgram.uAlpha = gl.getUniformLocation(gradientShaderProgram, 'uAlpha');
+
+		fg.gradientShaderProgram = gradientShaderProgram;
+
+		fg.lastProgram = null;
 	};
 
 	fg.initBuffers = function () {
@@ -261,7 +506,7 @@
 				animation_options,
 				currentFrame = options.currentFrame,
 				gl = fg.gl,
-				shaderProgram = fg.shaderProgram,
+				spriteShaderProgram = fg.spriteShaderProgram,
 				mvMatrix = fg.mvMatrix,
 				pMatrix = fg.pMatrix
 			;
@@ -284,27 +529,32 @@
 				old_alpha = fg.globalAlpha;
 				fg.globalAlpha *= alpha;
 
+				if (fg.lastProgram !== fg.spriteShaderProgram) {
+					gl.useProgram(fg.spriteShaderProgram);
+					fg.lastProgram = fg.spriteShaderProgram;
+				}
+
 				gl.bindBuffer(gl.ARRAY_BUFFER, animation.vertexPositionBuffer);
-				gl.vertexAttribPointer(shaderProgram.aVertexPosition, animation.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				gl.vertexAttribPointer(spriteShaderProgram.aVertexPosition, animation.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, fg.textureCoordBuffer);
-				gl.vertexAttribPointer(shaderProgram.aTextureCoord, fg.textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				gl.vertexAttribPointer(spriteShaderProgram.aTextureCoord, fg.textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 				gl.activeTexture(gl.TEXTURE0);
 				gl.bindTexture(gl.TEXTURE_2D, animation.texture);
-				gl.uniform1i(shaderProgram.uSampler, 0);
+				gl.uniform1i(spriteShaderProgram.uSampler, 0);
 
-				gl.uniform2fv(shaderProgram.uTextureSize, animation.textureSize);
+				gl.uniform2fv(spriteShaderProgram.uTextureSize, animation.textureSize);
 				gl.uniform2f(
-					shaderProgram.uTextureOffset,
+					spriteShaderProgram.uTextureOffset,
 					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
 					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay)
 				);
 
-				gl.uniformMatrix4fv(shaderProgram.uPMatrix, false, pMatrix);
-				gl.uniformMatrix4fv(shaderProgram.uMVMatrix, false, mvMatrix);
+				gl.uniformMatrix4fv(spriteShaderProgram.uPMatrix, false, pMatrix);
+				gl.uniformMatrix4fv(spriteShaderProgram.uMVMatrix, false, mvMatrix);
 
-				gl.uniform1f(shaderProgram.alphaUniform, fg.globalAlpha);
+				gl.uniform1f(spriteShaderProgram.uAlpha, fg.globalAlpha);
 
 				gl.drawArrays(gl.TRIANGLE_STRIP, 0, animation.vertexPositionBuffer.numItems);
 
@@ -351,6 +601,8 @@
 			;
 
 			fg.PSpriteGroup.init.apply(this, arguments);
+
+			this.old_options = {};
 
 			if (!parent) {
 				width = options.width;
@@ -411,7 +663,20 @@
 		// Public functions
 
 		remove: function () {
+			var
+				background = this.options.background,
+				old_background = this.old_options.background
+			;
+
 			fg.PSpriteGroup.remove.apply(this, arguments);
+
+			if (old_background) {
+				old_background.removeGroup(this);
+			}
+
+			if (background) {
+				background.removeGroup(this);
+			}
 
 			if (this.dom) {
 				this.dom.remove();
@@ -423,8 +688,13 @@
 		draw: function () {
 			var
 				options = this.options,
+				old_options = this.old_options,
 				left = this.left,
 				top = this.top,
+				width = this.width,
+				height = this.height,
+				background = options.background,
+				old_background = old_options.background,
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
@@ -438,6 +708,31 @@
 			if (!this.parent) {
 				gl.clear(gl.COLOR_BUFFER_BIT);
 				fg.globalAlpha = 1;
+			}
+
+			if (background !== old_background) {
+				if (old_background) {
+					old_background.removeGroup(this);
+				}
+
+				if (background) {
+					background.addGroup(this);
+				}
+
+				old_options.width = width;
+				old_options.height = height;
+				old_options.background = background;
+			} else {
+				if ((width !== old_options.width) || (height !== old_options.height)) {
+					// Reset the background in order to create a new one with the new width and height
+					if (background) {
+						background.removeGroup(this);
+						background.addGroup(this);
+					}
+
+					old_options.width = width;
+					old_options.height = height;
+				}
 			}
 
 			if (this.layers.length && alpha && !options.hidden) {
@@ -467,6 +762,10 @@
 
 				old_alpha = fg.globalAlpha;
 				fg.globalAlpha *= alpha;
+
+				if (background) {
+					background.drawBackground(gl, this);
+				}
 
 				fg.PSpriteGroup.draw.apply(this, arguments);
 
