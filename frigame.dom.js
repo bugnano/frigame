@@ -742,6 +742,11 @@
 					css_options['background-image'] = '';
 					css_options['background-size'] = '';
 
+					if (ie_filters && ie_filters.image) {
+						ie_filters.image = '';
+						apply_ie_filters = true;
+					}
+
 					if (ie_filters && ie_filters.gradient) {
 						ie_filters.gradient = '';
 						apply_ie_filters = true;
