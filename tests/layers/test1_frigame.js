@@ -3,7 +3,8 @@ $(function () {
 		fg = friGame,
 		background = fg.Animation('ruler.png'),
 		animation = fg.Animation('sh.png', {type: fg.ANIMATION_HORIZONTAL, numberOfFrame: 4, rate: 300}),
-		gradient = fg.Gradient({r: 128}, {b: 255, a: 0.3}, fg.GRADIENT_HORIZONTAL)
+		gradient = fg.Gradient({r: 128}, {b: 255, a: 0.3}, fg.GRADIENT_HORIZONTAL),
+		pinkgirl = fg.Animation('pinkgirl.png')
 	;
 
 	fg.startGame(function () {
@@ -15,6 +16,7 @@ $(function () {
 				.addSprite('sprite1', {animation: animation, left: 16, top: 32})
 				.addSprite('sprite2', {animation: animation, left: 112, top: 64})
 			.end()
+			.addGroup('group2', {left: 100, top: 150, width: 300, height: 200, background: pinkgirl}).end()
 		;
 
 		fg.sprites.group1.move({left: 64, top: 128});

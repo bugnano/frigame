@@ -36,7 +36,8 @@
 		transformFunction: '',
 		opacity: Modernizr.opacity,
 		rgba: Modernizr.rgba,
-		svg: Modernizr.svg
+		svg: Modernizr.svg,
+		backgroundsize: Modernizr.backgroundsize
 	};
 
 	if (Modernizr.csstransforms) {
@@ -173,10 +174,11 @@
 			this.dom_initialized = true;
 		},
 
-		getBackground: function (css_options, ie_filters) {
+		getBackground: function (background_type, css_options, ie_filters) {
 			var
 				apply_ie_filters = false
 			;
+
 			if (!this.dom_initialized) {
 				this.initDOM();
 			}
@@ -189,6 +191,43 @@
 				ie_filters.gradient = this.ie_filter;
 				apply_ie_filters = true;
 			}
+
+			return apply_ie_filters;
+		}
+	});
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	$.extend(fg.PAnimation, {
+		getBackground: function (background_type, css_options, ie_filters) {
+			var
+				support = fg.support,
+				apply_ie_filters = false
+			;
+
+			if (background_type === fg.BACKGROUND_STRETCHED) {
+				if (support.backgroundsize) {
+					// The proper way to stretch the background
+					css_options['background-image'] = ['url("', this.options.imageURL, '")'].join('');
+					css_options['background-size'] = '100% 100%';
+				} else if (support.ieFilter) {
+					// Background stretching supported through proprietary filter
+					ie_filters.image = ['progid:DXImageTransform.Microsoft.AlphaImageLoader(src="', this.options.imageURL, '",sizingMethod="scale")'].join('');
+					apply_ie_filters = true;
+				} else {
+					// Background stretching not supported, fall back to tiled
+					css_options['background-image'] = ['url("', this.options.imageURL, '")'].join('');
+				}
+			} else {
+				// A simple tiled background
+				css_options['background-image'] = ['url("', this.options.imageURL, '")'].join('');
+			}
+
+			return apply_ie_filters;
 		}
 	});
 
@@ -277,7 +316,7 @@
 			;
 
 			// Step 1: Apply the filters
-			dom.css('filter', [filters.matrix, filters.alpha, filters.gradient].join(''));
+			dom.css('filter', [filters.matrix, filters.alpha, filters.image, filters.gradient].join(''));
 
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
@@ -357,6 +396,7 @@
 						this.ieFilters = {
 							matrix: '',
 							alpha: '',
+							image: '',
 							gradient: ''
 						};
 					}
@@ -538,6 +578,7 @@
 					this.ieFilters = {
 						matrix: '',
 						alpha: '',
+						image: '',
 						gradient: ''
 					};
 				} else {
@@ -568,6 +609,7 @@
 				width = this.width,
 				height = this.height,
 				background = options.background,
+				backgroundType = options.backgroundType,
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
@@ -582,7 +624,7 @@
 				apply_ie_filters = false
 			;
 
-			if (this.layers.length && alpha && !options.hidden) {
+			if ((this.layers.length || background) && alpha && !options.hidden) {
 				if (!this.dom) {
 					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
@@ -593,6 +635,7 @@
 						this.ieFilters = {
 							matrix: '',
 							alpha: '',
+							image: '',
 							gradient: ''
 						};
 
@@ -646,7 +689,7 @@
 						}
 					}
 
-					old_options.width = height;
+					old_options.height = height;
 				}
 
 				if	(
@@ -693,7 +736,7 @@
 					old_options.alpha = alpha;
 				}
 
-				if (background !== old_options.background) {
+				if ((background !== old_options.background) || (backgroundType !== old_options.backgroundType)) {
 					// Reset all the background options before applying the new background
 					css_options['background-color'] = '';
 					css_options['background-image'] = '';
@@ -705,7 +748,7 @@
 					}
 
 					if (background) {
-						if (background.getBackground(css_options, ie_filters)) {
+						if (background.getBackground(backgroundType, css_options, ie_filters)) {
 							apply_ie_filters = true;
 						}
 					}
@@ -713,6 +756,7 @@
 					update_css = true;
 
 					old_options.background = background;
+					old_options.backgroundType = backgroundType;
 				}
 
 				if (update_css) {

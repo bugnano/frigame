@@ -735,7 +735,7 @@
 				}
 			}
 
-			if (this.layers.length && alpha && !options.hidden) {
+			if ((this.layers.length || background) && alpha && !options.hidden) {
 				if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
 					fg.mvPushMatrix();
 					context_saved = true;

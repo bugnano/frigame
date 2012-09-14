@@ -70,6 +70,9 @@ var friGame = {};
 		GRADIENT_VERTICAL: 0,
 		GRADIENT_HORIZONTAL: 1,
 
+		BACKGROUND_TILED: 0,
+		BACKGROUND_STRETCHED: 1,
+
 		// Implementation details
 
 		refreshRate: 30
@@ -1142,7 +1145,8 @@ var friGame = {};
 			// Set default options
 			$.extend(my_options, {
 				// Public options
-				background: null
+				background: null,
+				backgroundType: fg.BACKGROUND_TILED
 
 				// Implementation details
 			});
@@ -1171,6 +1175,10 @@ var friGame = {};
 
 			if (new_options.background !== undefined) {
 				my_options.background = new_options.background;
+			}
+
+			if (new_options.backgroundType !== undefined) {
+				my_options.backgroundType = new_options.backgroundType;
 			}
 
 			return this;
