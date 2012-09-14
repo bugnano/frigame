@@ -154,6 +154,45 @@
 			ctx.fillRect(0, 0, width, height);
 		}
 	});
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	$.extend(fg.PAnimation, {
+		drawBackground: function (ctx, group) {
+			var
+				img = this.options.img,
+				fillStyle = this.fillStyle
+			;
+
+			if (group.options.backgroundType === fg.BACKGROUND_STRETCHED) {
+				// Stretched background
+				fg.safeDrawImage(
+					ctx,
+					img,
+					0,
+					0,
+					img.width,
+					img.height,
+					0,
+					0,
+					group.width,
+					group.height
+				);
+			} else {
+				// Tiled background
+				if (!fillStyle) {
+					fillStyle = ctx.createPattern(img, 'repeat');
+					this.fillStyle = fillStyle;
+				}
+
+				ctx.fillStyle = fillStyle;
+				ctx.fillRect(0, 0, group.width, group.height);
+			}
+		}
+	});
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -279,11 +318,11 @@
 
 			fg.PSpriteGroup.remove.apply(this, arguments);
 
-			if (old_background) {
+			if (old_background && old_background.removeGroup) {
 				old_background.removeGroup(this);
 			}
 
-			if (background) {
+			if (background && background.removeGroup) {
 				background.removeGroup(this);
 			}
 
@@ -320,11 +359,11 @@
 			}
 
 			if (background !== old_background) {
-				if (old_background) {
+				if (old_background && old_background.removeGroup) {
 					old_background.removeGroup(this);
 				}
 
-				if (background) {
+				if (background && background.addGroup) {
 					background.addGroup(this);
 				}
 
@@ -335,8 +374,13 @@
 				if ((width !== old_options.width) || (height !== old_options.height)) {
 					// Reset the background in order to create a new one with the new width and height
 					if (background) {
-						background.removeGroup(this);
-						background.addGroup(this);
+						if (background.removeGroup) {
+							background.removeGroup(this);
+						}
+
+						if (background.addGroup) {
+							background.addGroup(this);
+						}
 					}
 
 					old_options.width = width;
