@@ -151,7 +151,7 @@
 				ctx.fillStyle = this.gradients[dimension].fillStyle;
 			}
 
-			ctx.fillRect(0, 0, width, height);
+			ctx.fill();
 		}
 	});
 	// ******************************************************************** //
@@ -189,7 +189,7 @@
 				}
 
 				ctx.fillStyle = fillStyle;
-				ctx.fillRect(0, 0, group.width, group.height);
+				ctx.fill();
 			}
 		}
 	});
@@ -337,6 +337,7 @@
 			var
 				options = this.options,
 				old_options = this.old_options,
+				parent = this.parent,
 				left = this.left,
 				top = this.top,
 				width = this.width,
@@ -347,13 +348,14 @@
 				scaleh = options.scaleh,
 				scalev = options.scalev,
 				alpha = options.alpha,
+				crop = options.crop,
 				old_alpha,
 				alpha_changed,
 				context_saved,
 				ctx = fg.ctx
 			;
 
-			if (!this.parent) {
+			if (!parent) {
 				fg.ctx.clearRect(0, 0, width, height);
 				fg.globalAlpha = 1;
 			}
@@ -423,8 +425,23 @@
 					alpha_changed = false;
 				}
 
+				if (background || crop) {
+					if (!context_saved) {
+						ctx.save();
+						context_saved = true;
+					}
+
+					// Prepare a rect path for the background and the clipping region
+					ctx.beginPath();
+					ctx.rect(0, 0, width, height);
+				}
+
 				if (background) {
 					background.drawBackground(ctx, this);
+				}
+
+				if (crop) {
+					ctx.clip();
 				}
 
 				fg.PSpriteGroup.draw.apply(this, arguments);

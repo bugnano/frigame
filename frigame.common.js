@@ -1146,7 +1146,8 @@ var friGame = {};
 			$.extend(my_options, {
 				// Public options
 				background: null,
-				backgroundType: fg.BACKGROUND_TILED
+				backgroundType: fg.BACKGROUND_TILED,
+				crop: false
 
 				// Implementation details
 			});
@@ -1180,6 +1181,20 @@ var friGame = {};
 			if (new_options.backgroundType !== undefined) {
 				my_options.backgroundType = new_options.backgroundType;
 			}
+
+			return this;
+		},
+
+		crop: function (cropping) {
+			var
+				options = this.options
+			;
+
+			if (cropping === undefined) {
+				return options.crop;
+			}
+
+			options.crop = cropping;
 
 			return this;
 		},
@@ -1338,6 +1353,7 @@ var friGame = {};
 				// The scenegraph cannot be resized or moved
 				scenegraph.resize = null;
 				scenegraph.move = null;
+				scenegraph.crop = null;
 			}
 
 			return scenegraph;

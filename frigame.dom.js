@@ -316,7 +316,7 @@
 			;
 
 			// Step 1: Apply the filters
-			dom.css('filter', [filters.matrix, filters.alpha, filters.image, filters.gradient].join(''));
+			dom.css('filter', [filters.matrix, filters.alpha, filters.gradient, filters.image].join(''));
 
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
@@ -396,8 +396,8 @@
 						this.ieFilters = {
 							matrix: '',
 							alpha: '',
-							image: '',
-							gradient: ''
+							gradient: '',
+							image: ''
 						};
 					}
 				}
@@ -578,8 +578,8 @@
 					this.ieFilters = {
 						matrix: '',
 						alpha: '',
-						image: '',
-						gradient: ''
+						gradient: '',
+						image: ''
 					};
 				} else {
 					fg.support.ieFilter = false;
@@ -603,7 +603,7 @@
 			var
 				options = this.options,
 				old_options = this.old_options,
-				dom = this.dom,
+				parent = this.parent,
 				left = this.left,
 				top = this.top,
 				width = this.width,
@@ -615,8 +615,10 @@
 				scalev = options.scalev,
 				alpha = options.alpha,
 				hidden = options.hidden,
+				crop = options.crop,
 				css_options = {},
 				update_css = false,
+				dom = this.dom,
 				support = fg.support,
 				transformFunction = support.transformFunction,
 				ieFilter = support.ieFilter,
@@ -626,7 +628,7 @@
 
 			if ((this.layers.length || background) && alpha && !options.hidden) {
 				if (!this.dom) {
-					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
+					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(parent.dom);
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					this.dom = dom;
@@ -635,8 +637,8 @@
 						this.ieFilters = {
 							matrix: '',
 							alpha: '',
-							image: '',
-							gradient: ''
+							gradient: '',
+							image: ''
 						};
 
 						ie_filters = this.ieFilters;
@@ -762,6 +764,20 @@
 
 					old_options.background = background;
 					old_options.backgroundType = backgroundType;
+				}
+
+				if (crop !== old_options.crop) {
+					// Cropping has no effect on the playground
+					if (parent) {
+						if (crop) {
+							css_options.overflow = 'hidden';
+						} else {
+							css_options.overflow = 'visible';
+						}
+						update_css = true;
+					}
+
+					old_options.crop = crop;
 				}
 
 				if (update_css) {
