@@ -361,6 +361,7 @@
 			var
 				options = this.options,
 				old_options = this.old_options,
+				parent = this.parent,
 				currentFrame = options.currentFrame,
 				animation = options.animation,
 				animation_options,
@@ -380,15 +381,24 @@
 				support = fg.support,
 				transformFunction = support.transformFunction,
 				ieFilter = support.ieFilter,
-				apply_ie_filters = false
+				apply_ie_filters = false,
+				last_sprite = fg.last_sprite
 			;
 
 			if (animation && alpha && !options.hidden) {
 				animation_options = animation.options;
 
 				if (!dom) {
-					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(this.parent.dom);
+					dom = $(['<div id="', this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
+
+					if (last_sprite === parent.name) {
+						dom.prependTo(parent.dom);
+					} else {
+						dom.insertAfter(fg.sprites[last_sprite].dom);
+					}
+
+					old_options.last_sprite = last_sprite;
 
 					this.dom = dom;
 
@@ -400,7 +410,21 @@
 							image: ''
 						};
 					}
+				} else {
+					if (last_sprite !== old_options.last_sprite) {
+						// The position in the DOM has changed
+						dom.detach();
+						if (last_sprite === parent.name) {
+							dom.prependTo(parent.dom);
+						} else {
+							dom.insertAfter(fg.sprites[last_sprite].dom);
+						}
+
+						old_options.last_sprite = last_sprite;
+					}
 				}
+
+				fg.last_sprite = this.name;
 
 				if (hidden !== old_options.hidden) {
 					dom.show();
@@ -571,6 +595,8 @@
 					'overflow': 'hidden'
 				});
 
+				this.old_options.last_sprite = name;
+
 				this.dom = dom;
 
 				if (dom.get(0).filters) {
@@ -623,13 +649,28 @@
 				transformFunction = support.transformFunction,
 				ieFilter = support.ieFilter,
 				ie_filters = ieFilter && this.ieFilters,
-				apply_ie_filters = false
+				apply_ie_filters = false,
+				last_sprite = fg.last_sprite,
+				name = this.name
 			;
+
+			if (!parent) {
+				last_sprite = name;
+				fg.last_sprite = last_sprite;
+			}
 
 			if ((this.layers.length || background) && alpha && !options.hidden) {
 				if (!this.dom) {
-					dom = $(['<div id="', this.name, '"></div>'].join('')).appendTo(parent.dom);
+					dom = $(['<div id="', this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
+
+					if (last_sprite === parent.name) {
+						dom.prependTo(parent.dom);
+					} else {
+						dom.insertAfter(fg.sprites[last_sprite].dom);
+					}
+
+					old_options.last_sprite = last_sprite;
 
 					this.dom = dom;
 
@@ -643,7 +684,21 @@
 
 						ie_filters = this.ieFilters;
 					}
+				} else {
+					if (last_sprite !== old_options.last_sprite) {
+						// The position in the DOM has changed
+						dom.detach();
+						if (last_sprite === parent.name) {
+							dom.prependTo(parent.dom);
+						} else {
+							dom.insertAfter(fg.sprites[last_sprite].dom);
+						}
+
+						old_options.last_sprite = last_sprite;
+					}
 				}
+
+				fg.last_sprite = this.name;
 
 				if (hidden !== old_options.hidden) {
 					dom.show();
@@ -789,6 +844,9 @@
 				}
 
 				fg.PSpriteGroup.draw.apply(this, arguments);
+
+				// Update the last sprite after drawing all the children nodes
+				fg.last_sprite = name;
 			} else {
 				if (dom) {
 					if (hidden && (hidden !== old_options.hidden)) {

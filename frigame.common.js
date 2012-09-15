@@ -735,6 +735,145 @@ var friGame = {};
 			delete fg.sprites[name];
 		},
 
+		moveFirst: function () {
+			var
+				parent = this.parent,
+				parent_layers,
+				len_parent_layers,
+				name = this.name,
+				obj,
+				i
+			;
+
+			if (parent) {
+				parent_layers = parent.layers;
+				len_parent_layers = parent_layers.length;
+
+				// Step 1: Remove myself from the parent layers
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === name) {
+						obj = parent_layers.splice(i, 1)[0];
+						break;
+					}
+				}
+
+				// Step 2: Insert myself
+				if (obj) {
+					parent_layers.unshift(obj);
+				}
+			}
+
+			return this;
+		},
+
+		moveLast: function () {
+			var
+				parent = this.parent,
+				parent_layers,
+				len_parent_layers,
+				name = this.name,
+				obj,
+				i
+			;
+
+			if (parent) {
+				parent_layers = parent.layers;
+				len_parent_layers = parent_layers.length;
+
+				// Step 1: Remove myself from the parent layers
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === name) {
+						obj = parent_layers.splice(i, 1)[0];
+						break;
+					}
+				}
+
+				// Step 2: Insert myself
+				if (obj) {
+					parent_layers.push(obj);
+				}
+			}
+
+			return this;
+		},
+
+		moveBefore: function (name) {
+			var
+				parent = this.parent,
+				parent_layers,
+				len_parent_layers,
+				my_name = this.name,
+				obj,
+				i
+			;
+
+			if (parent) {
+				parent_layers = parent.layers;
+				len_parent_layers = parent_layers.length;
+
+				// Step 1: Remove myself from the parent layers
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === my_name) {
+						obj = parent_layers.splice(i, 1)[0];
+						len_parent_layers -= 1;
+						break;
+					}
+				}
+
+				// Step 2: Find the position and insert myself
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === name) {
+						break;
+					}
+				}
+
+				if (obj) {
+					parent_layers.splice(i, 0, obj);
+				}
+			}
+
+			return this;
+		},
+
+		moveAfter: function (name) {
+			var
+				parent = this.parent,
+				parent_layers,
+				len_parent_layers,
+				my_name = this.name,
+				obj,
+				i
+			;
+
+			if (parent) {
+				parent_layers = parent.layers;
+				len_parent_layers = parent_layers.length;
+
+				// Step 1: Remove myself from the parent layers
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === my_name) {
+						obj = parent_layers.splice(i, 1)[0];
+						len_parent_layers -= 1;
+						break;
+					}
+				}
+
+				// Step 2: Find the position and insert myself
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === name) {
+						// The insertion is done after this one
+						i += 1;
+						break;
+					}
+				}
+
+				if (obj) {
+					parent_layers.splice(i, 0, obj);
+				}
+			}
+
+			return this;
+		},
 
 		rotate: function (angle) {
 			if (angle === undefined) {
@@ -1259,6 +1398,26 @@ var friGame = {};
 			;
 
 			this.layers.push({name: name, obj: group});
+
+			return group;
+		},
+
+		insertSprite: function (name, options) {
+			var
+				sprite = fg.Sprite(name, options, this)
+			;
+
+			this.layers.unshift({name: name, obj: sprite});
+
+			return this;
+		},
+
+		insertGroup: function (name, options) {
+			var
+				group = fg.SpriteGroup(name, options, this)
+			;
+
+			this.layers.unshift({name: name, obj: group});
 
 			return group;
 		},
