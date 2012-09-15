@@ -9,7 +9,7 @@ $(function () {
 		}),
 
 		simpleHorizontalAnimation = fg.Animation('sh.png', {
-			type: fg.ANIMATION_HORIZONTAL,
+			type: fg.ANIMATION_HORIZONTAL + fg.ANIMATION_BACKWARDS,
 			numberOfFrame: 4,
 			rate: 300
 		}),
@@ -74,6 +74,20 @@ $(function () {
 			numberOfFrame: 9,
 			rate: 60,
 			frameHeight: 64
+		}),
+
+		pingpongBackwardsAnimation = fg.Animation('rebound.png', {
+			type: fg.ANIMATION_HORIZONTAL + fg.ANIMATION_PINGPONG + fg.ANIMATION_ONCE + fg.ANIMATION_BACKWARDS,
+			numberOfFrame: 9,
+			//rate: 60
+			rate: 600
+		}),
+
+		multiPingpongBackwardsAnimation = fg.Animation('reboundm.png', {
+			type: fg.ANIMATION_HORIZONTAL + fg.ANIMATION_PINGPONG + fg.ANIMATION_BACKWARDS,
+			numberOfFrame: 9,
+			rate: 60,
+			frameHeight: 64
 		})
 	;
 
@@ -89,13 +103,18 @@ $(function () {
 			.addSprite('multiOffsetHorizontal', {animation: multiOffsetHorizontalAnimation, animationIndex: 1, left: 259})
 			.addSprite('pingpong', {animation: pingpongAnimation, left: 286})
 			.addSprite('multiPingpong', {animation: multiPingpongAnimation, left: 350})
+			.addSprite('backPingpong', {animation: pingpongBackwardsAnimation, left: 414})
+			.addSprite('multiBackPingpong', {animation: multiPingpongBackwardsAnimation, animationIndex: 1, left: 478})
 		;
 
 		fg.sprites.multiVertical.setAnimation({animationIndex: 1});
 		fg.sprites.multiHorizontal.setAnimation({animationIndex: 1});
 		fg.sprites.multiPingpong.setAnimation({animationIndex: 1});
 		fg.sprites.pingpong.setAnimation({callback: function () {
-			$('<p>Done</p>').appendTo('#playground').css({position: 'absolute', top: '64px'});
+			$('<p>Forwards Done</p>').appendTo('#playground').css({position: 'absolute', top: '64px'});
+		}});
+		fg.sprites.backPingpong.setAnimation({callback: function () {
+			$('<p>Backwards Done</p>').appendTo('#playground').css({position: 'absolute', top: '88px'});
 		}});
 	});
 });
