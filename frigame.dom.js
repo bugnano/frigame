@@ -372,7 +372,7 @@
 				parent = this.parent,
 				currentFrame = options.currentFrame,
 				animation = options.animation,
-				animation_options,
+				animation_options = this.animation_options,
 				dom = this.dom,
 				left = this.left,
 				top = this.top,
@@ -394,8 +394,6 @@
 			;
 
 			if (animation && alpha && !options.hidden) {
-				animation_options = animation.options;
-
 				if (!dom) {
 					dom = $(['<div id="', this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS

@@ -9,7 +9,7 @@ $(function () {
 		}),
 
 		simpleHorizontalAnimation = fg.Animation('sh.png', {
-			type: fg.ANIMATION_HORIZONTAL + fg.ANIMATION_BACKWARDS,
+			type: fg.ANIMATION_HORIZONTAL,
 			numberOfFrame: 4,
 			rate: 300
 		}),
@@ -94,7 +94,7 @@ $(function () {
 	fg.startGame(function () {
 		fg.playground()
 			.addSprite('simpleVertical', {animation: simpleVerticalAnimation, left: 0})
-			.addSprite('simpleHorizontal', {animation: simpleHorizontalAnimation, left: 34})
+			.addSprite('simpleHorizontal', {animation: simpleHorizontalAnimation, backwards: true, left: 34})
 			.addSprite('multiVertical', {animation: multiVerticalAnimation, left: 75})
 			.addSprite('multiHorizontal', {animation: multiHorizontalAnimation, left: 109})
 			.addSprite('simpleOffsetVertical', {animation: simpleOffsetVerticalAnimation, left: 150})

@@ -211,7 +211,7 @@
 				scalev = options.scalev,
 				alpha = options.alpha,
 				old_alpha,
-				animation_options,
+				animation_options = this.animation_options,
 				width = this.width,
 				height = this.height,
 				currentFrame = options.currentFrame,
@@ -219,8 +219,6 @@
 			;
 
 			if (animation && alpha && !options.hidden) {
-				animation_options = animation.options;
-
 				ctx.save();
 
 				ctx.translate(this.centerx, this.centery);

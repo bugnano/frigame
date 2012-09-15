@@ -503,7 +503,7 @@
 				scalev = options.scalev,
 				alpha = options.alpha,
 				old_alpha,
-				animation_options,
+				animation_options = this.animation_options,
 				currentFrame = options.currentFrame,
 				gl = fg.gl,
 				spriteShaderProgram = fg.spriteShaderProgram,
@@ -512,8 +512,6 @@
 			;
 
 			if (animation && alpha && !options.hidden) {
-				animation_options = animation.options;
-
 				fg.mvPushMatrix();
 
 				mat4.translate(mvMatrix, [this.centerx, this.centery, 0]);

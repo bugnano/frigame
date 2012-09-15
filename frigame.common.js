@@ -1124,9 +1124,7 @@ var friGame = {};
 				index,
 				animation_options,
 				animation_redefined = new_options.animation !== undefined,
-				index_redefined = new_options.animationIndex !== undefined,
-				callback_redefined = new_options.callback !== undefined,
-				paused_redefined = new_options.paused !== undefined
+				index_redefined = new_options.animationIndex !== undefined
 			;
 
 			if (animation_redefined) {
@@ -1135,14 +1133,18 @@ var friGame = {};
 
 				// Force new width and height based on the animation frame size
 				if (animation) {
-					animation_options = animation.options;
+					animation_options = Object.create(animation.options);
 
 					new_options.width = animation_options.frameWidth;
 					new_options.height = animation_options.frameHeight;
 				} else {
+					animation_options = null;
+
 					new_options.width = 0;
 					new_options.height = 0;
 				}
+
+				this.animation_options = animation_options;
 
 				// Call the resize method with all the options in order to update the position
 				fg.PBaseSprite.resize.call(this, new_options);
@@ -1156,20 +1158,40 @@ var friGame = {};
 				// If the animation gets redefined, the callback could be reset here
 			}
 
+			animation_options = this.animation_options;
+
 			if (index_redefined) {
 				index = new_options.animationIndex;
 				my_options.animationIndex = index;
 
 				animation = my_options.animation;
 				if (animation) {
-					animation_options = animation.options;
-
 					my_options.multix = index * animation_options.multix;
 					my_options.multiy = index * animation_options.multiy;
 				} else {
 					my_options.multix = 0;
 					my_options.multiy = 0;
 				}
+			}
+
+			if (new_options.rate !== undefined) {
+				animation_options.rate = Math.round(new_options.rate / fg.refreshRate) || 1;
+				animation_redefined = true;
+			}
+
+			if (new_options.once !== undefined) {
+				animation_options.once = new_options.once;
+				animation_redefined = true;
+			}
+
+			if (new_options.pingpong !== undefined) {
+				animation_options.pingpong = new_options.pingpong;
+				animation_redefined = true;
+			}
+
+			if (new_options.backwards !== undefined) {
+				animation_options.backwards = new_options.backwards;
+				animation_redefined = true;
 			}
 
 			if (animation_redefined || index_redefined) {
@@ -1184,11 +1206,11 @@ var friGame = {};
 				this.endAnimation = false;
 			}
 
-			if (callback_redefined) {
+			if (new_options.callback !== undefined) {
 				my_options.callback = new_options.callback;
 			}
 
-			if (paused_redefined) {
+			if (new_options.paused !== undefined) {
 				my_options.paused = new_options.paused;
 			}
 
@@ -1204,7 +1226,7 @@ var friGame = {};
 				options = this.options,
 				callback = options.callback,
 				animation = options.animation,
-				animation_options,
+				animation_options = this.animation_options,
 				currentFrame = options.currentFrame
 			;
 
@@ -1212,8 +1234,6 @@ var friGame = {};
 
 			if (!(this.endAnimation || options.paused)) {
 				if (animation) {
-					animation_options = animation.options;
-
 					options.idleCounter += 1;
 					if (options.idleCounter >= animation_options.rate) {
 						options.idleCounter = 0;
