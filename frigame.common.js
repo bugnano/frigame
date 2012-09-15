@@ -117,6 +117,18 @@ var friGame = {};
 		return result;
 	};
 
+	fg.truncate = function(n) {
+		if (n < 0) {
+			return Math.ceil(n);
+		}
+
+		return Math.floor(n);
+	};
+
+	fg.clamp = function(n, minVal, maxVal) {
+		return Math.min(Math.max(n, minVal), maxVal);
+	};
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -229,7 +241,7 @@ var friGame = {};
 		resize: function (options) {
 			var
 				new_options = options || {},
-				round = Math.floor,
+				round = fg.truncate,
 				change_radius
 			;
 
@@ -285,7 +297,7 @@ var friGame = {};
 		move: function (options) {
 			var
 				new_options = options || {},
-				round = Math.round,
+				round = fg.truncate,
 				last_x,
 				last_y
 			;
@@ -508,7 +520,7 @@ var friGame = {};
 			var
 				options = this.options,
 				img = options.img,
-				round = Math.floor
+				round = fg.truncate
 			;
 
 			if (options.type & fg.ANIMATION_HORIZONTAL) {
@@ -597,8 +609,7 @@ var friGame = {};
 	fg.PGradient = {
 		init: function (startColor, endColor, type) {
 			var
-				min = Math.min,
-				max = Math.max,
+				clamp = fg.clamp,
 				round = Math.round
 			;
 
@@ -611,10 +622,10 @@ var friGame = {};
 
 			if (startColor) {
 				startColor = $.extend(this.startColor, fg.pick(startColor, ['r', 'g', 'b', 'a']));
-				startColor.r = max(min(round(startColor.r), 255), 0);
-				startColor.g = max(min(round(startColor.g), 255), 0);
-				startColor.b = max(min(round(startColor.b), 255), 0);
-				startColor.a = max(min(startColor.a, 1), 0);
+				startColor.r = clamp(round(startColor.r), 0, 255);
+				startColor.g = clamp(round(startColor.g), 0, 255);
+				startColor.b = clamp(round(startColor.b), 0, 255);
+				startColor.a = clamp(startColor.a, 0, 1);
 				this.startColorStr = ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('');
 			}
 
@@ -627,10 +638,10 @@ var friGame = {};
 				};
 
 				endColor = $.extend(this.endColor, fg.pick(endColor, ['r', 'g', 'b', 'a']));
-				endColor.r = max(min(round(endColor.r), 255), 0);
-				endColor.g = max(min(round(endColor.g), 255), 0);
-				endColor.b = max(min(round(endColor.b), 255), 0);
-				endColor.a = max(min(endColor.a, 1), 0);
+				endColor.r = clamp(round(endColor.r), 0, 255);
+				endColor.g = clamp(round(endColor.g), 0, 255);
+				endColor.b = clamp(round(endColor.b), 0, 255);
+				endColor.a = clamp(endColor.a, 0, 1);
 				this.endColorStr = ['rgba(', String(endColor.r), ',', String(endColor.g), ',', String(endColor.b), ',', String(endColor.a), ')'].join('');
 
 				if (this.startColorStr === this.endColorStr) {
@@ -1087,7 +1098,8 @@ var friGame = {};
 				currentFrame: 0,
 				frameIncrement: 1,
 				multix: 0,
-				multiy: 0
+				multiy: 0,
+				paused: false
 			});
 
 			fg.PBaseSprite.init.apply(this, arguments);
@@ -1113,7 +1125,8 @@ var friGame = {};
 				animation_options,
 				animation_redefined = new_options.animation !== undefined,
 				index_redefined = new_options.animationIndex !== undefined,
-				callback_redefined = new_options.callback !== undefined
+				callback_redefined = new_options.callback !== undefined,
+				paused_redefined = new_options.paused !== undefined
 			;
 
 			if (animation_redefined) {
@@ -1175,6 +1188,10 @@ var friGame = {};
 				my_options.callback = new_options.callback;
 			}
 
+			if (paused_redefined) {
+				my_options.paused = new_options.paused;
+			}
+
 			return this;
 		},
 
@@ -1193,7 +1210,7 @@ var friGame = {};
 
 			fg.PBaseSprite.update.call(this);
 
-			if (!this.endAnimation) {
+			if (!(this.endAnimation || options.paused)) {
 				if (animation) {
 					animation_options = animation.options;
 
