@@ -33,15 +33,20 @@
 
 	fg.support = {
 		ieFilter: false,
-		transformFunction: '',
-		opacity: Modernizr.opacity,
 		rgba: Modernizr.rgba,
-		svg: Modernizr.svg,
-		backgroundsize: Modernizr.backgroundsize
+		svg: Modernizr.svg
 	};
+
+	if (Modernizr.opacity) {
+		fg.support.opacity = Modernizr.prefixed('opacity');
+	}
 
 	if (Modernizr.csstransforms) {
 		fg.support.transformFunction = Modernizr.prefixed('transform');
+	}
+
+	if (Modernizr.backgroundsize) {
+		fg.support.backgroundsize = Modernizr.prefixed('backgroundSize');
 	}
 
 	// ******************************************************************** //
@@ -126,9 +131,12 @@
 					fg.nextGradientId += 1;
 
 					this.css_options = {
-						'background-image': ['url("data:image/svg+xml;base64,', btoa(svg), '")'].join(''),
-						'background-size': '100% 100%'
+						'background-image': ['url("data:image/svg+xml;base64,', btoa(svg), '")'].join('')
 					};
+
+					if (support.backgroundsize) {
+						this.css_options[support.backgroundsize] = '100% 100%';
+					}
 				} else if (support.ieFilter) {
 					// Gradient supported through proprietary filter
 					str_a = ['0', Math.round(startColor.a * 255).toString(16).toUpperCase()].join('');
@@ -213,7 +221,7 @@
 				if (support.backgroundsize) {
 					// The proper way to stretch the background
 					css_options['background-image'] = ['url("', this.options.imageURL, '")'].join('');
-					css_options['background-size'] = '100% 100%';
+					css_options[support.backgroundsize] = '100% 100%';
 				} else if (support.ieFilter) {
 					// Background stretching supported through proprietary filter
 					ie_filters.image = ['progid:DXImageTransform.Microsoft.AlphaImageLoader(src="', this.options.imageURL, '",sizingMethod="scale")'].join('');
@@ -510,9 +518,9 @@
 
 					if (support.opacity) {
 						if (alpha !== 1) {
-							css_options.opacity = String(alpha);
+							css_options[support.opacity] = String(alpha);
 						} else {
-							css_options.opacity = '';
+							css_options[support.opacity] = '';
 						}
 						update_css = true;
 					} else if (ieFilter) {
@@ -777,9 +785,9 @@
 
 					if (support.opacity) {
 						if (alpha !== 1) {
-							css_options.opacity = String(alpha);
+							css_options[support.opacity] = String(alpha);
 						} else {
-							css_options.opacity = '';
+							css_options[support.opacity] = '';
 						}
 						update_css = true;
 					} else if (ieFilter) {
@@ -797,15 +805,17 @@
 					// Reset all the background options before applying the new background
 					css_options['background-color'] = '';
 					css_options['background-image'] = '';
-					css_options['background-size'] = '';
-
-					if (ie_filters && ie_filters.image) {
-						ie_filters.image = '';
-						apply_ie_filters = true;
+					if (support.backgroundsize) {
+						css_options[support.backgroundsize] = '';
 					}
 
 					if (ie_filters && ie_filters.gradient) {
 						ie_filters.gradient = '';
+						apply_ie_filters = true;
+					}
+
+					if (ie_filters && ie_filters.image) {
+						ie_filters.image = '';
 						apply_ie_filters = true;
 					}
 
