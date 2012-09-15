@@ -426,11 +426,6 @@
 				}
 
 				if (background || crop) {
-					if (!context_saved) {
-						ctx.save();
-						context_saved = true;
-					}
-
 					// Prepare a rect path for the background and the clipping region
 					ctx.beginPath();
 					ctx.rect(0, 0, width, height);
@@ -441,6 +436,11 @@
 				}
 
 				if (crop) {
+					if (!context_saved) {
+						ctx.save();
+						context_saved = true;
+					}
+
 					ctx.clip();
 				}
 
