@@ -752,6 +752,39 @@ var friGame = {};
 			delete fg.sprites[name];
 		},
 
+		registerCallback: function (callback, rate) {
+			rate = Math.round(rate / fg.refreshRate);
+			if (rate === 0) {
+				rate = 1;
+			}
+
+			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
+
+			return this;
+		},
+
+		hide: function () {
+			this.options.hidden = true;
+
+			return this;
+		},
+
+		show: function () {
+			this.options.hidden = false;
+
+			return this;
+		},
+
+		toggle: function (showOrHide) {
+			if (showOrHide === undefined) {
+				showOrHide = this.options.hidden;
+			}
+
+			this.options.hidden = !showOrHide;
+
+			return this;
+		},
+
 		moveFirst: function () {
 			var
 				parent = this.parent,
@@ -808,6 +841,37 @@ var friGame = {};
 				// Step 2: Insert myself
 				if (obj) {
 					parent_layers.push(obj);
+				}
+			}
+
+			return this;
+		},
+
+		moveTo: function (index) {
+			var
+				parent = this.parent,
+				parent_layers,
+				len_parent_layers,
+				name = this.name,
+				obj,
+				i
+			;
+
+			if (parent) {
+				parent_layers = parent.layers;
+				len_parent_layers = parent_layers.length;
+
+				// Step 1: Remove myself from the parent layers
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === name) {
+						obj = parent_layers.splice(i, 1)[0];
+						break;
+					}
+				}
+
+				// Step 2: Insert myself
+				if (obj) {
+					parent_layers.splice(fg.clamp(Math.round(index), 0, parent_layers.length), 0, obj);
 				}
 			}
 
@@ -1002,33 +1066,6 @@ var friGame = {};
 			}
 
 			this.options.alpha = alpha;
-
-			return this;
-		},
-
-		hide: function () {
-			this.options.hidden = true;
-
-			return this;
-		},
-
-		show: function () {
-			this.options.hidden = false;
-
-			return this;
-		},
-
-		hidden: function () {
-			return this.options.hidden;
-		},
-
-		registerCallback: function (callback, rate) {
-			rate = Math.round(rate / fg.refreshRate);
-			if (rate === 0) {
-				rate = 1;
-			}
-
-			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
 
 			return this;
 		},
