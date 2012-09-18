@@ -271,6 +271,56 @@
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
+		},
+
+		drawAnimation: function (gl, sprite) {
+			var
+				options = sprite.options,
+				animation_options = sprite.animation_options,
+				currentFrame = options.currentFrame,
+				vertexPositionBuffer = this.vertexPositionBuffer,
+				spriteShaderProgram = fg.spriteShaderProgram,
+				mvMatrix = fg.mvMatrix,
+				pMatrix = fg.pMatrix
+			;
+
+			if (!vertexPositionBuffer) {
+				this.initBuffers();
+				vertexPositionBuffer = this.vertexPositionBuffer;
+			}
+
+			if (!this.texture) {
+				this.initTexture();
+			}
+
+			if (fg.lastProgram !== fg.spriteShaderProgram) {
+				gl.useProgram(fg.spriteShaderProgram);
+				fg.lastProgram = fg.spriteShaderProgram;
+			}
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+			gl.vertexAttribPointer(spriteShaderProgram.aVertexPosition, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, fg.textureCoordBuffer);
+			gl.vertexAttribPointer(spriteShaderProgram.aTextureCoord, fg.textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D, this.texture);
+			gl.uniform1i(spriteShaderProgram.uSampler, 0);
+
+			gl.uniform2fv(spriteShaderProgram.uTextureSize, this.textureSize);
+			gl.uniform2f(
+				spriteShaderProgram.uTextureOffset,
+				animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
+				animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay)
+			);
+
+			gl.uniformMatrix4fv(spriteShaderProgram.uPMatrix, false, pMatrix);
+			gl.uniformMatrix4fv(spriteShaderProgram.uMVMatrix, false, mvMatrix);
+
+			gl.uniform1f(spriteShaderProgram.uAlpha, fg.globalAlpha);
+
+			gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPositionBuffer.numItems);
 		}
 	});
 
@@ -503,12 +553,8 @@
 				scalev = options.scalev,
 				alpha = options.alpha,
 				old_alpha,
-				animation_options = this.animation_options,
-				currentFrame = options.currentFrame,
 				gl = fg.gl,
-				spriteShaderProgram = fg.spriteShaderProgram,
-				mvMatrix = fg.mvMatrix,
-				pMatrix = fg.pMatrix
+				mvMatrix = fg.mvMatrix
 			;
 
 			if (animation && alpha && !options.hidden) {
@@ -527,34 +573,7 @@
 				old_alpha = fg.globalAlpha;
 				fg.globalAlpha *= alpha;
 
-				if (fg.lastProgram !== fg.spriteShaderProgram) {
-					gl.useProgram(fg.spriteShaderProgram);
-					fg.lastProgram = fg.spriteShaderProgram;
-				}
-
-				gl.bindBuffer(gl.ARRAY_BUFFER, animation.vertexPositionBuffer);
-				gl.vertexAttribPointer(spriteShaderProgram.aVertexPosition, animation.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-				gl.bindBuffer(gl.ARRAY_BUFFER, fg.textureCoordBuffer);
-				gl.vertexAttribPointer(spriteShaderProgram.aTextureCoord, fg.textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-				gl.activeTexture(gl.TEXTURE0);
-				gl.bindTexture(gl.TEXTURE_2D, animation.texture);
-				gl.uniform1i(spriteShaderProgram.uSampler, 0);
-
-				gl.uniform2fv(spriteShaderProgram.uTextureSize, animation.textureSize);
-				gl.uniform2f(
-					spriteShaderProgram.uTextureOffset,
-					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
-					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay)
-				);
-
-				gl.uniformMatrix4fv(spriteShaderProgram.uPMatrix, false, pMatrix);
-				gl.uniformMatrix4fv(spriteShaderProgram.uMVMatrix, false, mvMatrix);
-
-				gl.uniform1f(spriteShaderProgram.uAlpha, fg.globalAlpha);
-
-				gl.drawArrays(gl.TRIANGLE_STRIP, 0, animation.vertexPositionBuffer.numItems);
+				animation.drawAnimation(gl, this);
 
 				fg.mvPopMatrix();
 
@@ -590,9 +609,6 @@
 				str_width,
 				str_height,
 				canvas,
-				animations = fg.resourceManager.animations,
-				len_animations = animations.length,
-				i,
 				mvMatrix = mat4.create(),
 				mvMatrixStack = [],
 				pMatrix = mat4.create()
@@ -634,11 +650,6 @@
 					fg.gl = gl;
 					fg.initShaders();
 					fg.initBuffers();
-					for (i = 0; i < len_animations; i += 1) {
-						animations[i].initBuffers();
-						animations[i].initTexture();
-					}
-
 					fg.mvMatrix = mvMatrix;
 					fg.mvMatrixStack = mvMatrixStack;
 					fg.pMatrix = pMatrix;
