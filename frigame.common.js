@@ -1,5 +1,5 @@
-/*global jQuery,  */
-/*jslint bitwise: true, sloppy: true, white: true, browser: true */
+/*global jQuery, friGame */
+/*jslint sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
 
@@ -61,15 +61,11 @@ var friGame = {};
 	$.extend(fg, {
 		// Public constants
 
-		// constants for the different type of an animation
-		ANIMATION_VERTICAL: 1,		// genertated by a verical offset of the background
-		ANIMATION_HORIZONTAL: 2,	// genertated by a horizontal offset of the background
-		ANIMATION_ONCE: 4,			// played only once (else looping indefinitly)
-		ANIMATION_PINGPONG: 32,		// at the last frame of the animation it reverses
-		ANIMATION_BACKWARDS: 64,	// played from the last frame to the first
-
 		GRADIENT_VERTICAL: 0,
 		GRADIENT_HORIZONTAL: 1,
+
+		ANIMATION_VERTICAL: 0,
+		ANIMATION_HORIZONTAL: 1,
 
 		BACKGROUND_TILED: 0,
 		BACKGROUND_STRETCHED: 1,
@@ -203,6 +199,255 @@ var friGame = {};
 				}
 			}
 		}
+	};
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	fg.PGradient = {
+		init: function (startColor, endColor, type) {
+			var
+				clamp = fg.clamp,
+				round = Math.round
+			;
+
+			this.startColor = {
+				r: 0,
+				g: 0,
+				b: 0,
+				a: 1
+			};
+
+			if (startColor) {
+				startColor = $.extend(this.startColor, fg.pick(startColor, ['r', 'g', 'b', 'a']));
+				startColor.r = clamp(round(startColor.r), 0, 255);
+				startColor.g = clamp(round(startColor.g), 0, 255);
+				startColor.b = clamp(round(startColor.b), 0, 255);
+				startColor.a = clamp(startColor.a, 0, 1);
+				this.startColorStr = ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('');
+			}
+
+			if (endColor) {
+				this.endColor = {
+					r: 0,
+					g: 0,
+					b: 0,
+					a: 1
+				};
+
+				endColor = $.extend(this.endColor, fg.pick(endColor, ['r', 'g', 'b', 'a']));
+				endColor.r = clamp(round(endColor.r), 0, 255);
+				endColor.g = clamp(round(endColor.g), 0, 255);
+				endColor.b = clamp(round(endColor.b), 0, 255);
+				endColor.a = clamp(endColor.a, 0, 1);
+				this.endColorStr = ['rgba(', String(endColor.r), ',', String(endColor.g), ',', String(endColor.b), ',', String(endColor.a), ')'].join('');
+
+				if (this.startColorStr === this.endColorStr) {
+					this.endColor = this.startColor;
+				}
+			} else {
+				this.endColor = this.startColor;
+				this.endColorStr = this.startColorStr;
+			}
+
+			if (type !== undefined) {
+				this.type = type;
+			} else {
+				this.type = fg.GRADIENT_VERTICAL;
+			}
+		},
+
+		// Public functions
+
+		remove: function () {
+		},
+
+		// Implementation details
+
+		complete: function () {
+			return true;
+		},
+
+		onLoad: function () {
+		}
+	};
+
+	fg.Gradient = function () {
+		var
+			gradient = Object.create(fg.PGradient)
+		;
+
+		gradient.init.apply(gradient, arguments);
+
+		return gradient;
+	};
+
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+	// ******************************************************************** //
+
+	fg.PAnimation = {
+		init: function (imageURL, options) {
+			var
+				my_options,
+				new_options = options || {},
+				img,
+				resourceManager = fg.resourceManager
+			;
+
+			if (this.options) {
+				my_options = this.options;
+			} else {
+				my_options = {};
+				this.options = my_options;
+			}
+
+			// Set default options
+			$.extend(my_options, {
+				// Public options
+				numberOfFrame: 1,
+				rate: fg.refreshRate,
+				type: fg.ANIMATION_HORIZONTAL,
+				once: false,
+				pingpong: false,
+				backwards: false,
+				offsetx: 0,
+				offsety: 0,
+				frameWidth: 0,
+				frameHeight: 0,
+
+				// Implementation details
+				imageURL: '',
+				img: null,
+				halfWidth: 0,
+				halfHeight: 0,
+				deltax: 0,
+				deltay: 0,
+				multix: 0,
+				multiy: 0
+			});
+
+			new_options = $.extend(my_options, fg.pick(new_options, [
+				'numberOfFrame',
+				'rate',
+				'type',
+				'once',
+				'pingpong',
+				'backwards',
+				'offsetx',
+				'offsety',
+				'frameWidth',
+				'frameHeight'
+			]));
+
+			new_options.rate = Math.round(new_options.rate / fg.refreshRate);
+			if (new_options.rate === 0) {
+				new_options.rate = 1;
+			}
+			my_options.rate = new_options.rate;
+
+			my_options.imageURL = imageURL;
+
+			if (resourceManager.images[imageURL]) {
+				img = resourceManager.images[imageURL].img;
+				resourceManager.images[imageURL].refCount += 1;
+			} else {
+				img = new Image();
+				img.src = imageURL;
+				resourceManager.images[imageURL] = {
+					img: img,
+					refCount: 1
+				};
+			}
+
+			my_options.img = img;
+
+			resourceManager.animations.push(this);
+		},
+
+		// Public functions
+
+		remove: function () {
+			var
+				imageURL = this.options.imageURL,
+				resourceManager = fg.resourceManager
+			;
+
+			resourceManager.images[imageURL].refCount -= 1;
+
+			if (resourceManager.images[imageURL].refCount <= 0) {
+				delete resourceManager.images[imageURL];
+			}
+		},
+
+		// Implementation details
+
+		complete: function () {
+			return this.options.img.complete;
+		},
+
+		onLoad: function () {
+			var
+				options = this.options,
+				img = options.img,
+				round = fg.truncate
+			;
+
+			if (options.type === fg.ANIMATION_VERTICAL) {
+				// On multi vertical animations the frameWidth parameter is required
+				if (!options.frameWidth) {
+					options.frameWidth = img.width - options.offsetx;
+				}
+
+				// On vertical animations the frameHeight parameter is optional
+				if (!options.frameHeight) {
+					options.frameHeight = round((img.height - options.offsety) / options.numberOfFrame);
+				}
+
+				options.deltax = 0;
+				options.deltay = options.frameHeight;
+				options.multix = options.frameWidth;
+				options.multiy = 0;
+			} else {
+				// On horizontal animations the frameWidth parameter is optional
+				if (!options.frameWidth) {
+					options.frameWidth = round((img.width - options.offsetx) / options.numberOfFrame);
+				}
+
+				// On multi horizontal animations the frameHeight parameter is required
+				if (!options.frameHeight) {
+					options.frameHeight = img.height - options.offsety;
+				}
+
+				options.deltax = options.frameWidth;
+				options.deltay = 0;
+				options.multix = 0;
+				options.multiy = options.frameHeight;
+			}
+
+			options.halfWidth = round(options.frameWidth / 2);
+			options.halfHeight = round(options.frameHeight / 2);
+
+			this.width = options.frameWidth;
+			this.height = options.frameHeight;
+			this.halfWidth = options.halfWidth;
+			this.halfHeight = options.halfHeight;
+		}
+	};
+
+	fg.Animation = function () {
+		var
+			animation = Object.create(fg.PAnimation)
+		;
+
+		animation.init.apply(animation, arguments);
+
+		return animation;
 	};
 
 	// ******************************************************************** //
@@ -430,244 +675,6 @@ var friGame = {};
 		rect.init.apply(rect, arguments);
 
 		return rect;
-	};
-
-	// ******************************************************************** //
-	// ******************************************************************** //
-	// ******************************************************************** //
-	// ******************************************************************** //
-	// ******************************************************************** //
-
-	fg.PAnimation = {
-		init: function (imageURL, options) {
-			var
-				my_options,
-				img,
-				resourceManager = fg.resourceManager
-			;
-
-			if (this.options) {
-				my_options = this.options;
-			} else {
-				my_options = {};
-				this.options = my_options;
-			}
-
-			// Set default options
-			$.extend(my_options, {
-				// Public options
-				numberOfFrame: 1,
-				rate: fg.refreshRate,
-				type: 0,
-				offsetx: 0,
-				offsety: 0,
-				frameWidth: 0,
-				frameHeight: 0,
-
-				// Implementation details
-				imageURL: '',
-				img: null,
-				halfWidth: 0,
-				halfHeight: 0,
-				deltax: 0,
-				deltay: 0,
-				multix: 0,
-				multiy: 0,
-				once: false,
-				pingpong: false,
-				backwards: false
-			});
-
-			options = $.extend(my_options, options);
-
-			options.rate = Math.round(options.rate / fg.refreshRate);
-			if (options.rate === 0) {
-				options.rate = 1;
-			}
-
-			my_options.imageURL = imageURL;
-
-			if (resourceManager.images[imageURL]) {
-				img = resourceManager.images[imageURL];
-			} else {
-				img = new Image();
-				img.src = imageURL;
-				resourceManager.images[imageURL] = img;
-			}
-
-			my_options.img = img;
-
-			resourceManager.animations.push(this);
-		},
-
-		// Public functions
-
-		width: function () {
-			return this.options.frameWidth;
-		},
-
-		height: function () {
-			return this.options.frameHeight;
-		},
-
-		// Implementation details
-
-		complete: function () {
-			return this.options.img.complete;
-		},
-
-		onLoad: function () {
-			var
-				options = this.options,
-				img = options.img,
-				round = fg.truncate
-			;
-
-			if (options.type & fg.ANIMATION_HORIZONTAL) {
-				// On horizontal animations the frameWidth parameter is optional
-				if (!options.frameWidth) {
-					options.frameWidth = round((img.width - options.offsetx) / options.numberOfFrame);
-				}
-
-				// On multi horizontal animations the frameHeight parameter is required
-				if (!options.frameHeight) {
-					options.frameHeight = img.height - options.offsety;
-				}
-
-				options.deltax = options.frameWidth;
-				options.deltay = 0;
-				options.multix = 0;
-				options.multiy = options.frameHeight;
-			} else if (options.type & fg.ANIMATION_VERTICAL) {
-				// On multi vertical animations the frameWidth parameter is required
-				if (!options.frameWidth) {
-					options.frameWidth = img.width - options.offsetx;
-				}
-
-				// On vertical animations the frameHeight parameter is optional
-				if (!options.frameHeight) {
-					options.frameHeight = round((img.height - options.offsety) / options.numberOfFrame);
-				}
-
-				options.deltax = 0;
-				options.deltay = options.frameHeight;
-				options.multix = options.frameWidth;
-				options.multiy = 0;
-			} else {
-				// Neither horizontal, nor vertical animation. Force single frame
-				options.numberOfFrame = 1;
-
-				// On single frame animations the frameWidth parameter is optional
-				if (!options.frameWidth) {
-					options.frameWidth = img.width - options.offsetx;
-				}
-
-				// On single frame animations the frameHeight parameter is optional
-				if (!options.frameHeight) {
-					options.frameHeight = img.height - options.offsety;
-				}
-
-				options.deltax = 0;
-				options.deltay = 0;
-				options.multix = 0;
-				options.multiy = 0;
-			}
-
-			options.halfWidth = round(options.frameWidth / 2);
-			options.halfHeight = round(options.frameHeight / 2);
-
-			if (options.type & fg.ANIMATION_ONCE) {
-				options.once = true;
-			}
-
-			if (options.type & fg.ANIMATION_PINGPONG) {
-				options.pingpong = true;
-			}
-
-			if (options.type & fg.ANIMATION_BACKWARDS) {
-				options.backwards = true;
-			}
-		}
-	};
-
-	fg.Animation = function () {
-		var
-			animation = Object.create(fg.PAnimation)
-		;
-
-		animation.init.apply(animation, arguments);
-
-		return animation;
-	};
-
-	// ******************************************************************** //
-	// ******************************************************************** //
-	// ******************************************************************** //
-	// ******************************************************************** //
-	// ******************************************************************** //
-
-	fg.PGradient = {
-		init: function (startColor, endColor, type) {
-			var
-				clamp = fg.clamp,
-				round = Math.round
-			;
-
-			this.startColor = {
-				r: 0,
-				g: 0,
-				b: 0,
-				a: 1
-			};
-
-			if (startColor) {
-				startColor = $.extend(this.startColor, fg.pick(startColor, ['r', 'g', 'b', 'a']));
-				startColor.r = clamp(round(startColor.r), 0, 255);
-				startColor.g = clamp(round(startColor.g), 0, 255);
-				startColor.b = clamp(round(startColor.b), 0, 255);
-				startColor.a = clamp(startColor.a, 0, 1);
-				this.startColorStr = ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('');
-			}
-
-			if (endColor) {
-				this.endColor = {
-					r: 0,
-					g: 0,
-					b: 0,
-					a: 1
-				};
-
-				endColor = $.extend(this.endColor, fg.pick(endColor, ['r', 'g', 'b', 'a']));
-				endColor.r = clamp(round(endColor.r), 0, 255);
-				endColor.g = clamp(round(endColor.g), 0, 255);
-				endColor.b = clamp(round(endColor.b), 0, 255);
-				endColor.a = clamp(endColor.a, 0, 1);
-				this.endColorStr = ['rgba(', String(endColor.r), ',', String(endColor.g), ',', String(endColor.b), ',', String(endColor.a), ')'].join('');
-
-				if (this.startColorStr === this.endColorStr) {
-					this.endColor = this.startColor;
-				}
-			} else {
-				this.endColor = this.startColor;
-				this.endColorStr = this.startColorStr;
-			}
-
-			if (type !== undefined) {
-				this.type = type;
-			} else {
-				this.type = fg.GRADIENT_VERTICAL;
-			}
-		}
-	};
-
-	fg.Gradient = function () {
-		var
-			gradient = Object.create(fg.PGradient)
-		;
-
-		gradient.init.apply(gradient, arguments);
-
-		return gradient;
 	};
 
 	// ******************************************************************** //

@@ -63,28 +63,36 @@ $(function () {
 		}),
 
 		pingpongAnimation = fg.Animation('rebound.png', {
-			type: fg.ANIMATION_HORIZONTAL + fg.ANIMATION_PINGPONG + fg.ANIMATION_ONCE,
+			type: fg.ANIMATION_HORIZONTAL,
+			once: true,
+			pingpong: true,
 			numberOfFrame: 9,
 			//rate: 60
 			rate: 600
 		}),
 
 		multiPingpongAnimation = fg.Animation('reboundm.png', {
-			type: fg.ANIMATION_HORIZONTAL + fg.ANIMATION_PINGPONG,
+			type: fg.ANIMATION_HORIZONTAL,
+			pingpong: true,
 			numberOfFrame: 9,
 			rate: 60,
 			frameHeight: 64
 		}),
 
 		pingpongBackwardsAnimation = fg.Animation('rebound.png', {
-			type: fg.ANIMATION_HORIZONTAL + fg.ANIMATION_PINGPONG + fg.ANIMATION_ONCE + fg.ANIMATION_BACKWARDS,
+			type: fg.ANIMATION_HORIZONTAL,
+			once: true,
+			pingpong: true,
+			backwards: true,
 			numberOfFrame: 9,
 			//rate: 60
 			rate: 600
 		}),
 
 		multiPingpongBackwardsAnimation = fg.Animation('reboundm.png', {
-			type: fg.ANIMATION_HORIZONTAL + fg.ANIMATION_PINGPONG + fg.ANIMATION_BACKWARDS,
+			type: fg.ANIMATION_HORIZONTAL,
+			pingpong: true,
+			backwards: true,
 			numberOfFrame: 9,
 			rate: 60,
 			frameHeight: 64
