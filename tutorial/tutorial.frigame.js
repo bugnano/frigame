@@ -231,55 +231,74 @@
 	// --                                      the main declaration:                                                     --
 	// --------------------------------------------------------------------------------------------------------------------
 	$(function () {
-		var
-			// Aniomations declaration:
-
+		// Animations declaration:
+		fg.resourceManager
 			// The background:
-			background1 = fg.Animation('background1.png'),
-			background2 = fg.Animation('background2.png'),
-			background3 = fg.Animation('background3.png'),
-			background4 = fg.Animation('background4.png'),
-			background5 = fg.Animation('background5.png'),
-			background6 = fg.Animation('background6.png')
-		;
+			.addAnimation('background1', 'background1.png')
+			.addAnimation('background2', 'background2.png')
+			.addAnimation('background3', 'background3.png')
+			.addAnimation('background4', 'background4.png')
+			.addAnimation('background5', 'background5.png')
+			.addAnimation('background6', 'background6.png')
 
+			.addAnimation('playerAnimation.idle', 'player_spaceship.png')
+			.addAnimation('playerAnimation.explode', 'player_explode.png', {numberOfFrame: 4, frameHeight: 26, rate: 60, type: fg.ANIMATION_VERTICAL})
+			.addAnimation('playerAnimation.up', 'boosterup.png', {numberOfFrame: 6, frameWidth: 14, rate: 60, type: fg.ANIMATION_HORIZONTAL})
+			.addAnimation('playerAnimation.down', 'boosterdown.png', {numberOfFrame: 6, frameWidth: 14, rate: 60, type: fg.ANIMATION_HORIZONTAL})
+			.addAnimation('playerAnimation.boost', 'booster1.png', {numberOfFrame: 6, frameHeight: 14, rate: 60, type: fg.ANIMATION_VERTICAL})
+			.addAnimation('playerAnimation.booster', 'booster2.png', {numberOfFrame: 6, frameHeight: 14, rate: 60, type: fg.ANIMATION_VERTICAL})
+
+			.addAnimation('enemies[0].idle', 'minion_idle.png', {numberOfFrame: 5, frameHeight: 52, rate: 60, type: fg.ANIMATION_VERTICAL})
+			.addAnimation('enemies[0].explode', 'minion_explode.png', {numberOfFrame: 11, frameHeight: 52, rate: 30, type: fg.ANIMATION_VERTICAL})
+
+			.addAnimation('enemies[1].idle', 'brainy_idle.png', {numberOfFrame: 8, frameHeight: 42, rate: 60, type: fg.ANIMATION_VERTICAL})
+			.addAnimation('enemies[1].explode', 'brainy_explode.png', {numberOfFrame: 8, frameHeight: 42, rate: 60, type: fg.ANIMATION_VERTICAL})
+
+			.addAnimation('enemies[2].idle', 'bossy_idle.png', {numberOfFrame: 5, frameHeight: 100, rate: 60, type: fg.ANIMATION_VERTICAL})
+			.addAnimation('enemies[2].explode', 'bossy_explode.png', {numberOfFrame: 9, frameHeight: 100, rate: 60, type: fg.ANIMATION_VERTICAL})
+
+			.addAnimation('missile.player', 'player_missile.png', {numberOfFrame: 6, frameHeight: 10, rate: 90, type: fg.ANIMATION_VERTICAL})
+			.addAnimation('missile.enemies', 'enemy_missile.png', {numberOfFrame: 6, frameHeight: 15, rate: 90, type: fg.ANIMATION_VERTICAL})
+			.addAnimation('missile.playerexplode', 'player_missile_explode.png', {numberOfFrame: 8, frameHeight: 23, rate: 90, type: fg.ANIMATION_VERTICAL})
+			.addAnimation('missile.enemiesexplode', 'enemy_missile_explode.png', {numberOfFrame: 6, frameHeight: 15, rate: 90, type: fg.ANIMATION_VERTICAL})
+		;
 
 		// Player space shipannimations:
 		$.extend(playerAnimation, {
-			idle: fg.Animation('player_spaceship.png'),
-			explode: fg.Animation('player_explode.png', {numberOfFrame: 4, frameHeight: 26, rate: 60, type: fg.ANIMATION_VERTICAL}),
-			up: fg.Animation('boosterup.png', {numberOfFrame: 6, frameWidth: 14, rate: 60, type: fg.ANIMATION_HORIZONTAL}),
-			down: fg.Animation('boosterdown.png', {numberOfFrame: 6, frameWidth: 14, rate: 60, type: fg.ANIMATION_HORIZONTAL}),
-			boost: fg.Animation('booster1.png', {numberOfFrame: 6, frameHeight: 14, rate: 60, type: fg.ANIMATION_VERTICAL}),
-			booster: fg.Animation('booster2.png', {numberOfFrame: 6, frameHeight: 14, rate: 60, type: fg.ANIMATION_VERTICAL})
+			idle: 'playerAnimation.idle',
+			explode: 'playerAnimation.explode',
+			up: 'playerAnimation.up',
+			down: 'playerAnimation.down',
+			boost: 'playerAnimation.boost',
+			booster: 'playerAnimation.booster'
 		});
 
 		//  List of enemies animations :
 		// 1st kind of enemy:
 		enemies.push({
 			// enemies have two animations
-			idle: fg.Animation('minion_idle.png', {numberOfFrame: 5, frameHeight: 52, rate: 60, type: fg.ANIMATION_VERTICAL}),
-			explode: fg.Animation('minion_explode.png', {numberOfFrame: 11, frameHeight: 52, rate: 30, type: fg.ANIMATION_VERTICAL})
+			idle: 'enemies[0].idle',
+			explode: 'enemies[0].explode'
 		});
 
 		// 2nd kind of enemy:
 		enemies.push({
-			idle: fg.Animation('brainy_idle.png', {numberOfFrame: 8, frameHeight: 42, rate: 60, type: fg.ANIMATION_VERTICAL}),
-			explode: fg.Animation('brainy_explode.png', {numberOfFrame: 8, frameHeight: 42, rate: 60, type: fg.ANIMATION_VERTICAL})
+			idle: 'enemies[1].idle',
+			explode: 'enemies[1].explode'
 		});
 
 		// 3rd kind of enemy:
 		enemies.push({
-			idle: fg.Animation('bossy_idle.png', {numberOfFrame: 5, frameHeight: 100, rate: 60, type: fg.ANIMATION_VERTICAL}),
-			explode: fg.Animation('bossy_explode.png', {numberOfFrame: 9, frameHeight: 100, rate: 60, type: fg.ANIMATION_VERTICAL})
+			idle: 'enemies[2].idle',
+			explode: 'enemies[2].explode'
 		});
 
 		// Weapon missile:
 		$.extend(missile, {
-			player: fg.Animation('player_missile.png', {numberOfFrame: 6, frameHeight: 10, rate: 90, type: fg.ANIMATION_VERTICAL}),
-			enemies: fg.Animation('enemy_missile.png', {numberOfFrame: 6, frameHeight: 15, rate: 90, type: fg.ANIMATION_VERTICAL}),
-			playerexplode: fg.Animation('player_missile_explode.png', {numberOfFrame: 8, frameHeight: 23, rate: 90, type: fg.ANIMATION_VERTICAL}),
-			enemiesexplode: fg.Animation('enemy_missile_explode.png', {numberOfFrame: 6, frameHeight: 15, rate: 90, type: fg.ANIMATION_VERTICAL})
+			player: 'missile.player',
+			enemies: 'missile.enemies',
+			playerexplode: 'missile.playerexplode',
+			enemiesexplode: 'missile.enemiesexplode'
 		});
 
 		// this sets the id of the loading bar:
@@ -299,12 +318,12 @@
 				// Initialize the background
 				fg.playground($('#playground'))
 					.addGroup('background', {width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
-						.addSprite('background1', {animation: background1, width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
-						.addSprite('background2', {animation: background2, width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT, left: PLAYGROUND_WIDTH})
-						.addSprite('background3', {animation: background3, width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
-						.addSprite('background4', {animation: background4, width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT, left: PLAYGROUND_WIDTH})
-						.addSprite('background5', {animation: background5, width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
-						.addSprite('background6', {animation: background6, width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT, left: PLAYGROUND_WIDTH})
+						.addSprite('background1', {animation: 'background1', width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
+						.addSprite('background2', {animation: 'background2', width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT, left: PLAYGROUND_WIDTH})
+						.addSprite('background3', {animation: 'background3', width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
+						.addSprite('background4', {animation: 'background4', width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT, left: PLAYGROUND_WIDTH})
+						.addSprite('background5', {animation: 'background5', width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
+						.addSprite('background6', {animation: 'background6', width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT, left: PLAYGROUND_WIDTH})
 					.end()
 					.addGroup('actors', {width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
 						.addGroup('player', {left: PLAYGROUND_WIDTH / 2, top: PLAYGROUND_HEIGHT / 2, width: 100, height: 26})
@@ -373,7 +392,7 @@
 									$('#playground').append('<div style="position: absolute; top: 50px; width: 700px; color: white; font-family: verdana, sans-serif;"><center><h1>Game Over</h1><br><a style="cursor: pointer;" id="restartbutton">Click here to restart the game!</a></center></div>');
 									$('#restartbutton').click(restartgame);
 									$.each(['actors', 'playerMissileLayer', 'enemiesMissileLayer'], function(index, value) {
-										fg.sprites[value].fadeTo(1000, 0)
+										fg.sprites[value].fadeTo(1000, 0);
 									});
 									fg.sprites.background.fadeTo(5000, 0);
 								} else {

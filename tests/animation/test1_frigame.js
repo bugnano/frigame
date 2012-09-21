@@ -1,85 +1,87 @@
 $(function () {
 	var
-		fg = friGame,
+		fg = friGame
+	;
 
-		simpleVerticalAnimation = fg.Animation('sv.png', {
+	fg.resourceManager
+		.addAnimation('simpleVerticalAnimation', 'sv.png', {
 			type: fg.ANIMATION_VERTICAL,
 			numberOfFrame: 4,
 			rate: 300
-		}),
+		})
 
-		simpleHorizontalAnimation = fg.Animation('sh.png', {
+		.addAnimation('simpleHorizontalAnimation', 'sh.png', {
 			type: fg.ANIMATION_HORIZONTAL,
 			numberOfFrame: 4,
 			rate: 300
-		}),
+		})
 
-		multiVerticalAnimation = fg.Animation('mv.png', {
+		.addAnimation('multiVerticalAnimation', 'mv.png', {
 			type: fg.ANIMATION_VERTICAL,
 			numberOfFrame: 4,
 			rate: 300,
 			frameWidth: 32
-		}),
+		})
 
-		multiHorizontalAnimation = fg.Animation('mh.png', {
+		.addAnimation('multiHorizontalAnimation', 'mh.png', {
 			type: fg.ANIMATION_HORIZONTAL,
 			numberOfFrame: 4,
 			rate: 300,
 			frameHeight: 32
-		}),
+		})
 
-		simpleOffsetVerticalAnimation = fg.Animation('sov.png', {
+		.addAnimation('simpleOffsetVerticalAnimation', 'sov.png', {
 			type: fg.ANIMATION_VERTICAL,
 			numberOfFrame: 4,
 			rate: 300,
 			offsetx: 100,
 			offsety: 100
-		}),
+		})
 
-		simpleOffsetHorizontalAnimation = fg.Animation('soh.png', {
+		.addAnimation('simpleOffsetHorizontalAnimation', 'soh.png', {
 			type: fg.ANIMATION_HORIZONTAL,
 			numberOfFrame: 4,
 			rate: 300,
 			offsetx: 100,
 			offsety: 100
-		}),
+		})
 
-		multiOffsetVerticalAnimation = fg.Animation('mov.png', {
+		.addAnimation('multiOffsetVerticalAnimation', 'mov.png', {
 			type: fg.ANIMATION_VERTICAL,
 			numberOfFrame: 4,
 			rate: 300,
 			offsetx: 100,
 			offsety: 100,
 			frameWidth: 32
-		}),
+		})
 
-		multiOffsetHorizontalAnimation = fg.Animation('moh.png', {
+		.addAnimation('multiOffsetHorizontalAnimation', 'moh.png', {
 			type: fg.ANIMATION_HORIZONTAL,
 			numberOfFrame: 4,
 			rate: 300,
 			offsetx: 100,
 			offsety: 100,
 			frameHeight: 32
-		}),
+		})
 
-		pingpongAnimation = fg.Animation('rebound.png', {
+		.addAnimation('pingpongAnimation', 'rebound.png', {
 			type: fg.ANIMATION_HORIZONTAL,
 			once: true,
 			pingpong: true,
 			numberOfFrame: 9,
 			//rate: 60
 			rate: 600
-		}),
+		})
 
-		multiPingpongAnimation = fg.Animation('reboundm.png', {
+		.addAnimation('multiPingpongAnimation', 'reboundm.png', {
 			type: fg.ANIMATION_HORIZONTAL,
 			pingpong: true,
 			numberOfFrame: 9,
 			rate: 60,
 			frameHeight: 64
-		}),
+		})
 
-		pingpongBackwardsAnimation = fg.Animation('rebound.png', {
+		.addAnimation('pingpongBackwardsAnimation', 'rebound.png', {
 			type: fg.ANIMATION_HORIZONTAL,
 			once: true,
 			pingpong: true,
@@ -87,9 +89,9 @@ $(function () {
 			numberOfFrame: 9,
 			//rate: 60
 			rate: 600
-		}),
+		})
 
-		multiPingpongBackwardsAnimation = fg.Animation('reboundm.png', {
+		.addAnimation('multiPingpongBackwardsAnimation', 'reboundm.png', {
 			type: fg.ANIMATION_HORIZONTAL,
 			pingpong: true,
 			backwards: true,
@@ -101,18 +103,18 @@ $(function () {
 
 	fg.startGame(function () {
 		fg.playground()
-			.addSprite('simpleVertical', {animation: simpleVerticalAnimation, left: 0})
-			.addSprite('simpleHorizontal', {animation: simpleHorizontalAnimation, backwards: true, left: 34})
-			.addSprite('multiVertical', {animation: multiVerticalAnimation, left: 75})
-			.addSprite('multiHorizontal', {animation: multiHorizontalAnimation, left: 109})
-			.addSprite('simpleOffsetVertical', {animation: simpleOffsetVerticalAnimation, left: 150})
-			.addSprite('simpleOffsetHorizontal', {animation: simpleOffsetHorizontalAnimation, left: 184})
-			.addSprite('multiOffsetVertical', {animation: multiOffsetVerticalAnimation, animationIndex: 1, left: 225})
-			.addSprite('multiOffsetHorizontal', {animation: multiOffsetHorizontalAnimation, animationIndex: 1, left: 259})
-			.addSprite('pingpong', {animation: pingpongAnimation, left: 286})
-			.addSprite('multiPingpong', {animation: multiPingpongAnimation, left: 350})
-			.addSprite('backPingpong', {animation: pingpongBackwardsAnimation, left: 414})
-			.addSprite('multiBackPingpong', {animation: multiPingpongBackwardsAnimation, animationIndex: 1, left: 478})
+			.addSprite('simpleVertical', {animation: 'simpleVerticalAnimation', left: 0})
+			.addSprite('simpleHorizontal', {animation: 'simpleHorizontalAnimation', backwards: true, left: 34})
+			.addSprite('multiVertical', {animation: 'multiVerticalAnimation', left: 75})
+			.addSprite('multiHorizontal', {animation: 'multiHorizontalAnimation', left: 109})
+			.addSprite('simpleOffsetVertical', {animation: 'simpleOffsetVerticalAnimation', left: 150})
+			.addSprite('simpleOffsetHorizontal', {animation: 'simpleOffsetHorizontalAnimation', left: 184})
+			.addSprite('multiOffsetVertical', {animation: 'multiOffsetVerticalAnimation', animationIndex: 1, left: 225})
+			.addSprite('multiOffsetHorizontal', {animation: 'multiOffsetHorizontalAnimation', animationIndex: 1, left: 259})
+			.addSprite('pingpong', {animation: 'pingpongAnimation', left: 286})
+			.addSprite('multiPingpong', {animation: 'multiPingpongAnimation', left: 350})
+			.addSprite('backPingpong', {animation: 'pingpongBackwardsAnimation', left: 414})
+			.addSprite('multiBackPingpong', {animation: 'multiPingpongBackwardsAnimation', animationIndex: 1, left: 478})
 		;
 
 		fg.sprites.multiVertical.setAnimation({animationIndex: 1});

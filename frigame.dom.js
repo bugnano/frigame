@@ -1,5 +1,5 @@
 /*global Modernizr, btoa, jQuery, friGame */
-/*jslint bitwise: true, sloppy: true, white: true, browser: true */
+/*jslint sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
 
@@ -258,11 +258,11 @@
 			;
 
 			if (angle) {
-				transform.push.apply(transform, ['rotate(', String(angle), 'rad)']);
+				Array.prototype.push.apply(transform, ['rotate(', String(angle), 'rad)']);
 			}
 
 			if ((scaleh !== 1) || (scalev !== 1)) {
-				transform.push.apply(transform, ['scale(', String(scaleh), ',', String(scalev), ')']);
+				Array.prototype.push.apply(transform, ['scale(', String(scaleh), ',', String(scalev), ')']);
 			}
 
 			return transform.join('');

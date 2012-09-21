@@ -1,7 +1,10 @@
 $(function () {
 	var
-		fg = friGame,
-		animation = fg.Animation('sh.png', {type: fg.ANIMATION_HORIZONTAL, numberOfFrame: 4, rate: 300})
+		fg = friGame
+	;
+
+	fg.resourceManager
+		.addAnimation('animation', 'sh.png', {type: fg.ANIMATION_HORIZONTAL, numberOfFrame: 4, rate: 300})
 	;
 
 	fg.startGame(function () {
@@ -11,10 +14,10 @@ $(function () {
 		;
 
 		fg.playground()
-			.addSprite('aRotateScale', {animation: animation, left: 16, top: 16})
-			.addSprite('scaleARotate', {animation: animation, left: 80, top: 16})
-			.addSprite('rotateAScale', {animation: animation, left: 180, top: 16})
-			.addSprite('aScaleRotate', {animation: animation, left: 240, top: 16})
+			.addSprite('aRotateScale', {animation: 'animation', left: 16, top: 16})
+			.addSprite('scaleARotate', {animation: 'animation', left: 80, top: 16})
+			.addSprite('rotateAScale', {animation: 'animation', left: 180, top: 16})
+			.addSprite('aScaleRotate', {animation: 'animation', left: 240, top: 16})
 		;
 
 		fg.playground().registerCallback(function () {

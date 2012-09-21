@@ -80,6 +80,7 @@ var friGame = {};
 
 		cssClass: 'friGame',
 
+		resources: {},
 		sprites: {},
 
 		// Implementation details
@@ -136,21 +137,36 @@ var friGame = {};
 
 		// Implementation details
 		idPreload: null,
-		images: {},
-		animations: [],
+		preloadList: [],
 		loadCallback: null,
 		startCallbacks: [],
 		completeCallback: null,
 
 		// Public functions
 
+		addResource: function (name, resource) {
+			fg.resourceManager.preloadList.push(resource);
+			fg.resources[name] = resource;
+
+			return fg.resourceManager;
+		},
+
+		removeResource: function (name) {
+			if (fg.resources[name]) {
+				fg.resources[name].remove();
+				delete fg.resources[name];
+			}
+
+			return fg.resourceManager;
+		},
+
 		// Implementation details
 
 		preload: function () {
 			var
 				resourceManager = fg.resourceManager,
-				animations = resourceManager.animations,
-				len_animations = animations.length,
+				preload_list = resourceManager.preloadList,
+				len_preload_list = preload_list.length,
 				completed = 0,
 				loadCallback = resourceManager.loadCallback,
 				start_callbacks = resourceManager.startCallbacks,
@@ -158,21 +174,21 @@ var friGame = {};
 				i
 			;
 
-			for (i = 0; i < len_animations; i += 1) {
-				if (animations[i].complete()) {
+			for (i = 0; i < len_preload_list; i += 1) {
+				if (preload_list[i].complete()) {
 					completed += 1;
 				}
 			}
 
 			if (loadCallback) {
-				if (len_animations !== 0) {
-					loadCallback(completed / len_animations);
+				if (len_preload_list !== 0) {
+					loadCallback(completed / len_preload_list);
 				} else {
 					loadCallback(1);
 				}
 			}
 
-			if (completed === len_animations) {
+			if (completed === len_preload_list) {
 				if (loadCallback) {
 					resourceManager.loadCallback = null;
 				}
@@ -180,9 +196,10 @@ var friGame = {};
 				clearInterval(resourceManager.idPreload);
 				resourceManager.idPreload = null;
 
-				for (i = 0; i < len_animations; i += 1) {
-					animations[i].onLoad();
+				for (i = 0; i < len_preload_list; i += 1) {
+					preload_list[i].onLoad();
 				}
+				preload_list.splice(0, len_preload_list);
 
 				for (i = 0; i < len_start_callbacks; i += 1) {
 					start_callbacks[i]();
@@ -285,6 +302,17 @@ var friGame = {};
 		return gradient;
 	};
 
+	fg.resourceManager.addGradient = function (name) {
+		var
+			args = Array.prototype.slice.call(arguments, 1),
+			gradient = fg.Gradient.apply(this, args)
+		;
+
+		gradient.name = name;
+
+		return fg.resourceManager.addResource(name, gradient);
+	};
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -292,12 +320,17 @@ var friGame = {};
 	// ******************************************************************** //
 
 	fg.PAnimation = {
+		// Public options
+
+		// Implementation details
+		images: {},
+
 		init: function (imageURL, options) {
 			var
 				my_options,
 				new_options = options || {},
 				img,
-				resourceManager = fg.resourceManager
+				PAnimation = fg.PAnimation
 			;
 
 			if (this.options) {
@@ -353,21 +386,19 @@ var friGame = {};
 
 			my_options.imageURL = imageURL;
 
-			if (resourceManager.images[imageURL]) {
-				img = resourceManager.images[imageURL].img;
-				resourceManager.images[imageURL].refCount += 1;
+			if (PAnimation.images[imageURL]) {
+				img = PAnimation.images[imageURL].img;
+				PAnimation.images[imageURL].refCount += 1;
 			} else {
 				img = new Image();
 				img.src = imageURL;
-				resourceManager.images[imageURL] = {
+				PAnimation.images[imageURL] = {
 					img: img,
 					refCount: 1
 				};
 			}
 
 			my_options.img = img;
-
-			resourceManager.animations.push(this);
 		},
 
 		// Public functions
@@ -375,13 +406,13 @@ var friGame = {};
 		remove: function () {
 			var
 				imageURL = this.options.imageURL,
-				resourceManager = fg.resourceManager
+				PAnimation = fg.PAnimation
 			;
 
-			resourceManager.images[imageURL].refCount -= 1;
+			PAnimation.images[imageURL].refCount -= 1;
 
-			if (resourceManager.images[imageURL].refCount <= 0) {
-				delete resourceManager.images[imageURL];
+			if (PAnimation.images[imageURL].refCount <= 0) {
+				delete PAnimation.images[imageURL];
 			}
 		},
 
@@ -448,6 +479,17 @@ var friGame = {};
 		animation.init.apply(animation, arguments);
 
 		return animation;
+	};
+
+	fg.resourceManager.addAnimation = function (name) {
+		var
+			args = Array.prototype.slice.call(arguments, 1),
+			animation = fg.Animation.apply(this, args)
+		;
+
+		animation.name = name;
+
+		return fg.resourceManager.addResource(name, animation);
 	};
 
 	// ******************************************************************** //
@@ -1172,7 +1214,7 @@ var friGame = {};
 			;
 
 			if (animation_redefined) {
-				animation = new_options.animation;
+				animation = fg.resources[new_options.animation];
 				my_options.animation = animation;
 
 				// Force new width and height based on the animation frame size
@@ -1471,7 +1513,7 @@ var friGame = {};
 			;
 
 			if (new_options.background !== undefined) {
-				my_options.background = new_options.background;
+				my_options.background = fg.resources[new_options.background];
 			}
 
 			if (new_options.backgroundType !== undefined) {

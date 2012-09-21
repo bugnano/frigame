@@ -1,5 +1,5 @@
 /*global jQuery, friGame */
-/*jslint bitwise: true, nomen: true, sloppy: true, white: true, browser: true */
+/*jslint nomen: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
 
