@@ -85,6 +85,7 @@ var friGame = {};
 
 		// Implementation details
 
+		playgroundCallbacks: [],
 		idUpdate: null,
 		drawDone: true
 	});
@@ -158,6 +159,31 @@ var friGame = {};
 			}
 
 			return fg.resourceManager;
+		},
+
+		clear: function () {
+			var
+				resourceManager = fg.resourceManager,
+				removeResource = resourceManager.removeResource,
+				resources = fg.resources,
+				resource_name,
+				resource_names = [],
+				len_resource_names,
+				i
+			;
+
+			for (resource_name in resources) {
+				if (resources.hasOwnProperty(resource_name)) {
+					resource_names.push(resource_name);
+				}
+			}
+
+			len_resource_names = resource_names.length;
+			for (i = 0; i < len_resource_names; i += 1) {
+				removeResource(resource_names[i]);
+			}
+
+			return resourceManager;
 		},
 
 		// Implementation details
@@ -280,6 +306,15 @@ var friGame = {};
 		// Public functions
 
 		remove: function () {
+			var
+				gradient = this
+			;
+
+			$.each(fg.sprites, function () {
+				if (this.options.background === gradient) {
+					this.setBackground({background: null});
+				}
+			});
 		},
 
 		// Implementation details
@@ -406,11 +441,23 @@ var friGame = {};
 		remove: function () {
 			var
 				imageURL = this.options.imageURL,
-				PAnimation = fg.PAnimation
+				PAnimation = fg.PAnimation,
+				animation = this
 			;
 
-			PAnimation.images[imageURL].refCount -= 1;
+			// Step 1: Remove myself from all the sprites
+			$.each(fg.sprites, function () {
+				if (this.options.animation === animation) {
+					this.setAnimation({animation: null});
+				}
 
+				if (this.options.background === animation) {
+					this.setBackground({background: null});
+				}
+			});
+
+			// Step 2: Decrease the image reference count
+			PAnimation.images[imageURL].refCount -= 1;
 			if (PAnimation.images[imageURL].refCount <= 0) {
 				delete PAnimation.images[imageURL];
 			}
@@ -808,6 +855,12 @@ var friGame = {};
 			}
 
 			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
+
+			return this;
+		},
+
+		clearCallbacks: function () {
+			this.callbacks.splice(0, this.callbacks.length);
 
 			return this;
 		},
@@ -1490,6 +1543,11 @@ var friGame = {};
 				// Implementation details
 			});
 
+			// The playground has a parentDOM property
+			if (new_options.parentDOM) {
+				this.parentDOM = new_options.parentDOM;
+			}
+
 			this.layers = [];
 
 			fg.PBaseSprite.init.apply(this, arguments);
@@ -1505,6 +1563,24 @@ var friGame = {};
 		},
 
 		// Public functions
+
+		remove: function () {
+			this.clear();
+
+			fg.PBaseSprite.remove.apply(this, arguments);
+		},
+
+		clear: function () {
+			var
+				layers = this.layers
+			;
+
+			while (layers.length) {
+				layers[0].obj.remove();
+			}
+
+			return this;
+		},
 
 		setBackground: function (options) {
 			var
@@ -1536,19 +1612,6 @@ var friGame = {};
 
 			return this;
 		},
-
-		remove: function () {
-			var
-				layers = this.layers
-			;
-
-			while (layers.length) {
-				layers[0].obj.remove();
-			}
-
-			fg.PBaseSprite.remove.apply(this, arguments);
-		},
-
 
 		resize: function (options) {
 			var
@@ -1712,6 +1775,9 @@ var friGame = {};
 				scenegraph.resize = null;
 				scenegraph.move = null;
 				scenegraph.crop = null;
+
+				// Call the playgroundCallbacks only after the playground has been completely created
+				setTimeout(fg.firePlaygroundCallbacks, 0);
 			}
 
 			return scenegraph;
@@ -1725,16 +1791,22 @@ var friGame = {};
 			fg.resourceManager.startCallbacks.push(callback);
 		},
 
+		playgroundCallback: function (callback) {
+			fg.playgroundCallbacks.push(callback);
+		},
+
 		startGame: function (callback, rate) {
 			var
 				resourceManager = fg.resourceManager
 			;
 
+			if (callback) {
+				resourceManager.completeCallback = callback;
+			}
+
 			if (rate) {
 				fg.refreshRate = rate;
 			}
-
-			resourceManager.completeCallback = callback;
 
 			if (resourceManager.idPreload === null) {
 				resourceManager.idPreload = setInterval(resourceManager.preload, 100);
@@ -1744,13 +1816,30 @@ var friGame = {};
 		},
 
 		stopGame: function () {
-			clearInterval(fg.idUpdate);
-			fg.idUpdate = null;
+			if (fg.idUpdate !== null) {
+				clearInterval(fg.idUpdate);
+				fg.idUpdate = null;
+			}
 
 			return this;
 		},
 
 		// Implementation details
+
+		firePlaygroundCallbacks: function () {
+			var
+				i,
+				scenegraph = fg.sprites.scenegraph,
+				dom = scenegraph.parentDOM,
+				playground_callbacks = fg.playgroundCallbacks,
+				len_playground_callbacks = playground_callbacks.length
+			;
+
+			for (i = 0; i < len_playground_callbacks; i += 1) {
+				playground_callbacks[i].call(scenegraph, dom);
+			}
+			playground_callbacks.splice(0, len_playground_callbacks);
+		},
 
 		update: function () {
 			var

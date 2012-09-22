@@ -31,7 +31,26 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	$.extend(fg.PGradient, {
+	fg.PWebGLGradient = Object.create(fg.PGradient);
+	$.extend(fg.PWebGLGradient, {
+		remove: function () {
+			var
+				gl = fg.gl
+			;
+
+			if (this.vertexColorBuffer) {
+				gl.deleteBuffer(this.vertexColorBuffer);
+			}
+
+			if (this.gradients) {
+				$.each(this.gradients, function () {
+					gl.deleteBuffer(this.vertexPositionBuffer);
+				});
+			}
+
+			fg.PGradient.remove.call(this);
+		},
+
 		initColorBuffer: function () {
 			var
 				gl = fg.gl,
@@ -196,6 +215,16 @@
 		}
 	});
 
+	fg.Gradient = function () {
+		var
+			gradient = Object.create(fg.PWebGLGradient)
+		;
+
+		gradient.init.apply(gradient, arguments);
+
+		return gradient;
+	};
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -204,6 +233,22 @@
 
 	fg.PWebGLAnimation = Object.create(fg.PAnimation);
 	$.extend(fg.PWebGLAnimation, {
+		remove: function () {
+			var
+				gl = fg.gl
+			;
+
+			if (this.vertexPositionBuffer) {
+				gl.deleteBuffer(this.vertexPositionBuffer);
+			}
+
+			if (this.texture) {
+				gl.deleteTexture(this.texture);
+			}
+
+			fg.PAnimation.remove.call(this);
+		},
+
 		onLoad: function () {
 			var
 				options = this.options,
@@ -321,6 +366,15 @@
 			gl.uniform1f(spriteShaderProgram.uAlpha, fg.globalAlpha);
 
 			gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPositionBuffer.numItems);
+		},
+
+		addGroup: function () {
+		},
+
+		removeGroup: function () {
+		},
+
+		drawBackground: function () {
 		}
 	});
 
