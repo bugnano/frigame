@@ -35,6 +35,16 @@ $(function () {
 		fg.sprites.group1.resize({width: fg.sprites.group1.width - 64, height: fg.sprites.group1.height - 128});
 		fg.sprites.sprite1.rotate((45 * Math.PI) / 180);
 		fg.sprites.sprite2.scale(2);
+
+		fg.playground().registerCallback(function () {
+			$('#tracker_output').html([
+				'<p>x: ', String(fg.mouseTracker.x), '</p>',
+				'<p>y: ', String(fg.mouseTracker.y), '</p>',
+				'<p>1: ', String(fg.mouseTracker['1']), '</p>',
+				'<p>2: ', String(fg.mouseTracker['2']), '</p>',
+				'<p>3: ', String(fg.mouseTracker['3']), '</p>'
+			].join(''));
+		}, 100);
 	});
 });
 
