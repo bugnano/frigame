@@ -17,7 +17,7 @@
 		fg.resourceManager
 			.addGradient('top_gradient', {r: 127, g: 191, b: 255})
 			.addGradient('middle_gradient', {r: 127, g: 191, b: 255}, {r: 191, g: 255, b: 255})
-			.addGradient('bottom_gradient', {r: 191, g: 255, b: 255})
+			.addGradient('bottom_gradient', {r: 191, g: 255, b: 255}, {r: 63, g: 255, b: 95})
 			.addAnimation('blue_brick', 'bricks.png', {type: fg.ANIMATION_VERTICAL, offsety: 0 * BRICK_HEIGHT, frameWidth: BRICK_WIDTH, frameHeight: BRICK_HEIGHT})
 			.addAnimation('green_brick', 'bricks.png', {type: fg.ANIMATION_VERTICAL, offsety: 1 * BRICK_HEIGHT, frameWidth: BRICK_WIDTH, frameHeight: BRICK_HEIGHT})
 			.addAnimation('brick', 'bricks.png', {type: fg.ANIMATION_VERTICAL, offsety: 2 * BRICK_HEIGHT, frameWidth: BRICK_WIDTH, frameHeight: BRICK_HEIGHT})
@@ -191,8 +191,8 @@
 							}
 
 							if (this.userData.energy === 0) {
-								delete G.bricks[name];
 								this.remove();
+								delete G.bricks[name];
 							}
 						}
 					});
