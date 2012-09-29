@@ -55,7 +55,9 @@
 	if (window.soundManager) {
 		soundManager.onready(function() {
 			// mp3 is the only supported format for the Flash 8 version of soundManager2
-			fg.canPlay.mp3 = 'sm2';
+			if (!fg.canPlay.mp3) {
+				fg.canPlay.mp3 = 'sm2';
+			}
 
 			fg.sm2Loaded = true;
 		});
@@ -87,8 +89,7 @@
 		init: function (name, soundURLs, options) {
 			var
 				my_options,
-				new_options = options || {},
-				sound_object = this
+				new_options = options || {}
 			;
 
 			if (this.options) {
@@ -106,10 +107,6 @@
 
 			$.extend(my_options, fg.pick(new_options, ['muted', 'volume']));
 
-			this.doReplay = function () {
-				sound_object.replay();
-			};
-
 			this.name = name;
 			this.soundURLs = soundURLs;
 			this.initialized = false;
@@ -118,6 +115,8 @@
 		// Public functions
 
 		remove: function () {
+			this.stop();
+
 			if (this.sound) {
 				this.sound.destruct();
 			}
@@ -210,9 +209,7 @@
 				}
 
 				sound.play(sound_options);
-			}
-
-			if (audio) {
+			} else if (audio) {
 				if (new_options.muted !== undefined) {
 					my_options.muted = new_options.muted;
 					audio.muted = my_options.muted;
@@ -237,6 +234,11 @@
 				}
 
 				audio.play();
+			} else {
+				// Make sure the callback gets called even if the sound cannot be played
+				if ((!new_options.loop) && new_options.callback) {
+					new_options.callback.call(sound_object);
+				}
 			}
 
 			return this;
@@ -369,7 +371,17 @@
 		},
 
 		onLoad: function () {
+			var
+				sound_object = this
+			;
+
 			this.setVolume(this.options);
+
+			if (this.sound) {
+				this.doReplay = function () {
+					sound_object.replay();
+				};
+			}
 		},
 
 		replay: function () {
