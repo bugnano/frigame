@@ -51,8 +51,8 @@
 		}
 	}());
 
+	// Setup soundManager2
 	if (window.soundManager) {
-		// Setup soundManager2
 		soundManager.onready(function() {
 			// mp3 is the only supported format for the Flash 8 version of soundManager2
 			fg.canPlay.mp3 = 'sm2';
@@ -84,15 +84,35 @@
 	}
 
 	fg.PSound = {
-		init: function (name, soundURLs) {
+		init: function (name, soundURLs, options) {
+			var
+				my_options,
+				new_options = options || {},
+				sound_object = this
+			;
+
+			if (this.options) {
+				my_options = this.options;
+			} else {
+				my_options = {};
+				this.options = my_options;
+			}
+
+			// Set default options
+			$.extend(my_options, {
+				muted: false,
+				volume: 1
+			});
+
+			$.extend(my_options, fg.pick(new_options, ['muted', 'volume']));
+
+			this.doReplay = function () {
+				sound_object.replay();
+			};
+
 			this.name = name;
 			this.soundURLs = soundURLs;
 			this.initialized = false;
-			this.options = {
-				paused: true,
-				muted: false,
-				volume: 1
-			};
 		},
 
 		// Public functions
@@ -103,7 +123,7 @@
 			}
 		},
 
-		setOptions: function (options) {
+		setVolume: function (options) {
 			var
 				my_options = this.options,
 				new_options = options || {},
@@ -114,14 +134,6 @@
 			;
 
 			if (sound) {
-				if (new_options.paused !== undefined) {
-					if (new_options.paused) {
-						sound.pause();
-					} else {
-						sound.resume();
-					}
-				}
-
 				if (muted_redefined) {
 					my_options.muted = new_options.muted;
 				}
@@ -140,14 +152,6 @@
 			}
 
 			if (audio) {
-				if (new_options.paused !== undefined) {
-					if (new_options.paused) {
-						audio.pause();
-					} else {
-						audio.play();
-					}
-				}
-
 				if (muted_redefined) {
 					my_options.muted = new_options.muted;
 					audio.muted = my_options.muted;
@@ -164,6 +168,7 @@
 
 		play: function (options) {
 			// options:
+			// muted: true or false
 			// volume: From 0.0 to 1.0
 			// loop: true or false
 			// callback: when done playing
@@ -176,10 +181,10 @@
 				sound_object = this
 			;
 
-			if (sound) {
-				// Make sure the audio is paused before changing its options
-				sound.stop();
+			// Make sure the audio is stopped before changing its options
+			this.stop();
 
+			if (sound) {
 				if (new_options.muted !== undefined) {
 					my_options.muted = new_options.muted;
 				}
@@ -195,9 +200,7 @@
 				}
 
 				if (new_options.loop) {
-					sound_options.onfinish = function () {
-						sound_object.replay();
-					};
+					sound_options.onfinish = this.doReplay;
 				} else if (new_options.callback) {
 					sound_options.onfinish = function () {
 						new_options.callback.call(sound_object);
@@ -207,16 +210,9 @@
 				}
 
 				sound.play(sound_options);
-				if (new_options.paused) {
-					sound.pause();
-				}
-
 			}
 
 			if (audio) {
-				// Make sure the audio is paused before changing its options
-				audio.pause();
-
 				if (new_options.muted !== undefined) {
 					my_options.muted = new_options.muted;
 					audio.muted = my_options.muted;
@@ -240,10 +236,7 @@
 					audio.onended = null;
 				}
 
-				audio.currentTime = 0;
-				if (!new_options.paused) {
-					audio.play();
-				}
+				audio.play();
 			}
 
 			return this;
@@ -257,6 +250,30 @@
 			if (this.audio) {
 				this.audio.pause();
 				this.audio.currentTime = 0;
+			}
+
+			return this;
+		},
+
+		pause: function () {
+			if (this.sound) {
+				this.sound.pause();
+			}
+
+			if (this.audio) {
+				this.audio.pause();
+			}
+
+			return this;
+		},
+
+		resume: function () {
+			if (this.sound) {
+				this.sound.resume();
+			}
+
+			if (this.audio) {
+				this.audio.play();
 			}
 
 			return this;
@@ -320,17 +337,17 @@
 				if (sound_url) {
 					if (canPlay[format] === 'sm2') {
 						// Sound supported through soundManager2
-						this.sound = soundManager.createSound({
+						sound = soundManager.createSound({
 							id: this.name,
 							url: sound_url
 						});
-						this.sound.load();
-						sound = this.sound;
+						sound.load();
+						this.sound = sound;
 					} else if (canPlay[format]) {
 						// Sound supported through HTML5 Audio
-						this.audio = new Audio(sound_url);
-						this.audio.load();
-						audio = this.audio;
+						audio = new Audio(sound_url);
+						audio.load();
+						this.audio = audio;
 					} else {
 						// Sound type not supported -- It is not a fatal error
 						$.noop();
@@ -342,23 +359,23 @@
 
 			if (sound && (sound.readyState < 3)) {
 				completed = false;
-			} else if (audio && (audio.readyState < audio.HAVE_ENOUGH_DATA)) {
+			}
+
+			if (audio && (audio.readyState < audio.HAVE_ENOUGH_DATA)) {
 				completed = false;
-			} else {
-				completed = true;
 			}
 
 			return completed;
 		},
 
 		onLoad: function () {
+			this.setVolume(this.options);
 		},
 
 		replay: function () {
 			var
 				my_options = this.options,
-				sound_options = {},
-				sound_object = this
+				sound_options = {}
 			;
 
 			if (my_options.muted) {
@@ -367,9 +384,7 @@
 				sound_options.volume = Math.round(my_options.volume * 100);
 			}
 
-			sound_options.onfinish = function () {
-				sound_object.replay();
-			};
+			sound_options.onfinish = this.doReplay;
 
 			this.sound.play(sound_options);
 		}
