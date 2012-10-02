@@ -395,7 +395,7 @@
 
 			if (animation && alpha && !options.hidden) {
 				if (!dom) {
-					dom = $(['<div id="', this.name, '"></div>'].join(''));
+					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					if (last_sprite === parent.name) {
@@ -591,7 +591,7 @@
 			this.old_options = {};
 
 			if (!parent) {
-				dom = $(['<div id="', name, '"></div>'].join('')).prependTo(options.parentDOM);
+				dom = $(['<div id="', fg.domPrefix, name, '"></div>'].join('')).prependTo(options.parentDOM);
 				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 				dom.css({
 					'left': '0px',
@@ -667,7 +667,7 @@
 
 			if ((this.layers.length || background) && alpha && !options.hidden) {
 				if (!this.dom) {
-					dom = $(['<div id="', this.name, '"></div>'].join(''));
+					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					if (last_sprite === parent.name) {

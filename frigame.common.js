@@ -79,6 +79,7 @@ var friGame = {};
 		// Public options
 
 		cssClass: 'friGame',
+		domPrefix: 'friGame_',
 
 		resources: {},
 		sprites: {},
@@ -808,7 +809,7 @@ var friGame = {};
 			});
 
 			// A public userData property can be useful to the game
-			this.userData = null;
+			this.userData = {};
 
 			fg.sprites[name] = this;
 
@@ -1582,6 +1583,26 @@ var friGame = {};
 			return this;
 		},
 
+		children: function (callback) {
+			var
+				layers = this.layers,
+				len_layers = layers.length,
+				layer,
+				i
+			;
+
+			if (callback) {
+				for (i = 0; i < len_layers; i += 1) {
+					layer = layers[i];
+					if (layer) {
+						callback.call(layer.obj, layer.name);
+					}
+				}
+			}
+
+			return this;
+		},
+
 		setBackground: function (options) {
 			var
 				my_options = this.options,
@@ -1696,26 +1717,6 @@ var friGame = {};
 			return parent;
 		},
 
-		children: function (callback) {
-			var
-				layers = this.layers,
-				len_layers = layers.length,
-				layer,
-				i
-			;
-
-			if (callback) {
-				for (i = 0; i < len_layers; i += 1) {
-					layer = layers[i];
-					if (layer) {
-						callback.call(layer.obj, layer.name);
-					}
-				}
-			}
-
-			return this;
-		},
-
 		// Implementation details
 
 		update: function () {
@@ -1758,29 +1759,29 @@ var friGame = {};
 
 		playground: function (parentDOM) {
 			var
-				scenegraph = fg.sprites.scenegraph,
+				playground = fg.sprites.playground,
 				dom
 			;
 
-			if (!scenegraph) {
+			if (!playground) {
 				if (parentDOM) {
 					dom = $(parentDOM);
 				} else {
 					dom = $('#playground');
 				}
 
-				scenegraph = fg.SpriteGroup('scenegraph', {width: dom.width(), height: dom.height(), parentDOM: dom}, null);
+				playground = fg.SpriteGroup('playground', {width: dom.width(), height: dom.height(), parentDOM: dom}, null);
 
-				// The scenegraph cannot be resized or moved
-				scenegraph.resize = null;
-				scenegraph.move = null;
-				scenegraph.crop = null;
+				// The playground cannot be resized or moved
+				playground.resize = null;
+				playground.move = null;
+				playground.crop = null;
 
 				// Call the playgroundCallbacks only after the playground has been completely created
 				setTimeout(fg.firePlaygroundCallbacks, 0);
 			}
 
-			return scenegraph;
+			return playground;
 		},
 
 		loadCallback: function (callback) {
@@ -1829,25 +1830,25 @@ var friGame = {};
 		firePlaygroundCallbacks: function () {
 			var
 				i,
-				scenegraph = fg.sprites.scenegraph,
-				dom = scenegraph.parentDOM,
+				playground = fg.sprites.playground,
+				dom = playground.parentDOM,
 				playground_callbacks = fg.playgroundCallbacks,
 				len_playground_callbacks = playground_callbacks.length
 			;
 
 			for (i = 0; i < len_playground_callbacks; i += 1) {
-				playground_callbacks[i].call(scenegraph, dom);
+				playground_callbacks[i].call(playground, dom);
 			}
 			playground_callbacks.splice(0, len_playground_callbacks);
 		},
 
 		update: function () {
 			var
-				scenegraph = fg.sprites.scenegraph
+				playground = fg.sprites.playground
 			;
 
-			if (scenegraph) {
-				scenegraph.update();
+			if (playground) {
+				playground.update();
 
 				if (fg.drawDone) {
 					fg.drawDone = false;
@@ -1857,7 +1858,7 @@ var friGame = {};
 		},
 
 		draw: function () {
-			fg.sprites.scenegraph.draw();
+			fg.sprites.playground.draw();
 			fg.drawDone = true;
 		}
 	});

@@ -678,7 +678,7 @@
 				str_width = String(width);
 				str_height = String(height);
 
-				dom = $(['<canvas id="', name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).prependTo(options.parentDOM);
+				dom = $(['<canvas id="', fg.domPrefix, name, '" width ="', str_width, '" height="', str_height, '"></canvas>'].join('')).prependTo(options.parentDOM);
 				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 				dom.css({
 					'left': '0px',
