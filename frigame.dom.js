@@ -398,8 +398,8 @@
 					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
-					if (last_sprite === parent.name) {
-						dom.prependTo(parent.dom);
+					if (last_sprite === parent) {
+						dom.prependTo(fg.sprites[parent].dom);
 					} else {
 						dom.insertAfter(fg.sprites[last_sprite].dom);
 					}
@@ -420,8 +420,8 @@
 					if (last_sprite !== old_options.last_sprite) {
 						// The position in the DOM has changed
 						dom.detach();
-						if (last_sprite === parent.name) {
-							dom.prependTo(parent.dom);
+						if (last_sprite === parent) {
+							dom.prependTo(fg.sprites[parent].dom);
 						} else {
 							dom.insertAfter(fg.sprites[last_sprite].dom);
 						}
@@ -670,8 +670,8 @@
 					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
-					if (last_sprite === parent.name) {
-						dom.prependTo(parent.dom);
+					if (last_sprite === parent) {
+						dom.prependTo(fg.sprites[parent].dom);
 					} else {
 						dom.insertAfter(fg.sprites[last_sprite].dom);
 					}
@@ -694,8 +694,8 @@
 					if (last_sprite !== old_options.last_sprite) {
 						// The position in the DOM has changed
 						dom.detach();
-						if (last_sprite === parent.name) {
-							dom.prependTo(parent.dom);
+						if (last_sprite === parent) {
+							dom.prependTo(fg.sprites[parent].dom);
 						} else {
 							dom.insertAfter(fg.sprites[last_sprite].dom);
 						}

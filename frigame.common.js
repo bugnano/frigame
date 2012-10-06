@@ -808,14 +808,18 @@ var friGame = {};
 				posOffsetY: 0
 			});
 
-			// A public userData property can be useful to the game
-			this.userData = {};
-
 			fg.sprites[name] = this;
 
 			// name and parent are public read-only properties
 			this.name = name;
-			this.parent = parent;
+			if (parent) {
+				this.parent = parent.name;
+			} else {
+				this.parent = '';
+			}
+
+			// A public userData property can be useful to the game
+			this.userData = {};
 
 			// Implementation details
 			this.callbacks = [];
@@ -836,7 +840,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = parent.layers;
+				parent_layers = fg.sprites[parent].layers;
 				len_parent_layers = parent_layers.length;
 				for (i = 0; i < len_parent_layers; i += 1) {
 					if (parent_layers[i].name === name) {
@@ -899,7 +903,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = parent.layers;
+				parent_layers = fg.sprites[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -930,7 +934,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = parent.layers;
+				parent_layers = fg.sprites[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -961,7 +965,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = parent.layers;
+				parent_layers = fg.sprites[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -992,7 +996,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = parent.layers;
+				parent_layers = fg.sprites[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -1030,7 +1034,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = parent.layers;
+				parent_layers = fg.sprites[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -1638,13 +1642,15 @@ var friGame = {};
 			var
 				new_options = {},
 				set_new_options = false,
-				parent = this.parent
+				parent
 			;
 
 			// Set the new options
 			fg.PBaseSprite.resize.call(this, options);
 
-			if (parent) {
+			if (this.parent) {
+				parent = fg.sprites[this.parent];
+
 				// A width of 0 means the same width as the parent
 				if (!this.width) {
 					new_options.width = parent.width;
@@ -1711,10 +1717,10 @@ var friGame = {};
 			;
 
 			if (!parent) {
-				parent = this;
+				parent = this.name;
 			}
 
-			return parent;
+			return fg.sprites[parent];
 		},
 
 		// Implementation details
