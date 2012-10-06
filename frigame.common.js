@@ -812,11 +812,7 @@ var friGame = {};
 
 			// name and parent are public read-only properties
 			this.name = name;
-			if (parent) {
-				this.parent = parent.name;
-			} else {
-				this.parent = '';
-			}
+			this.parent = parent;
 
 			// A public userData property can be useful to the game
 			this.userData = {};
@@ -1673,7 +1669,7 @@ var friGame = {};
 
 		addSprite: function (name, options) {
 			var
-				sprite = fg.Sprite(name, options, this)
+				sprite = fg.Sprite(name, options, this.name)
 			;
 
 			this.layers.push({name: name, obj: sprite});
@@ -1683,7 +1679,7 @@ var friGame = {};
 
 		addGroup: function (name, options) {
 			var
-				group = fg.SpriteGroup(name, options, this)
+				group = fg.SpriteGroup(name, options, this.name)
 			;
 
 			this.layers.push({name: name, obj: group});
@@ -1693,7 +1689,7 @@ var friGame = {};
 
 		insertSprite: function (name, options) {
 			var
-				sprite = fg.Sprite(name, options, this)
+				sprite = fg.Sprite(name, options, this.name)
 			;
 
 			this.layers.unshift({name: name, obj: sprite});
@@ -1703,7 +1699,7 @@ var friGame = {};
 
 		insertGroup: function (name, options) {
 			var
-				group = fg.SpriteGroup(name, options, this)
+				group = fg.SpriteGroup(name, options, this.name)
 			;
 
 			this.layers.unshift({name: name, obj: group});
@@ -1776,7 +1772,7 @@ var friGame = {};
 					dom = $('#playground');
 				}
 
-				playground = fg.SpriteGroup('playground', {width: dom.width(), height: dom.height(), parentDOM: dom}, null);
+				playground = fg.SpriteGroup('playground', {width: dom.width(), height: dom.height(), parentDOM: dom}, '');
 
 				// The playground cannot be resized or moved
 				playground.resize = null;
