@@ -1588,6 +1588,7 @@ var friGame = {};
 				layers = this.layers,
 				len_layers = layers.length,
 				layer,
+				retval,
 				i
 			;
 
@@ -1595,7 +1596,10 @@ var friGame = {};
 				for (i = 0; i < len_layers; i += 1) {
 					layer = layers[i];
 					if (layer) {
-						callback.call(layer.obj, layer.name);
+						retval = callback.call(layer.obj, layer.name);
+						if (retval) {
+							break;
+						}
 					}
 				}
 			}
