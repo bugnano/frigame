@@ -209,9 +209,9 @@ var friGame = {};
 
 			if (loadCallback) {
 				if (len_preload_list !== 0) {
-					loadCallback(completed / len_preload_list);
+					loadCallback.call(fg, completed / len_preload_list);
 				} else {
-					loadCallback(1);
+					loadCallback.call(fg, 1);
 				}
 			}
 
@@ -229,12 +229,12 @@ var friGame = {};
 				preload_list.splice(0, len_preload_list);
 
 				for (i = 0; i < len_start_callbacks; i += 1) {
-					start_callbacks[i]();
+					start_callbacks[i].call(fg);
 				}
 				start_callbacks.splice(0, len_start_callbacks);
 
 				if (resourceManager.completeCallback) {
-					resourceManager.completeCallback();
+					resourceManager.completeCallback.call(fg);
 					resourceManager.completeCallback = null;
 				}
 
@@ -1335,7 +1335,7 @@ var friGame = {};
 			}
 
 			if (animation_redefined || index_redefined) {
-				if ((animation_options) && (animation_options.backwards)) {
+				if (animation_options && (animation_options.backwards)) {
 					my_options.currentFrame = animation_options.numberOfFrame - 1;
 					my_options.frameIncrement = -1;
 				} else {
@@ -1571,6 +1571,39 @@ var friGame = {};
 			fg.PBaseSprite.remove.apply(this, arguments);
 		},
 
+		resize: function (options) {
+			var
+				new_options = {},
+				set_new_options = false,
+				parent
+			;
+
+			// Set the new options
+			fg.PBaseSprite.resize.call(this, options);
+
+			if (this.parent) {
+				parent = fg.sprites[this.parent];
+
+				// A width of 0 means the same width as the parent
+				if (!this.width) {
+					new_options.width = parent.width;
+					set_new_options = true;
+				}
+
+				// A height of 0 means the same height as the parent
+				if (!this.height) {
+					new_options.height = parent.height;
+					set_new_options = true;
+				}
+
+				if (set_new_options) {
+					fg.PBaseSprite.resize.call(this, new_options);
+				}
+			}
+
+			return this;
+		},
+
 		clear: function () {
 			var
 				layers = this.layers
@@ -1638,45 +1671,22 @@ var friGame = {};
 			return this;
 		},
 
-		resize: function (options) {
-			var
-				new_options = {},
-				set_new_options = false,
-				parent
-			;
-
-			// Set the new options
-			fg.PBaseSprite.resize.call(this, options);
-
-			if (this.parent) {
-				parent = fg.sprites[this.parent];
-
-				// A width of 0 means the same width as the parent
-				if (!this.width) {
-					new_options.width = parent.width;
-					set_new_options = true;
-				}
-
-				// A height of 0 means the same height as the parent
-				if (!this.height) {
-					new_options.height = parent.height;
-					set_new_options = true;
-				}
-
-				if (set_new_options) {
-					fg.PBaseSprite.resize.call(this, new_options);
-				}
-			}
-
-			return this;
-		},
-
 		addSprite: function (name, options) {
 			var
 				sprite = fg.Sprite(name, options, this.name)
 			;
 
 			this.layers.push({name: name, obj: sprite});
+
+			return this;
+		},
+
+		insertSprite: function (name, options) {
+			var
+				sprite = fg.Sprite(name, options, this.name)
+			;
+
+			this.layers.unshift({name: name, obj: sprite});
 
 			return this;
 		},
@@ -1689,16 +1699,6 @@ var friGame = {};
 			this.layers.push({name: name, obj: group});
 
 			return group;
-		},
-
-		insertSprite: function (name, options) {
-			var
-				sprite = fg.Sprite(name, options, this.name)
-			;
-
-			this.layers.unshift({name: name, obj: sprite});
-
-			return this;
 		},
 
 		insertGroup: function (name, options) {
@@ -1790,18 +1790,6 @@ var friGame = {};
 			return playground;
 		},
 
-		loadCallback: function (callback) {
-			fg.resourceManager.loadCallback = callback;
-		},
-
-		startCallback: function (callback) {
-			fg.resourceManager.startCallbacks.push(callback);
-		},
-
-		playgroundCallback: function (callback) {
-			fg.playgroundCallbacks.push(callback);
-		},
-
 		startGame: function (callback, rate) {
 			var
 				resourceManager = fg.resourceManager
@@ -1827,6 +1815,24 @@ var friGame = {};
 				clearInterval(fg.idUpdate);
 				fg.idUpdate = null;
 			}
+
+			return this;
+		},
+
+		loadCallback: function (callback) {
+			fg.resourceManager.loadCallback = callback;
+
+			return this;
+		},
+
+		startCallback: function (callback) {
+			fg.resourceManager.startCallbacks.push(callback);
+
+			return this;
+		},
+
+		playgroundCallback: function (callback) {
+			fg.playgroundCallbacks.push(callback);
 
 			return this;
 		},
@@ -1868,5 +1874,11 @@ var friGame = {};
 			fg.drawDone = true;
 		}
 	});
+
+	// r is mapped to resources and s is mapped to sprites in order to have a more convenient
+	// access to these frequently used objects
+	fg.r = fg.resources;
+	fg.s = fg.sprites;
+
 }(jQuery, friGame));
 

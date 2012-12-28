@@ -25,18 +25,81 @@
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
 (function ($, fg) {
-	// TO DO -- It would be useful to define some constants that map to the keyCode
+	// Some constants that map to the keyCode
+	fg.keyCodes = {
+		8: 'backspace',
+		9: 'tab',
+		13: 'enter',
+		16: 'shift',
+		17: 'ctrl',
+		18: 'alt',
+		19: 'pause',
+		20: 'caps',
+		27: 'escape',
+		32: 'space',
+		33: 'pageup',
+		34: 'pagedown',
+		35: 'end',
+		36: 'home',
+		37: 'left',
+		38: 'up',
+		39: 'right',
+		40: 'down',
+		45: 'insert',
+		46: 'del'
+	};
+
+	(function () {
+		var
+			i,
+			keycodes = fg.keyCodes
+		;
+
+		for (i = 48; i <= 57; i += 1){
+			keycodes[i] = String.fromCharCode(i);
+		}
+
+		for (i = 65; i <= 90; i += 1){
+			keycodes[i] = String.fromCharCode(i);
+		}
+
+		for (i = 0; i <= 9; i += 1){
+			keycodes[i + 96] = ['num', String(i)].join ('');
+		}
+
+		for (i = 1; i <= 12; i += 1){
+			keycodes[i + 111] = ['f', String(i)].join ('');
+		}
+	}());
 
 	fg.keyTracker = {};
 
 	// keyTracker inside a startCallback in order to have effect only after startGame
 	fg.startCallback(function () {
 		$(document).keydown(function (e) {
-			fg.keyTracker[e.which] = true;
+			var
+				key = e.keyCode,
+				keycodes = fg.keyCodes
+			;
+
+			if (keycodes[key] !== undefined) {
+				key = keycodes[key];
+			}
+
+			fg.keyTracker[key] = true;
 		});
 
 		$(document).keyup(function (e) {
-			fg.keyTracker[e.which] = false;
+			var
+				key = e.keyCode,
+				keycodes = fg.keyCodes
+			;
+
+			if (keycodes[key] !== undefined) {
+				key = keycodes[key];
+			}
+
+			fg.keyTracker[key] = false;
 		});
 	});
 }(jQuery, friGame));

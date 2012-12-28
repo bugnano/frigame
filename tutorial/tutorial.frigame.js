@@ -358,25 +358,25 @@
 						//Update the movement of the ship:
 						if (!playerHit) {
 							fg.sprites.player.userData.update();
-							if (fg.keyTracker[65]) { //this is left! (a)
+							if (fg.keyTracker.A) { //this is left! (a)
 								nextpos = fg.sprites.player.left - 5;
 								if (nextpos > 0) {
 									fg.sprites.player.move({left: nextpos});
 								}
 							}
-							if (fg.keyTracker[68]) { //this is right! (d)
+							if (fg.keyTracker.D) { //this is right! (d)
 								nextpos = fg.sprites.player.left + 5;
 								if (nextpos < PLAYGROUND_WIDTH - 100) {
 									fg.sprites.player.move({left: nextpos});
 								}
 							}
-							if (fg.keyTracker[87]) { //this is up! (w)
+							if (fg.keyTracker.W) { //this is up! (w)
 								nextpos = fg.sprites.player.top - 3;
 								if (nextpos > 0) {
 									fg.sprites.player.move({top: nextpos});
 								}
 							}
-							if (fg.keyTracker[83]) { //this is down! (s)
+							if (fg.keyTracker.S) { //this is down! (s)
 								nextpos = fg.sprites.player.top + 3;
 								if (nextpos < PLAYGROUND_HEIGHT - 30) {
 									fg.sprites.player.move({top: nextpos});
@@ -603,12 +603,14 @@
 					var
 						playerposx,
 						playerposy,
-						name
+						name,
+						keycode
 					;
 
 					if (!gameOver && !playerHit) {
-						switch (e.which) {
-							case 75: //this is shoot (k)
+						keycode = fg.keyCodes[e.keyCode];
+						switch (keycode) {
+							case 'K': //this is shoot (k)
 								//shoot missile here
 								playerposx = fg.sprites.player.left;
 								playerposy = fg.sprites.player.top;
@@ -616,16 +618,16 @@
 								fg.sprites.playerMissileLayer.addSprite(name, {animation: missile.player, left: playerposx + 90, top: playerposy + 14, width: 36, height: 10});
 								G.playerMissiles[name] = fg.sprites[name];
 								break;
-							case 65: //this is left! (a)
+							case 'A': //this is left! (a)
 								fg.sprites.playerBooster.setAnimation({animation: null});
 								break;
-							case 87: //this is up! (w)
+							case 'W': //this is up! (w)
 								fg.sprites.playerBoostUp.setAnimation({animation: playerAnimation.up});
 								break;
-							case 68: //this is right (d)
+							case 'D': //this is right (d)
 								fg.sprites.playerBooster.setAnimation({animation: playerAnimation.booster});
 								break;
-							case 83: //this is down! (s)
+							case 'S': //this is down! (s)
 								fg.sprites.playerBoostDown.setAnimation({animation: playerAnimation.down});
 								break;
 						}
@@ -634,18 +636,23 @@
 
 				//this is where the keybinding occurs
 				$(document).keyup(function (e) {
+					var
+						keycode
+					;
+
 					if (!gameOver && !playerHit) {
-						switch (e.which) {
-							case 65: //this is left! (a)
+						keycode = fg.keyCodes[e.keyCode];
+						switch (keycode) {
+							case 'A': //this is left! (a)
 								fg.sprites.playerBooster.setAnimation({animation: playerAnimation.boost});
 								break;
-							case 87: //this is up! (w)
+							case 'W': //this is up! (w)
 								fg.sprites.playerBoostUp.setAnimation({animation: null});
 								break;
-							case 68: //this is right (d)
+							case 'D': //this is right (d)
 								fg.sprites.playerBooster.setAnimation({animation: playerAnimation.boost});
 								break;
-							case 83: //this is down! (s)
+							case 'S': //this is down! (s)
 								fg.sprites.playerBoostDown.setAnimation({animation: null});
 								break;
 						}
