@@ -97,6 +97,18 @@ var friGame = {};
 	// ******************************************************************** //
 	// ******************************************************************** //
 
+	fg.Maker = function (proto) {
+		return function () {
+			var
+				obj = Object.create(proto)
+			;
+
+			obj.init.apply(obj, arguments);
+
+			return obj;
+		};
+	};
+
 	// Return a new object with only the keys defined in the keys array parameter
 	fg.pick = function (obj, keys) {
 		var
@@ -328,15 +340,7 @@ var friGame = {};
 		}
 	};
 
-	fg.Gradient = function () {
-		var
-			gradient = Object.create(fg.PGradient)
-		;
-
-		gradient.init.apply(gradient, arguments);
-
-		return gradient;
-	};
+	fg.Gradient = fg.Maker(fg.PGradient);
 
 	fg.resourceManager.addGradient = function (name) {
 		var
@@ -519,15 +523,7 @@ var friGame = {};
 		}
 	};
 
-	fg.Animation = function () {
-		var
-			animation = Object.create(fg.PAnimation)
-		;
-
-		animation.init.apply(animation, arguments);
-
-		return animation;
-	};
+	fg.Animation = fg.Maker(fg.PAnimation);
 
 	fg.resourceManager.addAnimation = function (name) {
 		var
@@ -757,15 +753,7 @@ var friGame = {};
 		}
 	};
 
-	fg.Rect = function () {
-		var
-			rect = Object.create(fg.PRect)
-		;
-
-		rect.init.apply(rect, arguments);
-
-		return rect;
-	};
+	fg.Rect = fg.Maker(fg.PRect);
 
 	// ******************************************************************** //
 	// ******************************************************************** //

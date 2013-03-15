@@ -402,15 +402,7 @@
 		}
 	};
 
-	fg.Sound = function () {
-		var
-			sound = Object.create(fg.PSound)
-		;
-
-		sound.init.apply(sound, arguments);
-
-		return sound;
-	};
+	fg.Sound = fg.Maker(fg.PSound);
 
 	fg.resourceManager.addSound = function (name) {
 		var

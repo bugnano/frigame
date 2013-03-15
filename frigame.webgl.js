@@ -25,14 +25,21 @@
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
 (function ($, fg) {
+	var
+		baseGradient = fg.PGradient,
+		baseAnimation = fg.PAnimation,
+		baseSprite = fg.PSprite,
+		baseSpriteGroup = fg.PSpriteGroup
+	;
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PWebGLGradient = Object.create(fg.PGradient);
-	$.extend(fg.PWebGLGradient, {
+	fg.PGradient = Object.create(baseGradient);
+	$.extend(fg.PGradient, {
 		remove: function () {
 			var
 				gl = fg.gl
@@ -48,7 +55,7 @@
 				});
 			}
 
-			fg.PGradient.remove.call(this);
+			baseGradient.remove.call(this);
 		},
 
 		initColorBuffer: function () {
@@ -215,15 +222,7 @@
 		}
 	});
 
-	fg.Gradient = function () {
-		var
-			gradient = Object.create(fg.PWebGLGradient)
-		;
-
-		gradient.init.apply(gradient, arguments);
-
-		return gradient;
-	};
+	fg.Gradient = fg.Maker(fg.PGradient);
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -231,8 +230,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PWebGLAnimation = Object.create(fg.PAnimation);
-	$.extend(fg.PWebGLAnimation, {
+	fg.PAnimation = Object.create(baseAnimation);
+	$.extend(fg.PAnimation, {
 		remove: function () {
 			var
 				gl = fg.gl
@@ -246,7 +245,7 @@
 				gl.deleteTexture(this.texture);
 			}
 
-			fg.PAnimation.remove.call(this);
+			baseAnimation.remove.call(this);
 		},
 
 		onLoad: function () {
@@ -257,7 +256,7 @@
 				img_height = img.height
 			;
 
-			fg.PAnimation.onLoad.apply(this, arguments);
+			baseAnimation.onLoad.apply(this, arguments);
 
 			this.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
 			options.offsetx /= img_width;
@@ -378,15 +377,7 @@
 		}
 	});
 
-	fg.Animation = function () {
-		var
-			animation = Object.create(fg.PWebGLAnimation)
-		;
-
-		animation.init.apply(animation, arguments);
-
-		return animation;
-	};
+	fg.Animation = fg.Maker(fg.PAnimation);
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -596,8 +587,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PWebGLSprite = Object.create(fg.PSprite);
-	$.extend(fg.PWebGLSprite, {
+	fg.PSprite = Object.create(baseSprite);
+	$.extend(fg.PSprite, {
 		draw: function () {
 			var
 				options = this.options,
@@ -636,15 +627,7 @@
 		}
 	});
 
-	fg.Sprite = function () {
-		var
-			sprite = Object.create(fg.PWebGLSprite)
-		;
-
-		sprite.init.apply(sprite, arguments);
-
-		return sprite;
-	};
+	fg.Sprite = fg.Maker(fg.PSprite);
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -652,8 +635,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PWebGLSpriteGroup = Object.create(fg.PSpriteGroup);
-	$.extend(fg.PWebGLSpriteGroup, {
+	fg.PSpriteGroup = Object.create(baseSpriteGroup);
+	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				gl,
@@ -668,7 +651,7 @@
 				pMatrix = mat4.create()
 			;
 
-			fg.PSpriteGroup.init.apply(this, arguments);
+			baseSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
 
@@ -731,7 +714,7 @@
 				old_background = this.old_options.background
 			;
 
-			fg.PSpriteGroup.remove.apply(this, arguments);
+			baseSpriteGroup.remove.apply(this, arguments);
 
 			if (old_background) {
 				old_background.removeGroup(this);
@@ -830,7 +813,7 @@
 					background.drawBackground(gl, this);
 				}
 
-				fg.PSpriteGroup.draw.apply(this, arguments);
+				baseSpriteGroup.draw.apply(this, arguments);
 
 				if (context_saved) {
 					fg.mvPopMatrix();
@@ -841,14 +824,6 @@
 		}
 	});
 
-	fg.SpriteGroup = function () {
-		var
-			group = Object.create(fg.PWebGLSpriteGroup)
-		;
-
-		group.init.apply(group, arguments);
-
-		return group;
-	};
+	fg.SpriteGroup = fg.Maker(fg.PSpriteGroup);
 }(jQuery, friGame));
 

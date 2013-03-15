@@ -27,6 +27,11 @@
 // Akihabara Copyright (c) 2010 Francesco Cottone, http://www.kesiev.com/, licensed under the MIT
 
 (function ($, fg) {
+	var
+		baseSprite = fg.PSprite,
+		baseSpriteGroup = fg.PSpriteGroup
+	;
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -200,8 +205,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PCanvasSprite = Object.create(fg.PSprite);
-	$.extend(fg.PCanvasSprite, {
+	fg.PSprite = Object.create(baseSprite);
+	$.extend(fg.PSprite, {
 		draw: function () {
 			var
 				options = this.options,
@@ -257,15 +262,7 @@
 		}
 	});
 
-	fg.Sprite = function () {
-		var
-			sprite = Object.create(fg.PCanvasSprite)
-		;
-
-		sprite.init.apply(sprite, arguments);
-
-		return sprite;
-	};
+	fg.Sprite = fg.Maker(fg.PSprite);
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -273,8 +270,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PCanvasSpriteGroup = Object.create(fg.PSpriteGroup);
-	$.extend(fg.PCanvasSpriteGroup, {
+	fg.PSpriteGroup = Object.create(baseSpriteGroup);
+	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				dom,
@@ -282,7 +279,7 @@
 				height
 			;
 
-			fg.PSpriteGroup.init.apply(this, arguments);
+			baseSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
 
@@ -314,7 +311,7 @@
 				old_background = this.old_options.background
 			;
 
-			fg.PSpriteGroup.remove.apply(this, arguments);
+			baseSpriteGroup.remove.apply(this, arguments);
 
 			if (old_background && old_background.removeGroup) {
 				old_background.removeGroup(this);
@@ -442,7 +439,7 @@
 					ctx.clip();
 				}
 
-				fg.PSpriteGroup.draw.apply(this, arguments);
+				baseSpriteGroup.draw.apply(this, arguments);
 
 				if (context_saved) {
 					// ctx.restore restores also the globalAlpha value
@@ -458,15 +455,7 @@
 		}
 	});
 
-	fg.SpriteGroup = function () {
-		var
-			group = Object.create(fg.PCanvasSpriteGroup)
-		;
-
-		group.init.apply(group, arguments);
-
-		return group;
-	};
+	fg.SpriteGroup = fg.Maker(fg.PSpriteGroup);
 
 	// ******************************************************************** //
 	// ******************************************************************** //

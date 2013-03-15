@@ -25,6 +25,11 @@
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
 (function ($, fg) {
+	var
+		baseSprite = fg.PSprite,
+		baseSpriteGroup = fg.PSpriteGroup
+	;
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -344,10 +349,10 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PDOMSprite = Object.create(fg.PSprite);
-	$.extend(fg.PDOMSprite, {
+	fg.PSprite = Object.create(baseSprite);
+	$.extend(fg.PSprite, {
 		init: function (name, options, parent) {
-			fg.PSprite.init.apply(this, arguments);
+			baseSprite.init.apply(this, arguments);
 
 			this.old_options = {};
 
@@ -360,7 +365,7 @@
 				this.dom.remove();
 			}
 
-			fg.PSprite.remove.apply(this, arguments);
+			baseSprite.remove.apply(this, arguments);
 		},
 
 		// Implementation details
@@ -563,15 +568,7 @@
 		}
 	});
 
-	fg.Sprite = function () {
-		var
-			sprite = Object.create(fg.PDOMSprite)
-		;
-
-		sprite.init.apply(sprite, arguments);
-
-		return sprite;
-	};
+	fg.Sprite = fg.Maker(fg.PSprite);
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -579,14 +576,14 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PDOMSpriteGroup = Object.create(fg.PSpriteGroup);
-	$.extend(fg.PDOMSpriteGroup, {
+	fg.PSpriteGroup = Object.create(baseSpriteGroup);
+	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				dom
 			;
 
-			fg.PSpriteGroup.init.apply(this, arguments);
+			baseSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
 
@@ -622,7 +619,7 @@
 		// Public functions
 
 		remove: function () {
-			fg.PSpriteGroup.remove.apply(this, arguments);
+			baseSpriteGroup.remove.apply(this, arguments);
 
 			if (this.dom) {
 				this.dom.remove();
@@ -851,7 +848,7 @@
 					this.applyIeFilters();
 				}
 
-				fg.PSpriteGroup.draw.apply(this, arguments);
+				baseSpriteGroup.draw.apply(this, arguments);
 
 				// Update the last sprite after drawing all the children nodes
 				fg.last_sprite = name;
@@ -871,14 +868,6 @@
 		}
 	});
 
-	fg.SpriteGroup = function () {
-		var
-			group = Object.create(fg.PDOMSpriteGroup)
-		;
-
-		group.init.apply(group, arguments);
-
-		return group;
-	};
+	fg.SpriteGroup = fg.Maker(fg.PSpriteGroup);
 }(jQuery, friGame));
 
