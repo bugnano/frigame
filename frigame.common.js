@@ -58,6 +58,15 @@ if (!Date.now) {
 var friGame = {};
 
 (function ($, fg) {
+	var
+		myGradient,
+		myAnimation,
+		myRect,
+		myBaseSprite,
+		mySprite,
+		mySpriteGroup
+	;
+
 	$.extend(fg, {
 		// Public constants
 
@@ -90,6 +99,11 @@ var friGame = {};
 		idUpdate: null,
 		drawDone: true
 	});
+
+	// r is mapped to resources and s is mapped to sprites in order to have a more convenient
+	// access to these frequently used objects
+	fg.r = fg.resources;
+	fg.s = fg.sprites;
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -160,15 +174,15 @@ var friGame = {};
 
 		addResource: function (name, resource) {
 			fg.resourceManager.preloadList.push(resource);
-			fg.resources[name] = resource;
+			fg.r[name] = resource;
 
 			return fg.resourceManager;
 		},
 
 		removeResource: function (name) {
-			if (fg.resources[name]) {
-				fg.resources[name].remove();
-				delete fg.resources[name];
+			if (fg.r[name]) {
+				fg.r[name].remove();
+				delete fg.r[name];
 			}
 
 			return fg.resourceManager;
@@ -178,15 +192,15 @@ var friGame = {};
 			var
 				resourceManager = fg.resourceManager,
 				removeResource = resourceManager.removeResource,
-				resources = fg.resources,
+				r = fg.r,
 				resource_name,
 				resource_names = [],
 				len_resource_names,
 				i
 			;
 
-			for (resource_name in resources) {
-				if (resources.hasOwnProperty(resource_name)) {
+			for (resource_name in r) {
+				if (r.hasOwnProperty(resource_name)) {
 					resource_names.push(resource_name);
 				}
 			}
@@ -262,8 +276,9 @@ var friGame = {};
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
-
-	fg.PGradient = {
+	myGradient = {};
+	fg.PGradient = myGradient;
+	$.extend(fg.PGradient, {
 		init: function (startColor, endColor, type) {
 			var
 				clamp = fg.clamp,
@@ -323,7 +338,7 @@ var friGame = {};
 				gradient = this
 			;
 
-			$.each(fg.sprites, function () {
+			$.each(fg.s, function () {
 				if (this.options.background === gradient) {
 					this.setBackground({background: null});
 				}
@@ -338,7 +353,7 @@ var friGame = {};
 
 		onLoad: function () {
 		}
-	};
+	});
 
 	fg.Gradient = fg.Maker(fg.PGradient);
 
@@ -359,7 +374,9 @@ var friGame = {};
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PAnimation = {
+	myAnimation = {};
+	fg.PAnimation = myAnimation;
+	$.extend(fg.PAnimation, {
 		// Public options
 
 		// Implementation details
@@ -370,7 +387,7 @@ var friGame = {};
 				my_options,
 				new_options = options || {},
 				img,
-				PAnimation = fg.PAnimation
+				PAnimation = myAnimation
 			;
 
 			if (this.options) {
@@ -446,12 +463,12 @@ var friGame = {};
 		remove: function () {
 			var
 				imageURL = this.options.imageURL,
-				PAnimation = fg.PAnimation,
+				PAnimation = myAnimation,
 				animation = this
 			;
 
 			// Step 1: Remove myself from all the sprites
-			$.each(fg.sprites, function () {
+			$.each(fg.s, function () {
 				if (this.options.animation === animation) {
 					this.setAnimation({animation: null});
 				}
@@ -521,7 +538,7 @@ var friGame = {};
 			this.halfWidth = options.halfWidth;
 			this.halfHeight = options.halfHeight;
 		}
-	};
+	});
 
 	fg.Animation = fg.Maker(fg.PAnimation);
 
@@ -542,7 +559,9 @@ var friGame = {};
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PRect = {
+	myRect = {};
+	fg.PRect = myRect;
+	$.extend(fg.PRect, {
 		init: function (options) {
 			// Set default options
 			$.extend(this, {
@@ -751,7 +770,7 @@ var friGame = {};
 
 			return (((dx * dx) + (dy * dy)) < (radii * radii));
 		}
-	};
+	});
 
 	fg.Rect = fg.Maker(fg.PRect);
 
@@ -761,7 +780,8 @@ var friGame = {};
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PBaseSprite = Object.create(fg.PRect);
+	myBaseSprite = Object.create(myRect);
+	fg.PBaseSprite = myBaseSprite;
 	$.extend(fg.PBaseSprite, {
 		init: function (name, options, parent) {
 			var
@@ -796,7 +816,7 @@ var friGame = {};
 				posOffsetY: 0
 			});
 
-			fg.sprites[name] = this;
+			fg.s[name] = this;
 
 			// name and parent are public read-only properties
 			this.name = name;
@@ -808,8 +828,8 @@ var friGame = {};
 			// Implementation details
 			this.callbacks = [];
 
-			// Call PRect.init after setting this.parent
-			fg.PRect.init.call(this, options);
+			// Call myRect.init after setting this.parent
+			myRect.init.call(this, options);
 		},
 
 		// Public functions
@@ -824,7 +844,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = fg.sprites[parent].layers;
+				parent_layers = fg.s[parent].layers;
 				len_parent_layers = parent_layers.length;
 				for (i = 0; i < len_parent_layers; i += 1) {
 					if (parent_layers[i].name === name) {
@@ -834,7 +854,7 @@ var friGame = {};
 				}
 			}
 
-			delete fg.sprites[name];
+			delete fg.s[name];
 		},
 
 		registerCallback: function (callback, rate) {
@@ -887,7 +907,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = fg.sprites[parent].layers;
+				parent_layers = fg.s[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -918,7 +938,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = fg.sprites[parent].layers;
+				parent_layers = fg.s[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -949,7 +969,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = fg.sprites[parent].layers;
+				parent_layers = fg.s[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -980,7 +1000,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = fg.sprites[parent].layers;
+				parent_layers = fg.s[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -1018,7 +1038,7 @@ var friGame = {};
 			;
 
 			if (parent) {
-				parent_layers = fg.sprites[parent].layers;
+				parent_layers = fg.s[parent].layers;
 				len_parent_layers = parent_layers.length;
 
 				// Step 1: Remove myself from the parent layers
@@ -1199,7 +1219,8 @@ var friGame = {};
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PSprite = Object.create(fg.PBaseSprite);
+	mySprite = Object.create(myBaseSprite);
+	fg.PSprite = mySprite;
 	$.extend(fg.PSprite, {
 		init: function (name, options, parent) {
 			var
@@ -1230,7 +1251,7 @@ var friGame = {};
 				paused: false
 			});
 
-			fg.PBaseSprite.init.apply(this, arguments);
+			myBaseSprite.init.apply(this, arguments);
 
 			// If the animation has not been defined, force
 			// the animation to null in order to resize and move
@@ -1256,7 +1277,7 @@ var friGame = {};
 			;
 
 			if (animation_redefined) {
-				animation = fg.resources[new_options.animation];
+				animation = fg.r[new_options.animation];
 				my_options.animation = animation;
 
 				// Force new width and height based on the animation frame size
@@ -1275,7 +1296,7 @@ var friGame = {};
 				this.animation_options = animation_options;
 
 				// Call the resize method with all the options in order to update the position
-				fg.PBaseSprite.resize.call(this, new_options);
+				myBaseSprite.resize.call(this, new_options);
 
 				// If the animation gets redefined, set default index of 0
 				if ((my_options.animationIndex !== 0) && (!index_redefined)) {
@@ -1358,7 +1379,7 @@ var friGame = {};
 				currentFrame = options.currentFrame
 			;
 
-			fg.PBaseSprite.update.call(this);
+			myBaseSprite.update.call(this);
 
 			if (!(this.endAnimation || options.paused)) {
 				if (animation) {
@@ -1507,7 +1528,8 @@ var friGame = {};
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PSpriteGroup = Object.create(fg.PBaseSprite);
+	mySpriteGroup = Object.create(myBaseSprite);
+	fg.PSpriteGroup = mySpriteGroup;
 	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
@@ -1539,7 +1561,7 @@ var friGame = {};
 
 			this.layers = [];
 
-			fg.PBaseSprite.init.apply(this, arguments);
+			myBaseSprite.init.apply(this, arguments);
 
 			// If the background has not been defined, force
 			// the background to null in order to be
@@ -1556,7 +1578,7 @@ var friGame = {};
 		remove: function () {
 			this.clear();
 
-			fg.PBaseSprite.remove.apply(this, arguments);
+			myBaseSprite.remove.apply(this, arguments);
 		},
 
 		resize: function (options) {
@@ -1567,10 +1589,10 @@ var friGame = {};
 			;
 
 			// Set the new options
-			fg.PBaseSprite.resize.call(this, options);
+			myBaseSprite.resize.call(this, options);
 
 			if (this.parent) {
-				parent = fg.sprites[this.parent];
+				parent = fg.s[this.parent];
 
 				// A width of 0 means the same width as the parent
 				if (!this.width) {
@@ -1585,7 +1607,7 @@ var friGame = {};
 				}
 
 				if (set_new_options) {
-					fg.PBaseSprite.resize.call(this, new_options);
+					myBaseSprite.resize.call(this, new_options);
 				}
 			}
 
@@ -1635,7 +1657,7 @@ var friGame = {};
 			;
 
 			if (new_options.background !== undefined) {
-				my_options.background = fg.resources[new_options.background];
+				my_options.background = fg.r[new_options.background];
 			}
 
 			if (new_options.backgroundType !== undefined) {
@@ -1708,7 +1730,7 @@ var friGame = {};
 				parent = this.name;
 			}
 
-			return fg.sprites[parent];
+			return fg.s[parent];
 		},
 
 		// Implementation details
@@ -1720,7 +1742,7 @@ var friGame = {};
 				i
 			;
 
-			fg.PBaseSprite.update.call(this);
+			myBaseSprite.update.call(this);
 
 			for (i = 0; i < len_layers; i += 1) {
 				if (layers[i]) {
@@ -1753,7 +1775,7 @@ var friGame = {};
 
 		playground: function (parentDOM) {
 			var
-				playground = fg.sprites.playground,
+				playground = fg.s.playground,
 				dom
 			;
 
@@ -1830,7 +1852,7 @@ var friGame = {};
 		firePlaygroundCallbacks: function () {
 			var
 				i,
-				playground = fg.sprites.playground,
+				playground = fg.s.playground,
 				dom = playground.parentDOM,
 				playground_callbacks = fg.playgroundCallbacks,
 				len_playground_callbacks = playground_callbacks.length
@@ -1844,7 +1866,7 @@ var friGame = {};
 
 		update: function () {
 			var
-				playground = fg.sprites.playground
+				playground = fg.s.playground
 			;
 
 			if (playground) {
@@ -1858,15 +1880,9 @@ var friGame = {};
 		},
 
 		draw: function () {
-			fg.sprites.playground.draw();
+			fg.s.playground.draw();
 			fg.drawDone = true;
 		}
 	});
-
-	// r is mapped to resources and s is mapped to sprites in order to have a more convenient
-	// access to these frequently used objects
-	fg.r = fg.resources;
-	fg.s = fg.sprites;
-
 }(jQuery, friGame));
 

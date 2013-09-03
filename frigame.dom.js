@@ -404,9 +404,9 @@
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					if (last_sprite === parent) {
-						dom.prependTo(fg.sprites[parent].dom);
+						dom.prependTo(fg.s[parent].dom);
 					} else {
-						dom.insertAfter(fg.sprites[last_sprite].dom);
+						dom.insertAfter(fg.s[last_sprite].dom);
 					}
 
 					old_options.last_sprite = last_sprite;
@@ -426,9 +426,9 @@
 						// The position in the DOM has changed
 						dom.detach();
 						if (last_sprite === parent) {
-							dom.prependTo(fg.sprites[parent].dom);
+							dom.prependTo(fg.s[parent].dom);
 						} else {
-							dom.insertAfter(fg.sprites[last_sprite].dom);
+							dom.insertAfter(fg.s[last_sprite].dom);
 						}
 
 						old_options.last_sprite = last_sprite;
@@ -668,9 +668,9 @@
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					if (last_sprite === parent) {
-						dom.prependTo(fg.sprites[parent].dom);
+						dom.prependTo(fg.s[parent].dom);
 					} else {
-						dom.insertAfter(fg.sprites[last_sprite].dom);
+						dom.insertAfter(fg.s[last_sprite].dom);
 					}
 
 					old_options.last_sprite = last_sprite;
@@ -692,9 +692,9 @@
 						// The position in the DOM has changed
 						dom.detach();
 						if (last_sprite === parent) {
-							dom.prependTo(fg.sprites[parent].dom);
+							dom.prependTo(fg.s[parent].dom);
 						} else {
-							dom.insertAfter(fg.sprites[last_sprite].dom);
+							dom.insertAfter(fg.s[last_sprite].dom);
 						}
 
 						old_options.last_sprite = last_sprite;
