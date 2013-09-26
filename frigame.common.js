@@ -24,41 +24,10 @@
 // Uses ideas and APIs inspired by:
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
-// Prototypal Inheritance by Douglas Crockford
-if (typeof Object.create !== 'function') {
-	Object.create = function (o) {
-		function F() {}
-		F.prototype = o;
-		return new F();
-	};
-}
-
-// shim layer with setTimeout fallback by Paul Irish
-if (!window.requestAnimFrame) {
-	window.requestAnimFrame = (function () {
-		return window.requestAnimationFrame ||
-			window.webkitRequestAnimationFrame ||
-			window.mozRequestAnimationFrame ||
-			window.oRequestAnimationFrame ||
-			window.msRequestAnimationFrame ||
-			function (callback) {
-				window.setTimeout(callback, 1000 / 60);
-			};
-	}());
-}
-
-// Date.now() by Mozilla
-if (!Date.now) {
-	Date.now = function () {
-		return (new Date()).getTime();
-	};
-}
-
-// The friGame namespace
-var friGame = {};
-
-(function ($, fg) {
+(function ($) {
 	var
+		fg = {},
+		exports = this,
 		myGradient,
 		myAnimation,
 		myRect,
@@ -66,6 +35,39 @@ var friGame = {};
 		mySprite,
 		mySpriteGroup
 	;
+
+	// The friGame namespace
+	exports.friGame = fg;
+
+	// Prototypal Inheritance by Douglas Crockford
+	if (typeof Object.create !== 'function') {
+		Object.create = function (o) {
+			function F() {}
+			F.prototype = o;
+			return new F();
+		};
+	}
+
+	// shim layer with setTimeout fallback by Paul Irish
+	if (!window.requestAnimFrame) {
+		window.requestAnimFrame = (function () {
+			return window.requestAnimationFrame ||
+				window.webkitRequestAnimationFrame ||
+				window.mozRequestAnimationFrame ||
+				window.oRequestAnimationFrame ||
+				window.msRequestAnimationFrame ||
+				function (callback) {
+					window.setTimeout(callback, 1000 / 60);
+				};
+		}());
+	}
+
+	// Date.now() by Mozilla
+	if (!Date.now) {
+		Date.now = function () {
+			return (new Date()).getTime();
+		};
+	}
 
 	$.extend(fg, {
 		// Public constants
@@ -896,7 +898,7 @@ var friGame = {};
 			return this;
 		},
 
-		moveFirst: function () {
+		drawFirst: function () {
 			var
 				parent = this.parent,
 				parent_layers,
@@ -927,7 +929,7 @@ var friGame = {};
 			return this;
 		},
 
-		moveLast: function () {
+		drawLast: function () {
 			var
 				parent = this.parent,
 				parent_layers,
@@ -958,7 +960,7 @@ var friGame = {};
 			return this;
 		},
 
-		moveTo: function (index) {
+		drawTo: function (index) {
 			var
 				parent = this.parent,
 				parent_layers,
@@ -989,7 +991,7 @@ var friGame = {};
 			return this;
 		},
 
-		moveBefore: function (name) {
+		drawBefore: function (name) {
 			var
 				parent = this.parent,
 				parent_layers,
@@ -1027,7 +1029,7 @@ var friGame = {};
 			return this;
 		},
 
-		moveAfter: function (name) {
+		drawAfter: function (name) {
 			var
 				parent = this.parent,
 				parent_layers,
@@ -1199,7 +1201,7 @@ var friGame = {};
 				callback.idleCounter += 1;
 				if (callback.idleCounter >= callback.rate) {
 					callback.idleCounter = 0;
-					retval = callback.callback.call(this);
+					retval = callback.callback.call(this, this);
 					if (retval) {
 						remove_callbacks.unshift(i);
 					}
@@ -1631,6 +1633,7 @@ var friGame = {};
 				layers = this.layers,
 				len_layers = layers.length,
 				layer,
+				layer_obj,
 				retval,
 				i
 			;
@@ -1639,7 +1642,8 @@ var friGame = {};
 				for (i = 0; i < len_layers; i += 1) {
 					layer = layers[i];
 					if (layer) {
-						retval = callback.call(layer.obj, layer.name);
+						layer_obj = layer.obj;
+						retval = callback.call(layer_obj, layer_obj);
 						if (retval) {
 							break;
 						}
@@ -1884,5 +1888,5 @@ var friGame = {};
 			fg.drawDone = true;
 		}
 	});
-}(jQuery, friGame));
+}(jQuery));
 

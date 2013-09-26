@@ -27,6 +27,7 @@
 		playerHit = false,
 		timeOfRespawn = 0,
 		gameOver = false,
+		counter = 0,
 		G = {
 			enemiesMissiles: {},
 			enemy: {},
@@ -455,7 +456,8 @@
 								if (Math.random() < 0.05) {
 									enemyposx = this.left;
 									enemyposy = this.top;
-									name = ['enemiesMissile_', String(Math.ceil(Math.random() * 1000))].join('');
+									counter = (counter + 1) % 100000;
+									name = ['enemiesMissile_', String(counter)].join('');
 									fg.sprites.enemiesMissileLayer.addSprite(name, {animation: missile.enemies, left: enemyposx, top: enemyposy + 20, width: 30, height: 15});
 									G.enemiesMissiles[name] = fg.sprites[name];
 								}
@@ -549,18 +551,21 @@
 
 					if (!bossMode && !gameOver) {
 						if (Math.random() < 0.4) {
-							name = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
+							counter = (counter + 1) % 100000;
+							name = ['enemy1_', String(counter)].join('');
 							fg.sprites.actors.addSprite(name, {animation: enemies[0].idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT, width: 150, height: 52});
 							G.enemy[name] = fg.sprites[name];
 							fg.sprites[name].userData = G.Minion(fg.sprites[name]);
 						} else if (Math.random() < 0.5) {
-							name = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
+							counter = (counter + 1) % 100000;
+							name = ['enemy1_', String(counter)].join('');
 							fg.sprites.actors.addSprite(name, {animation: enemies[1].idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT, width: 100, height: 42});
 							G.enemy[name] = fg.sprites[name];
 							fg.sprites[name].userData = G.Brainy(fg.sprites[name]);
 						} else if (Math.random() > 0.8) {
+							counter = (counter + 1) % 100000;
 							bossMode = true;
-							bossName = ['enemy1_', String(Math.ceil(Math.random() * 1000))].join('');
+							bossName = ['enemy1_', String(counter)].join('');
 							fg.sprites.actors.addSprite(bossName, {animation: enemies[2].idle, left: PLAYGROUND_WIDTH, top: Math.random() * PLAYGROUND_HEIGHT, width: 100, height: 100});
 							G.enemy[bossName] = fg.sprites[bossName];
 							fg.sprites[bossName].userData = G.Bossy(fg.sprites[bossName]);
@@ -614,7 +619,8 @@
 								//shoot missile here
 								playerposx = fg.sprites.player.left;
 								playerposy = fg.sprites.player.top;
-								name = ['playerMissle_', String(Math.ceil(Math.random() * 1000))].join('');
+								counter = (counter + 1) % 100000;
+								name = ['playerMissle_', String(counter)].join('');
 								fg.sprites.playerMissileLayer.addSprite(name, {animation: missile.player, left: playerposx + 90, top: playerposy + 14, width: 36, height: 10});
 								G.playerMissiles[name] = fg.sprites[name];
 								break;
