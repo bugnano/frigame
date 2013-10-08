@@ -77,7 +77,7 @@
 				speed = speeds._default;
 			}
 
-			num_step = Math.floor(speed / fg.refreshRate) || 1;
+			num_step = Math.floor(speed / fg.REFRESH_RATE) || 1;
 
 			this.fx = this.fx || {};
 			this.fx.opacity = {
@@ -88,7 +88,7 @@
 				callback: callback
 			};
 
-			this.registerCallback(opacityStep, fg.refreshRate);
+			this.registerCallback(opacityStep, fg.REFRESH_RATE);
 
 			return this;
 		}

@@ -81,9 +81,9 @@
 		BACKGROUND_TILED: 0,
 		BACKGROUND_STRETCHED: 1,
 
-		// Implementation details
+		REFRESH_RATE: 1000 / 60
 
-		refreshRate: 30
+		// Implementation details
 	});
 
 	$.extend(fg, {
@@ -99,7 +99,7 @@
 
 		playgroundCallbacks: [],
 		idUpdate: null,
-		drawDone: true
+		nextUpdate: 0
 	});
 
 	// r is mapped to resources and s is mapped to sprites in order to have a more convenient
@@ -267,7 +267,9 @@
 				}
 
 				if (fg.idUpdate === null) {
-					fg.idUpdate = setInterval(fg.update, fg.refreshRate);
+					fg.nextUpdate = Date.now() + fg.REFRESH_RATE;
+					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
+					window.requestAnimFrame(fg.draw);
 				}
 			}
 		}
@@ -403,7 +405,7 @@
 			$.extend(my_options, {
 				// Public options
 				numberOfFrame: 1,
-				rate: fg.refreshRate,
+				rate: fg.REFRESH_RATE,
 				type: fg.ANIMATION_HORIZONTAL,
 				once: false,
 				pingpong: false,
@@ -437,10 +439,7 @@
 				'frameHeight'
 			]));
 
-			new_options.rate = Math.round(new_options.rate / fg.refreshRate);
-			if (new_options.rate === 0) {
-				new_options.rate = 1;
-			}
+			new_options.rate = Math.round(new_options.rate / fg.REFRESH_RATE) || 1;
 			my_options.rate = new_options.rate;
 
 			my_options.imageURL = imageURL;
@@ -860,10 +859,7 @@
 		},
 
 		registerCallback: function (callback, rate) {
-			rate = Math.round(rate / fg.refreshRate);
-			if (rate === 0) {
-				rate = 1;
-			}
+			rate = Math.round(rate / fg.REFRESH_RATE) || 1;
 
 			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
 
@@ -1326,7 +1322,7 @@
 			}
 
 			if (new_options.rate !== undefined) {
-				animation_options.rate = Math.round(new_options.rate / fg.refreshRate) || 1;
+				animation_options.rate = Math.round(new_options.rate / fg.REFRESH_RATE) || 1;
 				animation_redefined = true;
 			}
 
@@ -1804,17 +1800,13 @@
 			return playground;
 		},
 
-		startGame: function (callback, rate) {
+		startGame: function (callback) {
 			var
 				resourceManager = fg.resourceManager
 			;
 
 			if (callback) {
 				resourceManager.completeCallback = callback;
-			}
-
-			if (rate) {
-				fg.refreshRate = rate;
 			}
 
 			if (resourceManager.idPreload === null) {
@@ -1870,22 +1862,34 @@
 
 		update: function () {
 			var
-				playground = fg.s.playground
+				playground = fg.s.playground,
+				now = Date.now(),
+				next_update = fg.nextUpdate,
+				refresh_rate = fg.REFRESH_RATE
 			;
 
 			if (playground) {
-				playground.update();
-
-				if (fg.drawDone) {
-					fg.drawDone = false;
-					window.requestAnimFrame(fg.draw);
+				while ((now - next_update) >= refresh_rate) {
+					playground.update();
+					next_update += refresh_rate;
 				}
+
+				fg.nextUpdate = next_update;
 			}
 		},
 
 		draw: function () {
-			fg.s.playground.draw();
-			fg.drawDone = true;
+			var
+				playground = fg.s.playground
+			;
+
+			if (fg.idUpdate !== null) {
+				window.requestAnimFrame(fg.draw);
+			}
+
+			if (playground) {
+				playground.draw();
+			}
 		}
 	});
 }(jQuery));
