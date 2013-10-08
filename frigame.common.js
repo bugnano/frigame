@@ -824,7 +824,7 @@
 			this.parent = parent;
 
 			// A public userData property can be useful to the game
-			this.userData = {};
+			this.userData = null;
 
 			// Implementation details
 			this.callbacks = [];
