@@ -266,7 +266,7 @@
 					resourceManager.completeCallback = null;
 				}
 
-				if (fg.idUpdate === null) {
+				if ((fg.idUpdate === null) && (fg.s.playground)) {
 					fg.nextUpdate = Date.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
 					window.requestAnimFrame(fg.draw);
@@ -823,6 +823,9 @@
 			this.name = name;
 			this.parent = parent;
 
+			// A public read-only rect that is always relative to the playground
+			this.absRect = fg.Rect(options);
+
 			// A public userData property can be useful to the game
 			this.userData = null;
 
@@ -856,6 +859,37 @@
 			}
 
 			delete fg.s[name];
+		},
+
+		resize: function (options) {
+			this.absRect.resize(options);
+
+			myRect.resize.call(this, options);
+
+			return this;
+		},
+
+		move: function (options) {
+			var
+				parentAbsRect
+			;
+
+			myRect.move.call(this, options);
+
+			if (this.parent) {
+				parentAbsRect = fg.s[this.parent].absRect;
+				this.absRect.move({
+					left: parentAbsRect.left + this.left,
+					top: parentAbsRect.top + this.top
+				});
+			} else {
+				this.absRect.move({
+					left: this.left,
+					top: this.top
+				});
+			}
+
+			return this;
 		},
 
 		registerCallback: function (callback, rate) {
@@ -1612,6 +1646,14 @@
 			return this;
 		},
 
+		move: function (options) {
+			myBaseSprite.move.call(this, options);
+
+			this.moveChildrenAbsRect();
+
+			return this;
+		},
+
 		clear: function () {
 			var
 				layers = this.layers
@@ -1761,6 +1803,32 @@
 			for (i = 0; i < len_layers; i += 1) {
 				layers[i].obj.draw();
 			}
+		},
+
+		moveChildrenAbsRect: function () {
+			var
+				absRect = this.absRect,
+				myAbsLeft = absRect.left,
+				myAbsTop = absRect.top,
+				layers = this.layers,
+				len_layers = layers.length,
+				layer_obj,
+				i
+			;
+
+			for (i = 0; i < len_layers; i += 1) {
+				// Update the child node absRect
+				layer_obj = layers[i].obj;
+				layer_obj.absRect.move({
+					left: myAbsLeft + layer_obj.left,
+					top: myAbsTop + layer_obj.top
+				});
+
+				// If this node has children, they must be updated too
+				if (layer_obj.moveChildrenAbsRect) {
+					layer_obj.moveChildrenAbsRect();
+				}
+			}
 		}
 	});
 
@@ -1795,6 +1863,12 @@
 
 				// Call the playgroundCallbacks only after the playground has been completely created
 				setTimeout(fg.firePlaygroundCallbacks, 0);
+
+				if (fg.idUpdate === null) {
+					fg.nextUpdate = Date.now() + fg.REFRESH_RATE;
+					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
+					window.requestAnimFrame(fg.draw);
+				}
 			}
 
 			return playground;
@@ -1868,14 +1942,12 @@
 				refresh_rate = fg.REFRESH_RATE
 			;
 
-			if (playground) {
-				while ((now - next_update) >= refresh_rate) {
-					playground.update();
-					next_update += refresh_rate;
-				}
-
-				fg.nextUpdate = next_update;
+			while ((now - next_update) >= refresh_rate) {
+				playground.update();
+				next_update += refresh_rate;
 			}
+
+			fg.nextUpdate = next_update;
 		},
 
 		draw: function () {
@@ -1887,9 +1959,7 @@
 				window.requestAnimFrame(fg.draw);
 			}
 
-			if (playground) {
-				playground.draw();
-			}
+			playground.draw();
 		}
 	});
 }(jQuery));
