@@ -871,6 +871,7 @@
 
 		move: function (options) {
 			var
+				absRect = this.absRect,
 				parentAbsRect
 			;
 
@@ -878,15 +879,19 @@
 
 			if (this.parent) {
 				parentAbsRect = fg.s[this.parent].absRect;
-				this.absRect.move({
+				absRect.move({
 					left: parentAbsRect.left + this.left,
 					top: parentAbsRect.top + this.top
 				});
+
+				this.insidePlayground = absRect.collideRect(fg.s.playground);
 			} else {
-				this.absRect.move({
+				absRect.move({
 					left: this.left,
 					top: this.top
 				});
+
+				this.insidePlayground = true;
 			}
 
 			return this;
@@ -1810,19 +1815,24 @@
 				absRect = this.absRect,
 				myAbsLeft = absRect.left,
 				myAbsTop = absRect.top,
+				playground = fg.s.playground,
 				layers = this.layers,
 				len_layers = layers.length,
 				layer_obj,
+				layerAbsRect,
 				i
 			;
 
 			for (i = 0; i < len_layers; i += 1) {
 				// Update the child node absRect
 				layer_obj = layers[i].obj;
-				layer_obj.absRect.move({
+				layerAbsRect = layer_obj.absRect;
+				layerAbsRect.move({
 					left: myAbsLeft + layer_obj.left,
 					top: myAbsTop + layer_obj.top
 				});
+
+				layer_obj.insidePlayground = layerAbsRect.collideRect(playground);
 
 				// If this node has children, they must be updated too
 				if (layer_obj.moveChildrenAbsRect) {

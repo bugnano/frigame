@@ -223,7 +223,7 @@
 				ctx = fg.ctx
 			;
 
-			if (animation && alpha && !options.hidden) {
+			if (this.insidePlayground && animation && alpha && !options.hidden) {
 				ctx.save();
 
 				ctx.translate(this.centerx, this.centery);
@@ -337,7 +337,8 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
-				background = options.background,
+				insidePlayground = this.insidePlayground,
+				background = insidePlayground && options.background,
 				old_background = old_options.background,
 				angle = options.angle,
 				scaleh = options.scaleh,
@@ -355,38 +356,40 @@
 				fg.globalAlpha = 1;
 			}
 
-			if (background !== old_background) {
-				if (old_background && old_background.removeGroup) {
-					old_background.removeGroup(this);
-				}
+			if (insidePlayground) {
+				if (background !== old_background) {
+					if (old_background && old_background.removeGroup) {
+						old_background.removeGroup(this);
+					}
 
-				if (background && background.addGroup) {
-					background.addGroup(this);
-				}
-
-				old_options.width = width;
-				old_options.height = height;
-				old_options.background = background;
-			} else {
-				if ((width !== old_options.width) || (height !== old_options.height)) {
-					// Reset the background in order to create a new one with the new width and height
-					if (background) {
-						if (background.removeGroup) {
-							background.removeGroup(this);
-						}
-
-						if (background.addGroup) {
-							background.addGroup(this);
-						}
+					if (background && background.addGroup) {
+						background.addGroup(this);
 					}
 
 					old_options.width = width;
 					old_options.height = height;
+					old_options.background = background;
+				} else {
+					if ((width !== old_options.width) || (height !== old_options.height)) {
+						// Reset the background in order to create a new one with the new width and height
+						if (background) {
+							if (background.removeGroup) {
+								background.removeGroup(this);
+							}
+
+							if (background.addGroup) {
+								background.addGroup(this);
+							}
+						}
+
+						old_options.width = width;
+						old_options.height = height;
+					}
 				}
 			}
 
 			if ((this.layers.length || background) && alpha && !options.hidden) {
-				if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+				if (angle || (scaleh !== 1) || (scalev !== 1)) {
 					ctx.save();
 					context_saved = true;
 

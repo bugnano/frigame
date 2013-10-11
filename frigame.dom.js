@@ -285,7 +285,7 @@
 			;
 
 			// Apply the transformation matrix
-			if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+			if (angle || (scaleh !== 1) || (scalev !== 1)) {
 				cos = Math.cos(angle);
 				sin = Math.sin(angle);
 				filter = [
@@ -378,6 +378,7 @@
 				currentFrame = options.currentFrame,
 				animation = options.animation,
 				animation_options = this.animation_options,
+				insidePlayground = this.insidePlayground,
 				dom = this.dom,
 				left = this.left,
 				top = this.top,
@@ -398,7 +399,7 @@
 				last_sprite = fg.last_sprite
 			;
 
-			if (animation && alpha && !options.hidden) {
+			if (insidePlayground && animation && alpha && !options.hidden) {
 				if (!dom) {
 					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
@@ -437,6 +438,11 @@
 
 				fg.last_sprite = this.name;
 
+				if (insidePlayground !== old_options.insidePlayground) {
+					dom.show();
+					old_options.insidePlayground = insidePlayground;
+				}
+
 				if (hidden !== old_options.hidden) {
 					dom.show();
 					old_options.hidden = hidden;
@@ -466,7 +472,7 @@
 					update_position = true;
 
 					if (ieFilter) {
-						if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+						if (angle || (scaleh !== 1) || (scalev !== 1)) {
 							// For transformed objects force the update of the ie filters in order
 							// to have the position adjusted according to the transformed width and height
 							apply_ie_filters = true;
@@ -546,6 +552,11 @@
 				}
 			} else {
 				if (dom) {
+					if (!insidePlayground && (insidePlayground !== old_options.insidePlayground)) {
+						dom.hide();
+						old_options.insidePlayground = insidePlayground;
+					}
+
 					if (hidden && (hidden !== old_options.hidden)) {
 						dom.hide();
 						old_options.hidden = hidden;
@@ -727,7 +738,7 @@
 					update_css = true;
 
 					if (ieFilter) {
-						if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+						if (angle || (scaleh !== 1) || (scalev !== 1)) {
 							// For transformed objects force the update of the ie filters in order
 							// to have the position adjusted according to the transformed width and height
 							apply_ie_filters = true;
@@ -742,7 +753,7 @@
 					update_css = true;
 
 					if (ieFilter) {
-						if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+						if (angle || (scaleh !== 1) || (scalev !== 1)) {
 							// For transformed objects force the update of the ie filters in order
 							// to have the position adjusted according to the transformed width and height
 							apply_ie_filters = true;
