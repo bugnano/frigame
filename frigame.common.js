@@ -1,4 +1,4 @@
-/*global jQuery, friGame */
+/*global jQuery, friGame, performance */
 /*jslint sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2012 Franco Bugnano
@@ -68,6 +68,17 @@
 			return (new Date()).getTime();
 		};
 	}
+
+	// performance.now by Tony Gentilcore
+	window.performance = window.performance || {};
+	performance.now = (function() {
+		return	performance.now ||
+				performance.mozNow ||
+				performance.msNow ||
+				performance.oNow ||
+				performance.webkitNow ||
+				Date.now;
+	}());
 
 	$.extend(fg, {
 		// Public constants
@@ -267,7 +278,7 @@
 				}
 
 				if ((fg.idUpdate === null) && (fg.s.playground)) {
-					fg.nextUpdate = Date.now() + fg.REFRESH_RATE;
+					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
 					window.requestAnimFrame(fg.draw);
 				}
@@ -1875,7 +1886,7 @@
 				setTimeout(fg.firePlaygroundCallbacks, 0);
 
 				if (fg.idUpdate === null) {
-					fg.nextUpdate = Date.now() + fg.REFRESH_RATE;
+					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
 					window.requestAnimFrame(fg.draw);
 				}
@@ -1947,7 +1958,7 @@
 		update: function () {
 			var
 				playground = fg.s.playground,
-				now = Date.now(),
+				now = performance.now(),
 				next_update = fg.nextUpdate,
 				refresh_rate = fg.REFRESH_RATE
 			;
