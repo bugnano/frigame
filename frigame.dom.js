@@ -399,7 +399,7 @@
 				last_sprite = fg.last_sprite
 			;
 
-			if (insidePlayground && animation && alpha && !options.hidden) {
+			if (insidePlayground && animation && alpha && scaleh && scalev && !options.hidden) {
 				if (!dom) {
 					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
@@ -504,6 +504,10 @@
 					||	(scaleh !== old_options.scaleh)
 					||	(scalev !== old_options.scalev)
 					) {
+					if ((!old_options.scaleh) || (!old_options.scalev)) {
+						dom.show();
+					}
+
 					if (transformFunction) {
 						css_options[transformFunction] = this.transform();
 						update_css = true;
@@ -557,11 +561,6 @@
 						old_options.insidePlayground = insidePlayground;
 					}
 
-					if (hidden && (hidden !== old_options.hidden)) {
-						dom.hide();
-						old_options.hidden = hidden;
-					}
-
 					if ((!animation) && (animation !== old_options.animation)) {
 						dom.css({
 							'background-image': '',
@@ -570,9 +569,24 @@
 						old_options.animation = animation;
 					}
 
+					if (hidden && (hidden !== old_options.hidden)) {
+						dom.hide();
+						old_options.hidden = hidden;
+					}
+
 					if ((!alpha) && (alpha !== old_options.alpha)) {
 						dom.hide();
 						old_options.alpha = alpha;
+					}
+
+					if ((!scaleh) && (scaleh !== old_options.scaleh)) {
+						dom.hide();
+						old_options.scaleh = scaleh;
+					}
+
+					if ((!scalev) && (scalev !== old_options.scalev)) {
+						dom.hide();
+						old_options.scalev = scalev;
 					}
 				}
 			}
@@ -673,7 +687,7 @@
 				fg.last_sprite = last_sprite;
 			}
 
-			if ((this.layers.length || background) && alpha && !options.hidden) {
+			if ((this.layers.length || background) && alpha && scaleh && scalev && !options.hidden) {
 				if (!this.dom) {
 					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
@@ -768,6 +782,10 @@
 					||	(scaleh !== old_options.scaleh)
 					||	(scalev !== old_options.scalev)
 					) {
+					if ((!old_options.scaleh) || (!old_options.scalev)) {
+						dom.show();
+					}
+
 					if (transformFunction) {
 						css_options[transformFunction] = this.transform();
 						update_css = true;
@@ -873,6 +891,16 @@
 					if ((!alpha) && (alpha !== old_options.alpha)) {
 						dom.hide();
 						old_options.alpha = alpha;
+					}
+
+					if ((!scaleh) && (scaleh !== old_options.scaleh)) {
+						dom.hide();
+						old_options.scaleh = scaleh;
+					}
+
+					if ((!scalev) && (scalev !== old_options.scalev)) {
+						dom.hide();
+						old_options.scalev = scalev;
 					}
 				}
 			}

@@ -72,7 +72,7 @@
 			.end()
 		;
 
-		fg.s.blocks.scale(0.01);
+		fg.s.blocks.scale(0);
 
 		for (row = 0; row < data.bricks.length; row += 1) {
 			row_data = data.bricks[row];
@@ -106,7 +106,7 @@
 			num_step: Math.round(1500 / G.REFRESH_RATE) || 1
 		};
 		fg.s.blocks.registerCallback(function () {
-			this.scale(Math.max(this.userData.current_step / this.userData.num_step, 0.01));
+			this.scale(this.userData.current_step / this.userData.num_step);
 			this.userData.current_step += 1;
 			if (this.userData.current_step >= this.userData.num_step) {
 				this.scale(1);
@@ -141,7 +141,7 @@
 			num_step: Math.round(300 / G.REFRESH_RATE) || 1
 		});
 		block.registerCallback(function () {
-			this.scale(Math.max(1 - (this.userData.current_step / this.userData.num_step), 0.1));
+			this.scale(1 - (this.userData.current_step / this.userData.num_step));
 			this.userData.current_step += 1;
 			if (this.userData.current_step >= this.userData.num_step) {
 				this.remove();

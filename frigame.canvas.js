@@ -223,7 +223,7 @@
 				ctx = fg.ctx
 			;
 
-			if (this.insidePlayground && animation && alpha && !options.hidden) {
+			if (this.insidePlayground && animation && alpha && scaleh && scalev && !options.hidden) {
 				ctx.save();
 
 				ctx.translate(this.centerx, this.centery);
@@ -388,7 +388,7 @@
 				}
 			}
 
-			if ((this.layers.length || background) && alpha && !options.hidden) {
+			if ((this.layers.length || background) && alpha && scaleh && scalev && !options.hidden) {
 				if (angle || (scaleh !== 1) || (scalev !== 1)) {
 					ctx.save();
 					context_saved = true;
