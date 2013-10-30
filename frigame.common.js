@@ -366,8 +366,7 @@
 			return true;
 		},
 
-		onLoad: function () {
-		}
+		onLoad: $.noop
 	});
 
 	fg.Gradient = fg.Maker(fg.PGradient);
@@ -1224,7 +1223,7 @@
 				return this.options.alpha;
 			}
 
-			this.options.alpha = alpha;
+			this.options.alpha = fg.clamp(alpha, 0, 1);
 
 			return this;
 		},
