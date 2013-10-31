@@ -100,19 +100,10 @@
 			}
 		}
 
-		// Manual animation -- It would be nice to implement a tweening plugin for friGame (or just extend the built-in fx plugin...)
-		fg.s.blocks.userData = {
-			current_step: 0,
-			num_step: Math.round(1500 / G.REFRESH_RATE) || 1
-		};
-		fg.s.blocks.registerCallback(function () {
-			this.scale(this.userData.current_step / this.userData.num_step);
-			this.userData.current_step += 1;
-			if (this.userData.current_step >= this.userData.num_step) {
-				this.scale(1);
-				return true;
-			}
-		}, G.REFRESH_RATE);
+		fg.s.blocks.tween({scale: 1}, {
+			duration: 1500,
+			easing: 'easeOutElastic'
+		});
 	};
 
 	G.onBlockDeath = function (block) {
@@ -135,18 +126,12 @@
 			G.addPowerdown(block.centerx, block.centery);
 		}
 
-		// Manual animation -- It would be nice to implement a tweening plugin for friGame (or just extend the built-in fx plugin...)
-		$.extend(block.userData, {
-			current_step: 0,
-			num_step: Math.round(300 / G.REFRESH_RATE) || 1
-		});
-		block.registerCallback(function () {
-			this.scale(1 - (this.userData.current_step / this.userData.num_step));
-			this.userData.current_step += 1;
-			if (this.userData.current_step >= this.userData.num_step) {
+		block.tween({scale: 0}, {
+			duration: 300,
+			callback: function() {
 				this.remove();
 			}
-		}, G.REFRESH_RATE);
+		});
 	};
 
 	G.addPaddle = function () {
