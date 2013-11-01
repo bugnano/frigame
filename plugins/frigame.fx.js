@@ -47,7 +47,7 @@
 			return t * t;
 		},
 		easeOutQuad: function (t) {
-			return -1 * t * (t - 2);
+			return -(t * (t - 2));
 		},
 		easeInOutQuad: function (t) {
 			t *= 2;
@@ -79,7 +79,7 @@
 		},
 		easeOutQuart: function (t) {
 			t -= 1;
-			return -1 * ((t * t * t * t) - 1);
+			return -((t * t * t * t) - 1);
 		},
 		easeInOutQuart: function (t) {
 			t *= 2;
@@ -107,7 +107,7 @@
 			return ((t * t * t * t * t) + 2) / 2;
 		},
 		easeInSine: function (t) {
-			return (-1 * Math.cos(t * (Math.PI / 2))) + 1;
+			return -(Math.cos(t * (Math.PI / 2))) + 1;
 		},
 		easeOutSine: function (t) {
 			return Math.sin(t * (Math.PI / 2));
@@ -139,7 +139,7 @@
 			return (-Math.pow(2, -10 * t) + 2) / 2;
 		},
 		easeInCirc: function (t) {
-			return -1 * (Math.sqrt(1 - (t * t)) - 1);
+			return -(Math.sqrt(1 - (t * t)) - 1);
 		},
 		easeOutCirc: function (t) {
 			t -= 1;
