@@ -1,7 +1,7 @@
-/*global jQuery, friGame, soundManager, Audio */
+/*global jQuery, friGame, soundManager, Audio, AudioContext */
 /*jslint sloppy: true, white: true, browser: true */
 
-// Copyright (c) 2011-2012 Franco Bugnano
+// Copyright (c) 2011-2013 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,11 @@
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
 (function ($, fg) {
+	var
+		onError = $.noop,
+		audio_initialized = false
+	;
+
 	fg.canPlay = {};
 	fg.sm2Loaded = false;
 
@@ -48,6 +53,20 @@
 			if (a.canPlayType('audio/mpeg; codecs="mp3"') === 'probably') {
 				fg.canPlay.mp3 = true;
 			}
+
+			// Setup Web Audio API
+			window.addEventListener('load', function () {
+				try {
+					window.AudioContext = window.AudioContext || window.webkitAudioContext;
+					fg.audioContext = new AudioContext();
+					fg.audioContext.createGain = fg.audioContext.createGain || fg.audioContext.createGainNode;
+				}
+				catch (e) {
+					fg.audioContext = null;
+				}
+
+				audio_initialized = true;
+			}, false);
 		}
 	}());
 
@@ -128,6 +147,7 @@
 				new_options = options || {},
 				sound = this.sound,
 				audio = this.audio,
+				gainNode = this.gainNode,
 				muted_redefined = new_options.muted !== undefined,
 				volume_redefined = new_options.volume !== undefined
 			;
@@ -141,7 +161,7 @@
 					my_options.volume = fg.clamp(new_options.volume, 0, 1);
 				}
 
-				if ((muted_redefined) || (volume_redefined)) {
+				if (muted_redefined || volume_redefined) {
 					if (my_options.muted) {
 						sound.setVolume(0);
 					} else {
@@ -162,6 +182,24 @@
 				}
 			}
 
+			if (gainNode) {
+				if (muted_redefined) {
+					my_options.muted = new_options.muted;
+				}
+
+				if (volume_redefined) {
+					my_options.volume = fg.clamp(new_options.volume, 0, 1);
+				}
+
+				if (muted_redefined || volume_redefined) {
+					if (my_options.muted) {
+						gainNode.gain.value = 0;
+					} else {
+						gainNode.gain.value = my_options.volume;
+					}
+				}
+			}
+
 			return this;
 		},
 
@@ -177,6 +215,9 @@
 				sound_options = {},
 				sound = this.sound,
 				audio = this.audio,
+				audioBuffer = this.audioBuffer,
+				gainNode = this.gainNode,
+				source,
 				sound_object = this
 			;
 
@@ -234,6 +275,45 @@
 				}
 
 				audio.play();
+			} else if (audioBuffer) {
+				source = fg.audioContext.createBufferSource();
+				this.source = source;
+
+				source.buffer = audioBuffer;
+				source.connect(gainNode);
+
+				if (new_options.muted !== undefined) {
+					my_options.muted = new_options.muted;
+				}
+
+				if (new_options.volume !== undefined) {
+					my_options.volume = fg.clamp(new_options.volume, 0, 1);
+				}
+
+				if (my_options.muted) {
+					gainNode.gain.value = 0;
+				} else {
+					gainNode.gain.value = my_options.volume;
+				}
+
+				if (new_options.loop) {
+					source.loop = true;
+					source.onended = null;
+				} else if (new_options.callback) {
+					source.loop = false;
+					source.onended = function () {
+						new_options.callback.call(sound_object);
+					};
+				} else {
+					source.loop = false;
+					source.onended = null;
+				}
+
+				if (source.start) {
+					source.start(0);
+				} else {
+					source.noteOn(0);
+				}
 			} else {
 				// Make sure the callback gets called even if the sound cannot be played
 				if ((!new_options.loop) && new_options.callback) {
@@ -245,13 +325,29 @@
 		},
 
 		stop: function () {
+			var
+				source = this.source
+			;
+
 			if (this.sound) {
 				this.sound.stop();
 			}
 
 			if (this.audio) {
 				this.audio.pause();
-				this.audio.currentTime = 0;
+				this.audio.currentTime = this.audio.startTime;
+			}
+
+			if (source) {
+				if (source.stop) {
+					source.stop(0);
+				} else {
+					source.noteOff(0);
+				}
+
+				source.disconnect(0);
+
+				this.source = null;
 			}
 
 			return this;
@@ -266,6 +362,8 @@
 				this.audio.pause();
 			}
 
+			// Pause / Resume is not supported by the Web Audio API
+
 			return this;
 		},
 
@@ -277,6 +375,8 @@
 			if (this.audio) {
 				this.audio.play();
 			}
+
+			// Pause / Resume is not supported by the Web Audio API
 
 			return this;
 		},
@@ -293,10 +393,12 @@
 				sound_url,
 				len_sound_urls,
 				format,
-				completed = true
+				request,
+				completed = true,
+				sound_object = this
 			;
 
-			if (!fg.sm2Loaded) {
+			if ((!fg.sm2Loaded) || (!audio_initialized)) {
 				return false;
 			}
 
@@ -346,10 +448,27 @@
 						sound.load();
 						this.sound = sound;
 					} else if (canPlay[format]) {
-						// Sound supported through HTML5 Audio
-						audio = new Audio(sound_url);
-						audio.load();
-						this.audio = audio;
+						if (fg.audioContext) {
+							// Sound supported through Web Audio API
+							request = new XMLHttpRequest();
+
+							request.open('GET', sound_url, true);
+							request.responseType = 'arraybuffer';
+
+							// Decode asynchronously
+							request.onload = function () {
+								fg.audioContext.decodeAudioData(request.response, function (buffer) {
+									sound_object.audioBuffer = buffer;
+								}, onError);
+							};
+
+							request.send();
+						} else {
+							// Sound supported through HTML5 Audio
+							audio = new Audio(sound_url);
+							audio.load();
+							this.audio = audio;
+						}
 					} else {
 						// Sound type not supported -- It is not a fatal error
 						$.noop();
@@ -360,6 +479,10 @@
 			}
 
 			if (sound && (sound.readyState < 3)) {
+				completed = false;
+			}
+
+			if (fg.audioContext && (!(this.audioBuffer))) {
 				completed = false;
 			}
 
@@ -374,6 +497,11 @@
 			var
 				sound_object = this
 			;
+
+			if (fg.audioContext) {
+				this.gainNode = fg.audioContext.createGain();
+				this.gainNode.connect(fg.audioContext.destination);
+			}
 
 			this.setVolume(this.options);
 
