@@ -152,46 +152,30 @@
 				volume_redefined = new_options.volume !== undefined
 			;
 
-			if (sound) {
-				if (muted_redefined) {
-					my_options.muted = new_options.muted;
+			if (muted_redefined) {
+				my_options.muted = new_options.muted;
+				if (audio) {
+					audio.muted = my_options.muted;
 				}
+			}
 
-				if (volume_redefined) {
-					my_options.volume = fg.clamp(new_options.volume, 0, 1);
+			if (volume_redefined) {
+				my_options.volume = fg.clamp(new_options.volume, 0, 1);
+				if (audio) {
+					audio.volume = my_options.volume;
 				}
+			}
 
-				if (muted_redefined || volume_redefined) {
+			if (muted_redefined || volume_redefined) {
+				if (sound) {
 					if (my_options.muted) {
 						sound.setVolume(0);
 					} else {
 						sound.setVolume(Math.round(my_options.volume * 100));
 					}
 				}
-			}
 
-			if (audio) {
-				if (muted_redefined) {
-					my_options.muted = new_options.muted;
-					audio.muted = my_options.muted;
-				}
-
-				if (volume_redefined) {
-					my_options.volume = fg.clamp(new_options.volume, 0, 1);
-					audio.volume = my_options.volume;
-				}
-			}
-
-			if (gainNode) {
-				if (muted_redefined) {
-					my_options.muted = new_options.muted;
-				}
-
-				if (volume_redefined) {
-					my_options.volume = fg.clamp(new_options.volume, 0, 1);
-				}
-
-				if (muted_redefined || volume_redefined) {
+				if (gainNode) {
 					if (my_options.muted) {
 						gainNode.gain.value = 0;
 					} else {
@@ -302,13 +286,15 @@
 				} else if (new_options.callback) {
 					source.loop = false;
 					source.onended = function () {
+						sound_object.disconnect();
 						new_options.callback.call(sound_object);
 					};
 				} else {
 					source.loop = false;
-					source.onended = null;
+					source.onended = this.doDisconnect;
 				}
 
+				this.startTime = fg.audioContext.currentTime;
 				if (source.start) {
 					source.start(0);
 				} else {
@@ -338,22 +324,30 @@
 				this.audio.currentTime = this.audio.startTime;
 			}
 
+			this.pauseTime = 0;
+			this.old_loop = false;
+			this.old_onended = null;
+
 			if (source) {
+				source.onended = null;
+
 				if (source.stop) {
 					source.stop(0);
 				} else {
 					source.noteOff(0);
 				}
 
-				source.disconnect(0);
-
-				this.source = null;
+				this.disconnect();
 			}
 
 			return this;
 		},
 
 		pause: function () {
+			var
+				source = this.source
+			;
+
 			if (this.sound) {
 				this.sound.pause();
 			}
@@ -362,12 +356,34 @@
 				this.audio.pause();
 			}
 
-			// Pause / Resume is not supported by the Web Audio API
+			if (source && (!(this.pauseTime))) {
+				// Since pause / resume is not supported in the Web Audio API, here the currentTime is saved,
+				// in order to create a new source object when the sound is resumed
+				this.old_loop = source.loop;
+				this.old_onended = source.onended;
+				source.loop = false;
+				source.onended = null;
+
+				this.pauseTime = fg.audioContext.currentTime;
+				if (source.stop) {
+					source.stop(0);
+				} else {
+					source.noteOff(0);
+				}
+
+				this.disconnect();
+			}
 
 			return this;
 		},
 
 		resume: function () {
+			var
+				source,
+				audioBuffer = this.audioBuffer,
+				offset
+			;
+
 			if (this.sound) {
 				this.sound.resume();
 			}
@@ -376,7 +392,30 @@
 				this.audio.play();
 			}
 
-			// Pause / Resume is not supported by the Web Audio API
+			if (this.pauseTime) {
+				// Since pause / resume is not supported in the Web Audio API, a new source object is created
+				// containing all the values of the old source object
+				source = fg.audioContext.createBufferSource();
+				this.source = source;
+
+				source.buffer = audioBuffer;
+				source.connect(this.gainNode);
+
+				source.loop = this.old_loop;
+				source.onended = this.old_onended;
+				this.old_loop = false;
+				this.old_onended = null;
+
+				offset = (this.pauseTime - this.startTime) % audioBuffer.duration;
+
+				this.pauseTime = 0;
+				this.startTime = fg.audioContext.currentTime - offset;
+				if (source.start) {
+					source.start(0, offset);
+				} else {
+					source.noteGrainOn(0, offset);
+				}
+			}
 
 			return this;
 		},
@@ -501,6 +540,9 @@
 			if (fg.audioContext) {
 				this.gainNode = fg.audioContext.createGain();
 				this.gainNode.connect(fg.audioContext.destination);
+				this.doDisconnect = function () {
+					sound_object.disconnect();
+				};
 			}
 
 			this.setVolume(this.options);
@@ -527,6 +569,13 @@
 			sound_options.onfinish = this.doReplay;
 
 			this.sound.play(sound_options);
+		},
+
+		disconnect: function () {
+			if (this.source) {
+				this.source.disconnect(0);
+				this.source = null;
+			}
 		}
 	};
 
