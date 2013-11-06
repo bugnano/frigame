@@ -26,32 +26,35 @@
 
 (function ($, fg) {
 	var
-		onError = $.noop,
-		audio_initialized = false
+		sm2_loaded = false,
+		audio_initialized = false,
+		onError = $.noop
 	;
 
-	fg.canPlay = {};
-	fg.sm2Loaded = false;
+	fg.sound = {
+		canPlay: {}
+	};
 
 	// Setup HTML5 Audio
 	(function () {
 		var
-			a
+			a,
+			canPlay = fg.sound.canPlay
 		;
 
 		if (window.Audio) {
 			a = new Audio();
 			if (a.canPlayType('audio/wav; codecs="1"') === 'probably') {
-				fg.canPlay.wav = true;
+				canPlay.wav = true;
 			}
 
 			if (a.canPlayType('audio/ogg; codecs="vorbis"') === 'probably') {
-				fg.canPlay.ogg = true;
-				fg.canPlay.oga = true;
+				canPlay.ogg = true;
+				canPlay.oga = true;
 			}
 
 			if (a.canPlayType('audio/mpeg; codecs="mp3"') === 'probably') {
-				fg.canPlay.mp3 = true;
+				canPlay.mp3 = true;
 			}
 
 			// Setup Web Audio API
@@ -74,15 +77,15 @@
 	if (window.soundManager) {
 		soundManager.onready(function() {
 			// mp3 is the only supported format for the Flash 8 version of soundManager2
-			if (!fg.canPlay.mp3) {
-				fg.canPlay.mp3 = 'sm2';
+			if (!fg.sound.canPlay.mp3) {
+				fg.sound.canPlay.mp3 = 'sm2';
 			}
 
-			fg.sm2Loaded = true;
+			sm2_loaded = true;
 		});
 
 		soundManager.ontimeout(function() {
-			fg.sm2Loaded = true;
+			sm2_loaded = true;
 		});
 
 		soundManager.setup({
@@ -101,7 +104,7 @@
 			}
 		});
 	} else {
-		fg.sm2Loaded = true;
+		sm2_loaded = true;
 	}
 
 	fg.PSound = {
@@ -227,7 +230,7 @@
 					sound_options.onfinish = this.doReplay;
 				} else if (new_options.callback) {
 					sound_options.onfinish = function () {
-						new_options.callback.call(sound_object);
+						new_options.callback.call(sound_object, sound_object);
 					};
 				} else {
 					sound_options.onfinish = null;
@@ -251,7 +254,7 @@
 				} else if (new_options.callback) {
 					audio.loop = false;
 					audio.onended = function () {
-						new_options.callback.call(sound_object);
+						new_options.callback.call(sound_object, sound_object);
 					};
 				} else {
 					audio.loop = false;
@@ -287,7 +290,7 @@
 					source.loop = false;
 					source.onended = function () {
 						sound_object.disconnect();
-						new_options.callback.call(sound_object);
+						new_options.callback.call(sound_object, sound_object);
 					};
 				} else {
 					source.loop = false;
@@ -303,7 +306,7 @@
 			} else {
 				// Make sure the callback gets called even if the sound cannot be played
 				if ((!new_options.loop) && new_options.callback) {
-					new_options.callback.call(sound_object);
+					new_options.callback.call(sound_object, sound_object);
 				}
 			}
 
@@ -428,7 +431,7 @@
 				audio = this.audio,
 				soundURLs = this.soundURLs,
 				i,
-				canPlay = fg.canPlay,
+				canPlay = fg.sound.canPlay,
 				sound_url,
 				len_sound_urls,
 				format,
@@ -437,7 +440,7 @@
 				sound_object = this
 			;
 
-			if ((!fg.sm2Loaded) || (!audio_initialized)) {
+			if ((!sm2_loaded) || (!audio_initialized)) {
 				return false;
 			}
 
@@ -588,5 +591,22 @@
 
 		return fg.resourceManager.addResource(name, sound);
 	};
+
+	if (fg.fx) {
+		fg.sound.hooks = {
+			volume: {
+				get: function (s) {
+					return s.options.volume;
+				},
+				set: function (s, value) {
+					s.setVolume({volume: value});
+				}
+			}
+		};
+
+		fg.PSound.tween = function (properties, options) {
+			return fg.fx.tween.call(this, fg.sound.hooks, properties, options);
+		};
+	}
 }(jQuery, friGame));
 
