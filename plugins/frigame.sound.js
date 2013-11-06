@@ -70,6 +70,8 @@
 
 				audio_initialized = true;
 			}, false);
+		} else {
+			audio_initialized = true;
 		}
 	}());
 
