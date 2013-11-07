@@ -1,4 +1,4 @@
-/*global jQuery, friGame, performance */
+/*global jQuery, friGame, requestAnimFrame, performance */
 /*jslint sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2013 Franco Bugnano
@@ -190,7 +190,10 @@
 
 		removeResource: function (name) {
 			if (fg.r[name]) {
-				fg.r[name].remove();
+				if (fg.r[name].remove) {
+					fg.r[name].remove();
+				}
+
 				delete fg.r[name];
 			}
 
@@ -237,7 +240,7 @@
 			;
 
 			for (i = 0; i < len_preload_list; i += 1) {
-				if (preload_list[i].complete()) {
+				if ((!(preload_list[i].complete)) || (preload_list[i].complete())) {
 					completed += 1;
 				}
 			}
@@ -259,7 +262,9 @@
 				resourceManager.idPreload = null;
 
 				for (i = 0; i < len_preload_list; i += 1) {
-					preload_list[i].onLoad();
+					if (preload_list[i].onLoad) {
+						preload_list[i].onLoad();
+					}
 				}
 				preload_list.splice(0, len_preload_list);
 
@@ -276,7 +281,7 @@
 				if ((fg.idUpdate === null) && (fg.s.playground)) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
-					window.requestAnimFrame(fg.draw);
+					requestAnimFrame(fg.draw);
 				}
 			}
 		}
@@ -353,15 +358,9 @@
 					this.setBackground({background: null});
 				}
 			});
-		},
+		}
 
 		// Implementation details
-
-		complete: function () {
-			return true;
-		},
-
-		onLoad: $.noop
 	};
 
 	fg.Gradient = fg.Maker(fg.PGradient);
@@ -1879,7 +1878,7 @@
 				if (fg.idUpdate === null) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
-					window.requestAnimFrame(fg.draw);
+					requestAnimFrame(fg.draw);
 				}
 			}
 
@@ -1970,7 +1969,7 @@
 			;
 
 			if (fg.idUpdate !== null) {
-				window.requestAnimFrame(fg.draw);
+				requestAnimFrame(fg.draw);
 			}
 
 			if (fg.needsRedraw) {

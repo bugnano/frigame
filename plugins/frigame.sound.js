@@ -113,28 +113,22 @@
 	fg.PSound = {
 		init: function (name, soundURLs, options) {
 			var
-				my_options,
 				new_options = options || {}
 			;
 
-			if (this.options) {
-				my_options = this.options;
-			} else {
-				my_options = {};
-				this.options = my_options;
-			}
-
 			// Set default options
-			$.extend(my_options, {
+			$.extend(this, {
+				// Public options
 				muted: false,
-				volume: 1
+				volume: 1,
+				name: name,
+
+				// Implementation details
+				soundURLs: soundURLs,
+				initialized: false
 			});
 
-			$.extend(my_options, fg.pick(new_options, ['muted', 'volume']));
-
-			this.name = name;
-			this.soundURLs = soundURLs;
-			this.initialized = false;
+			$.extend(this, fg.pick(new_options, ['muted', 'volume']));
 		},
 
 		// Public functions
@@ -149,7 +143,6 @@
 
 		setVolume: function (options) {
 			var
-				my_options = this.options,
 				new_options = options || {},
 				sound = this.sound,
 				audio = this.audio,
@@ -159,33 +152,33 @@
 			;
 
 			if (muted_redefined) {
-				my_options.muted = new_options.muted;
+				this.muted = new_options.muted;
 				if (audio) {
-					audio.muted = my_options.muted;
+					audio.muted = this.muted;
 				}
 			}
 
 			if (volume_redefined) {
-				my_options.volume = fg.clamp(new_options.volume, 0, 1);
+				this.volume = fg.clamp(new_options.volume, 0, 1);
 				if (audio) {
-					audio.volume = my_options.volume;
+					audio.volume = this.volume;
 				}
 			}
 
 			if (muted_redefined || volume_redefined) {
 				if (sound) {
-					if (my_options.muted) {
+					if (this.muted) {
 						sound.setVolume(0);
 					} else {
-						sound.setVolume(Math.round(my_options.volume * 100));
+						sound.setVolume(Math.round(this.volume * 100));
 					}
 				}
 
 				if (gainNode) {
-					if (my_options.muted) {
+					if (this.muted) {
 						gainNode.gain.value = 0;
 					} else {
-						gainNode.gain.value = my_options.volume;
+						gainNode.gain.value = this.volume;
 					}
 				}
 			}
@@ -200,7 +193,6 @@
 			// loop: true or false
 			// callback: when done playing
 			var
-				my_options = this.options,
 				new_options = options || {},
 				sound_options = {},
 				sound = this.sound,
@@ -216,17 +208,17 @@
 
 			if (sound) {
 				if (new_options.muted !== undefined) {
-					my_options.muted = new_options.muted;
+					this.muted = new_options.muted;
 				}
 
 				if (new_options.volume !== undefined) {
-					my_options.volume = fg.clamp(new_options.volume, 0, 1);
+					this.volume = fg.clamp(new_options.volume, 0, 1);
 				}
 
-				if (my_options.muted) {
+				if (this.muted) {
 					sound_options.volume = 0;
 				} else {
-					sound_options.volume = Math.round(my_options.volume * 100);
+					sound_options.volume = Math.round(this.volume * 100);
 				}
 
 				if (new_options.loop) {
@@ -242,13 +234,13 @@
 				sound.play(sound_options);
 			} else if (audio) {
 				if (new_options.muted !== undefined) {
-					my_options.muted = new_options.muted;
-					audio.muted = my_options.muted;
+					this.muted = new_options.muted;
+					audio.muted = this.muted;
 				}
 
 				if (new_options.volume !== undefined) {
-					my_options.volume = fg.clamp(new_options.volume, 0, 1);
-					audio.volume = my_options.volume;
+					this.volume = fg.clamp(new_options.volume, 0, 1);
+					audio.volume = this.volume;
 				}
 
 				if (new_options.loop) {
@@ -273,17 +265,17 @@
 				source.connect(gainNode);
 
 				if (new_options.muted !== undefined) {
-					my_options.muted = new_options.muted;
+					this.muted = new_options.muted;
 				}
 
 				if (new_options.volume !== undefined) {
-					my_options.volume = fg.clamp(new_options.volume, 0, 1);
+					this.volume = fg.clamp(new_options.volume, 0, 1);
 				}
 
-				if (my_options.muted) {
+				if (this.muted) {
 					gainNode.gain.value = 0;
 				} else {
-					gainNode.gain.value = my_options.volume;
+					gainNode.gain.value = this.volume;
 				}
 
 				if (new_options.loop) {
@@ -551,7 +543,7 @@
 				};
 			}
 
-			this.setVolume(this.options);
+			this.setVolume(this);
 
 			if (this.sound) {
 				this.doReplay = function () {
@@ -562,14 +554,13 @@
 
 		replay: function () {
 			var
-				my_options = this.options,
 				sound_options = {}
 			;
 
-			if (my_options.muted) {
+			if (this.muted) {
 				sound_options.volume = 0;
 			} else {
-				sound_options.volume = Math.round(my_options.volume * 100);
+				sound_options.volume = Math.round(this.volume * 100);
 			}
 
 			sound_options.onfinish = this.doReplay;
@@ -599,7 +590,7 @@
 		fg.sound.hooks = {
 			volume: {
 				get: function (s) {
-					return s.options.volume;
+					return s.volume;
 				},
 				set: function (s, value) {
 					s.setVolume({volume: value});
