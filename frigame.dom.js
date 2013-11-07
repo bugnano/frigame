@@ -26,8 +26,7 @@
 
 (function ($, fg) {
 	var
-		baseSprite = fg.PSprite,
-		baseSpriteGroup = fg.PSpriteGroup
+		overrides = {}
 	;
 
 	// ******************************************************************** //
@@ -349,13 +348,16 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PSprite = Object.create(baseSprite);
+	overrides.PSprite = fg.pick(fg.PSprite, [
+		'init',
+		'remove'
+	]);
+
 	$.extend(fg.PSprite, {
 		init: function (name, options, parent) {
-			baseSprite.init.apply(this, arguments);
+			overrides.PSprite.init.apply(this, arguments);
 
 			this.old_options = {};
-
 		},
 
 		// Public functions
@@ -365,7 +367,7 @@
 				this.dom.remove();
 			}
 
-			baseSprite.remove.apply(this, arguments);
+			overrides.PSprite.remove.apply(this, arguments);
 		},
 
 		// Implementation details
@@ -593,22 +595,25 @@
 		}
 	});
 
-	fg.Sprite = fg.Maker(fg.PSprite);
-
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PSpriteGroup = Object.create(baseSpriteGroup);
+	overrides.PSpriteGroup = fg.pick(fg.PSpriteGroup, [
+		'init',
+		'remove',
+		'draw'
+	]);
+
 	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				dom
 			;
 
-			baseSpriteGroup.init.apply(this, arguments);
+			overrides.PSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
 
@@ -644,7 +649,7 @@
 		// Public functions
 
 		remove: function () {
-			baseSpriteGroup.remove.apply(this, arguments);
+			overrides.PSpriteGroup.remove.apply(this, arguments);
 
 			if (this.dom) {
 				this.dom.remove();
@@ -877,7 +882,7 @@
 					this.applyIeFilters();
 				}
 
-				baseSpriteGroup.draw.apply(this, arguments);
+				overrides.PSpriteGroup.draw.apply(this, arguments);
 
 				// Update the last sprite after drawing all the children nodes
 				fg.last_sprite = name;
@@ -906,7 +911,5 @@
 			}
 		}
 	});
-
-	fg.SpriteGroup = fg.Maker(fg.PSpriteGroup);
 }(jQuery, friGame));
 

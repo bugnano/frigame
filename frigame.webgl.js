@@ -26,10 +26,7 @@
 
 (function ($, fg) {
 	var
-		baseGradient = fg.PGradient,
-		baseAnimation = fg.PAnimation,
-		baseSprite = fg.PSprite,
-		baseSpriteGroup = fg.PSpriteGroup
+		overrides = {}
 	;
 
 	// ******************************************************************** //
@@ -38,7 +35,10 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PGradient = Object.create(baseGradient);
+	overrides.PGradient = fg.pick(fg.PGradient, [
+		'remove'
+	]);
+
 	$.extend(fg.PGradient, {
 		remove: function () {
 			var
@@ -55,7 +55,7 @@
 				});
 			}
 
-			baseGradient.remove.call(this);
+			overrides.PGradient.remove.call(this);
 		},
 
 		initColorBuffer: function () {
@@ -222,15 +222,17 @@
 		}
 	});
 
-	fg.Gradient = fg.Maker(fg.PGradient);
-
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PAnimation = Object.create(baseAnimation);
+	overrides.PAnimation = fg.pick(fg.PAnimation, [
+		'remove',
+		'onLoad'
+	]);
+
 	$.extend(fg.PAnimation, {
 		remove: function () {
 			var
@@ -245,7 +247,7 @@
 				gl.deleteTexture(this.texture);
 			}
 
-			baseAnimation.remove.call(this);
+			overrides.PAnimation.remove.call(this);
 		},
 
 		onLoad: function () {
@@ -256,7 +258,7 @@
 				img_height = img.height
 			;
 
-			baseAnimation.onLoad.apply(this, arguments);
+			overrides.PAnimation.onLoad.apply(this, arguments);
 
 			this.textureSize = new Float32Array([options.frameWidth / img_width, options.frameHeight / img_height]);
 			options.offsetx /= img_width;
@@ -376,8 +378,6 @@
 		drawBackground: function () {
 		}
 	});
-
-	fg.Animation = fg.Maker(fg.PAnimation);
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -587,7 +587,6 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PSprite = Object.create(baseSprite);
 	$.extend(fg.PSprite, {
 		draw: function () {
 			var
@@ -627,15 +626,18 @@
 		}
 	});
 
-	fg.Sprite = fg.Maker(fg.PSprite);
-
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PSpriteGroup = Object.create(baseSpriteGroup);
+	overrides.PSpriteGroup = fg.pick(fg.PSpriteGroup, [
+		'init',
+		'remove',
+		'draw'
+	]);
+
 	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
@@ -651,7 +653,7 @@
 				pMatrix = mat4.create()
 			;
 
-			baseSpriteGroup.init.apply(this, arguments);
+			overrides.PSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
 
@@ -678,6 +680,7 @@
 					canvas = dom.get(0);
 					gl = canvas.getContext('webgl', {alpha: false}) || canvas.getContext('experimental-webgl', {alpha: false});
 				} catch (e) {
+					gl = null;
 				}
 
 				if (gl) {
@@ -714,7 +717,7 @@
 				old_background = this.old_options.background
 			;
 
-			baseSpriteGroup.remove.apply(this, arguments);
+			overrides.PSpriteGroup.remove.apply(this, arguments);
 
 			if (old_background) {
 				old_background.removeGroup(this);
@@ -782,7 +785,7 @@
 			}
 
 			if ((this.layers.length || background) && alpha && !options.hidden) {
-				if ((angle) || (scaleh !== 1) || (scalev !== 1)) {
+				if (angle || (scaleh !== 1) || (scalev !== 1)) {
 					fg.mvPushMatrix();
 					context_saved = true;
 
@@ -813,7 +816,7 @@
 					background.drawBackground(gl, this);
 				}
 
-				baseSpriteGroup.draw.apply(this, arguments);
+				overrides.PSpriteGroup.draw.apply(this, arguments);
 
 				if (context_saved) {
 					fg.mvPopMatrix();
@@ -823,7 +826,5 @@
 			}
 		}
 	});
-
-	fg.SpriteGroup = fg.Maker(fg.PSpriteGroup);
 }(jQuery, friGame));
 

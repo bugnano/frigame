@@ -28,8 +28,7 @@
 
 (function ($, fg) {
 	var
-		baseSprite = fg.PSprite,
-		baseSpriteGroup = fg.PSpriteGroup
+		overrides = {}
 	;
 
 	// ******************************************************************** //
@@ -205,7 +204,6 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PSprite = Object.create(baseSprite);
 	$.extend(fg.PSprite, {
 		draw: function () {
 			var
@@ -262,15 +260,18 @@
 		}
 	});
 
-	fg.Sprite = fg.Maker(fg.PSprite);
-
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.PSpriteGroup = Object.create(baseSpriteGroup);
+	overrides.PSpriteGroup = fg.pick(fg.PSpriteGroup, [
+		'init',
+		'remove',
+		'draw'
+	]);
+
 	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
@@ -279,7 +280,7 @@
 				height
 			;
 
-			baseSpriteGroup.init.apply(this, arguments);
+			overrides.PSpriteGroup.init.apply(this, arguments);
 
 			this.old_options = {};
 
@@ -311,7 +312,7 @@
 				old_background = this.old_options.background
 			;
 
-			baseSpriteGroup.remove.apply(this, arguments);
+			overrides.PSpriteGroup.remove.apply(this, arguments);
 
 			if (old_background && old_background.removeGroup) {
 				old_background.removeGroup(this);
@@ -442,7 +443,7 @@
 					ctx.clip();
 				}
 
-				baseSpriteGroup.draw.apply(this, arguments);
+				overrides.PSpriteGroup.draw.apply(this, arguments);
 
 				if (context_saved) {
 					// ctx.restore restores also the globalAlpha value
@@ -457,8 +458,6 @@
 			}
 		}
 	});
-
-	fg.SpriteGroup = fg.Maker(fg.PSpriteGroup);
 
 	// ******************************************************************** //
 	// ******************************************************************** //

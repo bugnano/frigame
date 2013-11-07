@@ -86,7 +86,7 @@
 		// Remove all the completed tweens
 		len_remove_queue = remove_queue.length;
 		for (i_queue = 0; i_queue < len_remove_queue; i_queue += 1) {
-			queue.splice(i_queue, 1);
+			queue.splice(remove_queue[i_queue], 1);
 		}
 
 		// If there are no more tweens in the queue, this callback can be stopped

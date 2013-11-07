@@ -26,18 +26,11 @@
 
 (function ($) {
 	var
-		fg = {},
-		exports = this,
-		myGradient,
-		myAnimation,
-		myRect,
-		myBaseSprite,
-		mySprite,
-		mySpriteGroup
+		fg = {}
 	;
 
 	// The friGame namespace
-	exports.friGame = fg;
+	window.friGame = fg;
 
 	// Prototypal Inheritance by Douglas Crockford
 	if (typeof Object.create !== 'function') {
@@ -110,7 +103,8 @@
 
 		playgroundCallbacks: [],
 		idUpdate: null,
-		nextUpdate: 0
+		nextUpdate: 0,
+		needsRedraw: false
 	});
 
 	// r is mapped to resources and s is mapped to sprites in order to have a more convenient
@@ -124,48 +118,50 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	fg.Maker = function (proto) {
-		return function () {
+	$.extend(fg, {
+		Maker: function (proto) {
+			return function () {
+				var
+					obj = Object.create(proto)
+				;
+
+				obj.init.apply(obj, arguments);
+
+				return obj;
+			};
+		},
+
+		// Return a new object with only the keys defined in the keys array parameter
+		pick: function (obj, keys) {
 			var
-				obj = Object.create(proto)
+				len_keys = keys.length,
+				result = {},
+				key,
+				i
 			;
 
-			obj.init.apply(obj, arguments);
-
-			return obj;
-		};
-	};
-
-	// Return a new object with only the keys defined in the keys array parameter
-	fg.pick = function (obj, keys) {
-		var
-			len_keys = keys.length,
-			result = {},
-			key,
-			i
-		;
-
-		for (i = 0; i < len_keys; i += 1) {
-			key = keys[i];
-			if (obj[key] !== undefined) {
-				result[key] = obj[key];
+			for (i = 0; i < len_keys; i += 1) {
+				key = keys[i];
+				if (obj[key] !== undefined) {
+					result[key] = obj[key];
+				}
 			}
+
+			return result;
+		},
+
+		truncate: function (n) {
+			if (n < 0) {
+				return Math.ceil(n);
+			}
+
+			return Math.floor(n);
+		},
+
+		clamp: function (n, minVal, maxVal) {
+			return Math.min(Math.max(n, minVal), maxVal);
 		}
-
-		return result;
-	};
-
-	fg.truncate = function(n) {
-		if (n < 0) {
-			return Math.ceil(n);
-		}
-
-		return Math.floor(n);
-	};
-
-	fg.clamp = function(n, minVal, maxVal) {
-		return Math.min(Math.max(n, minVal), maxVal);
-	};
+	});
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -291,9 +287,8 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
-	myGradient = {};
-	fg.PGradient = myGradient;
-	$.extend(fg.PGradient, {
+
+	fg.PGradient = {
 		init: function (startColor, endColor, type) {
 			var
 				clamp = fg.clamp,
@@ -367,7 +362,7 @@
 		},
 
 		onLoad: $.noop
-	});
+	};
 
 	fg.Gradient = fg.Maker(fg.PGradient);
 
@@ -388,9 +383,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	myAnimation = {};
-	fg.PAnimation = myAnimation;
-	$.extend(fg.PAnimation, {
+	fg.PAnimation = {
 		// Public options
 
 		// Implementation details
@@ -401,7 +394,7 @@
 				my_options,
 				new_options = options || {},
 				img,
-				PAnimation = myAnimation
+				PAnimation = fg.PAnimation
 			;
 
 			if (this.options) {
@@ -474,7 +467,7 @@
 		remove: function () {
 			var
 				imageURL = this.options.imageURL,
-				PAnimation = myAnimation,
+				PAnimation = fg.PAnimation,
 				animation = this
 			;
 
@@ -549,7 +542,7 @@
 			this.halfWidth = options.halfWidth;
 			this.halfHeight = options.halfHeight;
 		}
-	});
+	};
 
 	fg.Animation = fg.Maker(fg.PAnimation);
 
@@ -570,9 +563,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	myRect = {};
-	fg.PRect = myRect;
-	$.extend(fg.PRect, {
+	fg.PRect = {
 		init: function (options) {
 			// Set default options
 			$.extend(this, {
@@ -781,7 +772,7 @@
 
 			return (((dx * dx) + (dy * dy)) < (radii * radii));
 		}
-	});
+	};
 
 	fg.Rect = fg.Maker(fg.PRect);
 
@@ -791,8 +782,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	myBaseSprite = Object.create(myRect);
-	fg.PBaseSprite = myBaseSprite;
+	fg.PBaseSprite = Object.create(fg.PRect);
 	$.extend(fg.PBaseSprite, {
 		init: function (name, options, parent) {
 			var
@@ -842,8 +832,8 @@
 			// Implementation details
 			this.callbacks = [];
 
-			// Call myRect.init after setting this.parent
-			myRect.init.call(this, options);
+			// Call fg.PRect.init after setting this.parent
+			fg.PRect.init.call(this, options);
 		},
 
 		// Public functions
@@ -874,7 +864,7 @@
 		resize: function (options) {
 			this.absRect.resize(options);
 
-			myRect.resize.call(this, options);
+			fg.PRect.resize.call(this, options);
 
 			return this;
 		},
@@ -885,7 +875,7 @@
 				parentAbsRect
 			;
 
-			myRect.move.call(this, options);
+			fg.PRect.move.call(this, options);
 
 			if (this.parent) {
 				parentAbsRect = fg.s[this.parent].absRect;
@@ -1255,7 +1245,7 @@
 
 			len_remove_callbacks = remove_callbacks.length;
 			for (i = 0; i < len_remove_callbacks; i += 1) {
-				callbacks.splice(i, 1);
+				callbacks.splice(remove_callbacks[i], 1);
 			}
 		}
 	});
@@ -1266,8 +1256,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	mySprite = Object.create(myBaseSprite);
-	fg.PSprite = mySprite;
+	fg.PSprite = Object.create(fg.PBaseSprite);
 	$.extend(fg.PSprite, {
 		init: function (name, options, parent) {
 			var
@@ -1298,7 +1287,7 @@
 				paused: false
 			});
 
-			myBaseSprite.init.apply(this, arguments);
+			fg.PBaseSprite.init.apply(this, arguments);
 
 			// If the animation has not been defined, force
 			// the animation to null in order to resize and move
@@ -1343,7 +1332,7 @@
 				this.animation_options = animation_options;
 
 				// Call the resize method with all the options in order to update the position
-				myBaseSprite.resize.call(this, new_options);
+				fg.PBaseSprite.resize.call(this, new_options);
 
 				// If the animation gets redefined, set default index of 0
 				if ((my_options.animationIndex !== 0) && (!index_redefined)) {
@@ -1426,7 +1415,7 @@
 				currentFrame = options.currentFrame
 			;
 
-			myBaseSprite.update.call(this);
+			fg.PBaseSprite.update.call(this);
 
 			if (!(this.endAnimation || options.paused)) {
 				if (animation) {
@@ -1569,14 +1558,15 @@
 		}
 	});
 
+	fg.Sprite = fg.Maker(fg.PSprite);
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	mySpriteGroup = Object.create(myBaseSprite);
-	fg.PSpriteGroup = mySpriteGroup;
+	fg.PSpriteGroup = Object.create(fg.PBaseSprite);
 	$.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
@@ -1608,7 +1598,7 @@
 
 			this.layers = [];
 
-			myBaseSprite.init.apply(this, arguments);
+			fg.PBaseSprite.init.apply(this, arguments);
 
 			// If the background has not been defined, force
 			// the background to null in order to be
@@ -1625,7 +1615,7 @@
 		remove: function () {
 			this.clear();
 
-			myBaseSprite.remove.apply(this, arguments);
+			fg.PBaseSprite.remove.apply(this, arguments);
 		},
 
 		resize: function (options) {
@@ -1636,7 +1626,7 @@
 			;
 
 			// Set the new options
-			myBaseSprite.resize.call(this, options);
+			fg.PBaseSprite.resize.call(this, options);
 
 			if (this.parent) {
 				parent = fg.s[this.parent];
@@ -1654,7 +1644,7 @@
 				}
 
 				if (set_new_options) {
-					myBaseSprite.resize.call(this, new_options);
+					fg.PBaseSprite.resize.call(this, new_options);
 				}
 			}
 
@@ -1662,7 +1652,7 @@
 		},
 
 		move: function (options) {
-			myBaseSprite.move.call(this, options);
+			fg.PBaseSprite.move.call(this, options);
 
 			this.moveChildrenAbsRect();
 
@@ -1799,7 +1789,7 @@
 				i
 			;
 
-			myBaseSprite.update.call(this);
+			fg.PBaseSprite.update.call(this);
 
 			for (i = 0; i < len_layers; i += 1) {
 				if (layers[i]) {
@@ -1851,6 +1841,8 @@
 			}
 		}
 	});
+
+	fg.SpriteGroup = fg.Maker(fg.PSpriteGroup);
 
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -1968,6 +1960,8 @@
 			}
 
 			fg.nextUpdate = next_update;
+
+			fg.needsRedraw = true;
 		},
 
 		draw: function () {
@@ -1979,7 +1973,11 @@
 				window.requestAnimFrame(fg.draw);
 			}
 
-			playground.draw();
+			if (fg.needsRedraw) {
+				playground.draw();
+
+				fg.needsRedraw = false;
+			}
 		}
 	});
 }(jQuery));
