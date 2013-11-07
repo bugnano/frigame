@@ -28,7 +28,8 @@
 	var
 		sm2_loaded = false,
 		audio_initialized = false,
-		onError = $.noop
+		onError = $.noop,
+		context
 	;
 
 	fg.sound = {
@@ -61,11 +62,11 @@
 			window.addEventListener('load', function () {
 				try {
 					window.AudioContext = window.AudioContext || window.webkitAudioContext;
-					fg.audioContext = new AudioContext();
-					fg.audioContext.createGain = fg.audioContext.createGain || fg.audioContext.createGainNode;
+					context = new AudioContext();
+					context.createGain = context.createGain || context.createGainNode;
 				}
 				catch (e) {
-					fg.audioContext = null;
+					context = null;
 				}
 
 				audio_initialized = true;
@@ -265,7 +266,7 @@
 
 				audio.play();
 			} else if (audioBuffer) {
-				source = fg.audioContext.createBufferSource();
+				source = context.createBufferSource();
 				this.source = source;
 
 				source.buffer = audioBuffer;
@@ -299,7 +300,7 @@
 					source.onended = this.doDisconnect;
 				}
 
-				this.startTime = fg.audioContext.currentTime;
+				this.startTime = context.currentTime;
 				if (source.start) {
 					source.start(0);
 				} else {
@@ -369,7 +370,7 @@
 				source.loop = false;
 				source.onended = null;
 
-				this.pauseTime = fg.audioContext.currentTime;
+				this.pauseTime = context.currentTime;
 				if (source.stop) {
 					source.stop(0);
 				} else {
@@ -400,7 +401,7 @@
 			if (this.pauseTime) {
 				// Since pause / resume is not supported in the Web Audio API, a new source object is created
 				// containing all the values of the old source object
-				source = fg.audioContext.createBufferSource();
+				source = context.createBufferSource();
 				this.source = source;
 
 				source.buffer = audioBuffer;
@@ -414,7 +415,7 @@
 				offset = (this.pauseTime - this.startTime) % audioBuffer.duration;
 
 				this.pauseTime = 0;
-				this.startTime = fg.audioContext.currentTime - offset;
+				this.startTime = context.currentTime - offset;
 				if (source.start) {
 					source.start(0, offset);
 				} else {
@@ -492,7 +493,7 @@
 						sound.load();
 						this.sound = sound;
 					} else if (canPlay[format]) {
-						if (fg.audioContext) {
+						if (context) {
 							// Sound supported through Web Audio API
 							request = new XMLHttpRequest();
 
@@ -501,7 +502,7 @@
 
 							// Decode asynchronously
 							request.onload = function () {
-								fg.audioContext.decodeAudioData(request.response, function (buffer) {
+								context.decodeAudioData(request.response, function (buffer) {
 									sound_object.audioBuffer = buffer;
 								}, onError);
 							};
@@ -526,7 +527,7 @@
 				completed = false;
 			}
 
-			if (fg.audioContext && (!(this.audioBuffer))) {
+			if (context && (!(this.audioBuffer))) {
 				completed = false;
 			}
 
@@ -542,9 +543,9 @@
 				sound_object = this
 			;
 
-			if (fg.audioContext) {
-				this.gainNode = fg.audioContext.createGain();
-				this.gainNode.connect(fg.audioContext.destination);
+			if (context) {
+				this.gainNode = context.createGain();
+				this.gainNode.connect(context.destination);
 				this.doDisconnect = function () {
 					sound_object.disconnect();
 				};

@@ -55,6 +55,8 @@
 			property_list = tween_obj.property_list;
 			len_property_list = property_list.length;
 
+			tween_obj.current_step += 1;
+
 			// This object has finished its tweening
 			if (tween_obj.current_step >= tween_obj.num_step) {
 				// Set every property to its target value
@@ -78,8 +80,6 @@
 					property = property_list[i_property];
 					property.setValue(this, property.start_value + (property.change * step));
 				}
-
-				tween_obj.current_step += 1;
 			}
 		}
 
