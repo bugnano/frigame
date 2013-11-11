@@ -234,7 +234,7 @@
 		}
 
 		this.setAnimation({animationIndex: this.userData.index});
-		fg.r.countdownBlip.play();
+		fg.r.countdownBlip.play({muted: false});
 	}
 
 	G.addCountdown = function () {
@@ -247,7 +247,7 @@
 			})
 		;
 
-		fg.r.countdownBlip.play();
+		fg.r.countdownBlip.play({muted: false});
 
 		fg.s.countdown.userData = {
 			index: 0
