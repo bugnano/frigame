@@ -258,8 +258,10 @@
 					resourceManager.loadCallback = null;
 				}
 
-				clearInterval(resourceManager.idPreload);
-				resourceManager.idPreload = null;
+				if (resourceManager.idPreload !== null) {
+					clearInterval(resourceManager.idPreload);
+					resourceManager.idPreload = null;
+				}
 
 				for (i = 0; i < len_preload_list; i += 1) {
 					if (preload_list[i].onLoad) {
@@ -1893,6 +1895,13 @@
 			if (callback) {
 				resourceManager.completeCallback = callback;
 			}
+
+			// Call preload() now, in order to have the resources initialize
+			// inside the function that called startGame. This is useful for
+			// preloading sounds in mobile environments, for example, where
+			// the sounds will not load if audio.load() is not called in an user
+			// event handler such as mousedown.
+			resourceManager.preload();
 
 			if (resourceManager.idPreload === null) {
 				resourceManager.idPreload = setInterval(resourceManager.preload, 100);

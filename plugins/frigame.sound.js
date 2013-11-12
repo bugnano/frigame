@@ -113,10 +113,27 @@
 	fg.PSound = {
 		init: function (name, soundURLs, options) {
 			var
+				my_options,
 				new_options = options || {}
 			;
 
+			if (this.options) {
+				my_options = this.options;
+			} else {
+				my_options = {};
+				this.options = my_options;
+			}
+
 			// Set default options
+			$.extend(my_options, {
+				// Public options
+				streaming: false
+
+				// Implementation details
+			});
+
+			$.extend(my_options, fg.pick(new_options, ['streaming']));
+
 			$.extend(this, {
 				// Public options
 				muted: false,
@@ -319,7 +336,7 @@
 
 			if (this.audio) {
 				this.audio.pause();
-				this.audio.currentTime = this.audio.startTime;
+				this.audio.currentTime = this.audio.startTime || 0;
 			}
 
 			this.pauseTime = 0;
@@ -485,7 +502,7 @@
 						sound.load();
 						this.sound = sound;
 					} else if (canPlay[format]) {
-						if (context) {
+						if (context && (!(this.options.streaming))) {
 							// Sound supported through Web Audio API
 							request = new XMLHttpRequest();
 
@@ -519,7 +536,7 @@
 				completed = false;
 			}
 
-			if (context && (!(this.audioBuffer))) {
+			if (context && (!(this.options.streaming)) && (!(this.audioBuffer))) {
 				completed = false;
 			}
 
@@ -535,7 +552,7 @@
 				sound_object = this
 			;
 
-			if (context) {
+			if (this.audioBuffer) {
 				this.gainNode = context.createGain();
 				this.gainNode.connect(context.destination);
 				this.doDisconnect = function () {
