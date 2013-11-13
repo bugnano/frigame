@@ -79,7 +79,9 @@
 
 			this.checkWallCollision();
 			this.checkBlockCollision();
-			this.checkPaddleCollision();
+			if (fg.s.paddle) {
+				this.checkPaddleCollision();
+			}
 		},
 
 		checkWallCollision: function () {

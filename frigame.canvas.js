@@ -280,8 +280,6 @@
 				height
 			;
 
-			overrides.PSpriteGroup.init.apply(this, arguments);
-
 			this.old_options = {};
 
 			if (!parent) {
@@ -302,6 +300,9 @@
 
 				fg.ctx = dom.get(0).getContext('2d');
 			}
+
+			// Call the overridden function last, in order to have the callbacks called once the object has been fully initialized
+			overrides.PSpriteGroup.init.apply(this, arguments);
 		},
 
 		// Public functions

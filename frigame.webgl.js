@@ -653,8 +653,6 @@
 				pMatrix = mat4.create()
 			;
 
-			overrides.PSpriteGroup.init.apply(this, arguments);
-
 			this.old_options = {};
 
 			if (!parent) {
@@ -707,6 +705,9 @@
 					mat4.identity(mvMatrix);
 				}
 			}
+
+			// Call the overridden function last, in order to have the callbacks called once the object has been fully initialized
+			overrides.PSpriteGroup.init.apply(this, arguments);
 		},
 
 		// Public functions

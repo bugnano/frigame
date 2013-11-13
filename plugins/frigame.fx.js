@@ -1,5 +1,5 @@
 /*global jQuery, friGame */
-/*jslint nomen: true, sloppy: true, white: true, browser: true */
+/*jslint forin: true, nomen: true, sloppy: true, white: true, browser: true */
 
 // Copyright (c) 2011-2013 Franco Bugnano
 
@@ -27,6 +27,7 @@
 
 (function ($, fg) {
 	var
+		overrides = {},
 		speeds = {
 			slow: 600,
 			fast: 200,
@@ -42,6 +43,7 @@
 			remove_queue = [],
 			len_remove_queue,
 			tween_obj,
+			target_obj,
 			property,
 			i_property,
 			property_list,
@@ -52,6 +54,8 @@
 		// Process all the tweens in the queue
 		for (i_queue = 0; i_queue < len_queue; i_queue += 1) {
 			tween_obj = queue[i_queue];
+			target_obj = tween_obj.target_obj;
+
 			property_list = tween_obj.property_list;
 			len_property_list = property_list.length;
 
@@ -62,12 +66,12 @@
 				// Set every property to its target value
 				for (i_property = 0; i_property < len_property_list; i_property += 1) {
 					property = property_list[i_property];
-					property.setValue(this, property.target_value);
+					property.setValue(target_obj, property.target_value);
 				}
 
 				// Call the complete callback
 				if (tween_obj.callback) {
-					tween_obj.callback.call(this, this);
+					tween_obj.callback.call(target_obj, target_obj);
 				}
 
 				// Mark this object for removal
@@ -78,7 +82,7 @@
 				// Set the properties to the current value
 				for (i_property = 0; i_property < len_property_list; i_property += 1) {
 					property = property_list[i_property];
-					property.setValue(this, property.start_value + (property.change * step));
+					property.setValue(target_obj, property.start_value + (property.change * step));
 				}
 			}
 		}
@@ -97,6 +101,34 @@
 			return true;
 		}
 	}
+
+	fg.playgroundCallback(function () {
+		overrides.playground = fg.pick(this, [
+			'clearCallbacks'
+		]);
+
+		$.extend(this, {
+			fx: {
+				queue: [],
+				inprogress: false
+			},
+
+			clearQueue: function () {
+				this.fx.queue.splice(0, this.fx.queue.length);
+
+				return this;
+			},
+
+			clearCallbacks: function () {
+				overrides.playground.clearCallbacks.apply(this, arguments);
+
+				this.clearQueue();
+				this.fx.inprogress = false;
+
+				return this;
+			}
+		});
+	});
 
 	fg.fx = {
 		easing: {
@@ -465,6 +497,7 @@
 		tween: function (hooks, properties, options) {
 			var
 				new_options = options || {},
+				playground = fg.s.playground,
 				easing_list = fg.fx.easing,
 				duration = new_options.duration,
 				speed,
@@ -477,11 +510,6 @@
 				target_obj = this
 			;
 
-			this.fx = this.fx || {
-				queue: [],
-				inprogress: false
-			};
-
 			if (typeof duration === 'number') {
 				speed = duration;
 			} else if (speeds[duration]) {
@@ -491,6 +519,7 @@
 			}
 
 			tween_obj = {
+				target_obj: target_obj,
 				current_step: 0,
 				num_step: Math.round(speed / fg.REFRESH_RATE) || 1,
 				easing: easing_list[new_options.easing] || easing_list.swing,
@@ -504,7 +533,7 @@
 				if (hooks[property]) {
 					hook = hooks[property];
 
-					start_value = hook.get(this);
+					start_value = hook.get(target_obj);
 					target_value = properties[property];
 
 					property_list.push({
@@ -516,12 +545,10 @@
 				}
 			}
 
-			this.fx.queue.push(tween_obj);
-			if (!(this.fx.inprogress)) {
-				this.fx.inprogress = true;
-				fg.s.playground.registerCallback(function () {
-					return tweenStep.call(target_obj);
-				});
+			playground.fx.queue.push(tween_obj);
+			if (!(playground.fx.inprogress)) {
+				playground.fx.inprogress = true;
+				playground.registerCallback(tweenStep);
 			}
 
 			return this;

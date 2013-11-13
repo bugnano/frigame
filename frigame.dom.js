@@ -613,8 +613,6 @@
 				dom
 			;
 
-			overrides.PSpriteGroup.init.apply(this, arguments);
-
 			this.old_options = {};
 
 			if (!parent) {
@@ -644,6 +642,9 @@
 					fg.support.ieFilter = false;
 				}
 			}
+
+			// Call the overridden function last, in order to have the callbacks called once the object has been fully initialized
+			overrides.PSpriteGroup.init.apply(this, arguments);
 		},
 
 		// Public functions

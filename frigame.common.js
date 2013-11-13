@@ -1856,7 +1856,10 @@
 
 		playground: function (parentDOM) {
 			var
+				i,
 				playground = fg.s.playground,
+				playground_callbacks = fg.playgroundCallbacks,
+				len_playground_callbacks = playground_callbacks.length,
 				dom
 			;
 
@@ -1875,7 +1878,10 @@
 				playground.crop = null;
 
 				// Call the playgroundCallbacks only after the playground has been completely created
-				setTimeout(fg.firePlaygroundCallbacks, 0);
+				for (i = 0; i < len_playground_callbacks; i += 1) {
+					playground_callbacks[i].call(playground, dom);
+				}
+				playground_callbacks.splice(0, len_playground_callbacks);
 
 				if (fg.idUpdate === null) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
@@ -1938,21 +1944,6 @@
 		},
 
 		// Implementation details
-
-		firePlaygroundCallbacks: function () {
-			var
-				i,
-				playground = fg.s.playground,
-				dom = playground.parentDOM,
-				playground_callbacks = fg.playgroundCallbacks,
-				len_playground_callbacks = playground_callbacks.length
-			;
-
-			for (i = 0; i < len_playground_callbacks; i += 1) {
-				playground_callbacks[i].call(playground, dom);
-			}
-			playground_callbacks.splice(0, len_playground_callbacks);
-		},
 
 		update: function () {
 			var
