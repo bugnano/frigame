@@ -558,6 +558,8 @@
 				}
 			} else {
 				if (dom) {
+					fg.last_sprite = this.name;
+
 					if (!insidePlayground && (insidePlayground !== old_options.insidePlayground)) {
 						dom.hide();
 						old_options.insidePlayground = insidePlayground;
@@ -889,6 +891,8 @@
 				fg.last_sprite = name;
 			} else {
 				if (dom) {
+					fg.last_sprite = this.name;
+
 					if (hidden && (hidden !== old_options.hidden)) {
 						dom.hide();
 						old_options.hidden = hidden;
