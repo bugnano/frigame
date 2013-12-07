@@ -97,14 +97,11 @@
 			debugMode: false,
 			useFlashBlock: false,
 
+			preferFlash: true,
 			useHTML5Audio: false,
 
 			useHighPerformance: true,
-			wmode: 'transparent',
-
-			defaultOptions: {
-				stream: false
-			}
+			wmode: 'transparent'
 		});
 	} else {
 		sm2_loaded = true;
