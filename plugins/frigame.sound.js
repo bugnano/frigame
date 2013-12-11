@@ -501,6 +501,8 @@
 					} else if (canPlay[format]) {
 						if (context && (!(this.options.streaming))) {
 							// Sound supported through Web Audio API
+							this.waitAudioBuffer = true;
+
 							request = new XMLHttpRequest();
 
 							request.open('GET', sound_url, true);
@@ -510,6 +512,7 @@
 							request.onload = function () {
 								context.decodeAudioData(request.response, function (buffer) {
 									sound_object.audioBuffer = buffer;
+									sound_object.waitAudioBuffer = false;
 								}, onError);
 							};
 
@@ -533,7 +536,7 @@
 				completed = false;
 			}
 
-			if (context && (!(this.options.streaming)) && (!(this.audioBuffer))) {
+			if (this.waitAudioBuffer) {
 				completed = false;
 			}
 
