@@ -236,6 +236,7 @@
 				loadCallback = resourceManager.loadCallback,
 				start_callbacks = resourceManager.startCallbacks,
 				len_start_callbacks = start_callbacks.length,
+				completeCallback = resourceManager.completeCallback,
 				i
 			;
 
@@ -275,9 +276,11 @@
 				}
 				start_callbacks.splice(0, len_start_callbacks);
 
-				if (resourceManager.completeCallback) {
-					resourceManager.completeCallback.call(fg);
+				if (completeCallback) {
+					// Set to null the completeCallback before calling the completeCallback
+					// in order to enable recursion
 					resourceManager.completeCallback = null;
+					completeCallback.call(fg);
 				}
 
 				if ((fg.idUpdate === null) && (fg.s.playground)) {
