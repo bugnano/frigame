@@ -26,6 +26,7 @@
 
 (function ($, fg) {
 	var
+		overrides = {},
 		sm2_loaded = false,
 		audio_initialized = false,
 		onError = $.noop,
@@ -615,9 +616,21 @@
 			}
 		};
 
-		fg.PSound.tween = function (properties, options) {
-			return fg.fx.tween.call(this, fg.sound.hooks, properties, options);
-		};
+		overrides.PSound = fg.pick(fg.PSound, [
+			'remove'
+		]);
+
+		$.extend(fg.PSound, {
+			tween: function (properties, options) {
+				return fg.fx.tween.call(this, fg.sound.hooks, properties, options);
+			},
+
+			remove: function () {
+				fg.fx.remove.call(this);
+
+				overrides.PSound.remove.apply(this, arguments);
+			}
+		});
 	}
 }(jQuery, friGame));
 

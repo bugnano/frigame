@@ -61,8 +61,12 @@
 
 			tween_obj.current_step += 1;
 
-			// This object has finished its tweening
-			if (tween_obj.current_step >= tween_obj.num_step) {
+			if (tween_obj.remove) {
+				// This object has been marked for removal
+				remove_queue.unshift(i_queue);
+			} else if (tween_obj.current_step >= tween_obj.num_step) {
+				// This object has finished its tweening
+
 				// Set every property to its target value
 				for (i_property = 0; i_property < len_property_list; i_property += 1) {
 					property = property_list[i_property];
@@ -520,6 +524,7 @@
 
 			tween_obj = {
 				target_obj: target_obj,
+				remove: false,
 				current_step: 0,
 				num_step: Math.round(speed / fg.REFRESH_RATE) || 1,
 				easing: easing_list[new_options.easing] || easing_list.swing,
@@ -552,12 +557,39 @@
 			}
 
 			return this;
+		},
+
+		remove: function () {
+			var
+				queue = fg.s.playground.fx.queue,
+				len_queue = queue.length,
+				i_queue,
+				tween_obj
+			;
+
+			for (i_queue = 0; i_queue < len_queue; i_queue += 1) {
+				tween_obj = queue[i_queue];
+				if (tween_obj.target_obj === this) {
+					// Mark this object for removal
+					tween_obj.remove = true;
+				}
+			}
 		}
 	};
+
+	overrides.PBaseSprite = fg.pick(fg.PBaseSprite, [
+		'remove'
+	]);
 
 	$.extend(fg.PBaseSprite, {
 		tween: function (properties, options) {
 			return fg.fx.tween.call(this, fg.fx.hooks, properties, options);
+		},
+
+		remove: function () {
+			fg.fx.remove.call(this);
+
+			overrides.PBaseSprite.remove.apply(this, arguments);
 		},
 
 		fadeIn: function (duration, callback) {
