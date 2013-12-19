@@ -909,6 +909,30 @@
 			return this;
 		},
 
+		removeCallback: function (callback) {
+			var
+				callbacks = this.callbacks,
+				len_callbacks = callbacks.length,
+				remove_callbacks = [],
+				len_remove_callbacks,
+				i
+			;
+
+			for (i = 0; i < len_callbacks; i += 1) {
+				// The same callback function might have been registered more than once
+				if (callbacks[i].callback === callback) {
+					remove_callbacks.unshift(i);
+				}
+			}
+
+			len_remove_callbacks = remove_callbacks.length;
+			for (i = 0; i < len_remove_callbacks; i += 1) {
+				callbacks.splice(remove_callbacks[i], 1);
+			}
+
+			return this;
+		},
+
 		clearCallbacks: function () {
 			this.callbacks.splice(0, this.callbacks.length);
 
