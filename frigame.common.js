@@ -285,7 +285,7 @@
 
 				if ((fg.idUpdate === null) && (fg.s.playground)) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
+					fg.idUpdate = setTimeout(fg.update, 4);
 					requestAnimFrame(fg.draw);
 				}
 			}
@@ -1912,7 +1912,7 @@
 
 				if (fg.idUpdate === null) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
+					fg.idUpdate = setTimeout(fg.update, 4);
 					requestAnimFrame(fg.draw);
 				}
 			}
@@ -1945,7 +1945,7 @@
 
 		stopGame: function () {
 			if (fg.idUpdate !== null) {
-				clearInterval(fg.idUpdate);
+				clearTimeout(fg.idUpdate);
 				fg.idUpdate = null;
 			}
 
@@ -1980,14 +1980,19 @@
 				refresh_rate = fg.REFRESH_RATE
 			;
 
-			while ((now - next_update) >= refresh_rate) {
-				playground.update();
-				next_update += refresh_rate;
+			if ((now - next_update) >= refresh_rate) {
+				while ((now - next_update) >= refresh_rate) {
+					playground.update();
+					next_update += refresh_rate;
+				}
+
+				fg.nextUpdate = next_update;
+
+				fg.needsRedraw = true;
 			}
 
-			fg.nextUpdate = next_update;
-
-			fg.needsRedraw = true;
+			// Avoid the spiral of death by always leaving at least 4 ms between updates
+			fg.idUpdate = setTimeout(fg.update, 4);
 		},
 
 		draw: function () {
