@@ -1,7 +1,7 @@
 /*global jQuery, friGame */
-/*jslint forin: true, nomen: true, sloppy: true, white: true, browser: true */
+/*jslint forin: true, nomen: true, white: true, browser: true */
 
-// Copyright (c) 2011-2013 Franco Bugnano
+// Copyright (c) 2011-2014 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@
 // based on easing equations from Robert Penner (http://www.robertpenner.com/easing)
 
 (function ($, fg) {
+	'use strict';
+
 	var
 		overrides = {},
 		speeds = {

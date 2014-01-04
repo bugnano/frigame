@@ -15,15 +15,15 @@ Source: https://bitbucket.org/bugnano/frigame
 
 ##Breakout Status
 The game is pretty feature complete, but it does not currently implement tiled
-backgrounds, and it has not been tested on mobile devices
+backgrounds
 
 ##Notes:
 * Implements both a DOM version, with soundmanager2 support for sound, which means
-  that sound can be supported on older browser that do not support the HTML5 audio
-  element, but support flash (tested and fully working on IE8), and a canvas version
-  with only HTML5 audio support
+  that sound can be supported on older browser that do not support the Web Audio /
+  HTML5 audio element, but support flash (tested and fully working on IE8), and a
+  canvas version with only Web Audio / HTML5 audio support
 * Tested and working on all major desktop browsers (including older ones, like IE8)
-* Not tested on mobile/table device
+* Fully working, with sound, on mobile/table device (iOS 6+, Chrome for Android)
 * Show's off the container support by scaling in the Bricks on each level
 * Did not implement Tile support
 * friGame does not try to duplicate functionality already found in jQuery. This

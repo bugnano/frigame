@@ -1,7 +1,7 @@
 /*global jQuery, friGame */
-/*jslint sloppy: true, white: true, browser: true */
+/*jslint white: true, browser: true */
 
-// Copyright (c) 2011-2013 Franco Bugnano
+// Copyright (c) 2011-2014 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,8 @@
 // Akihabara Copyright (c) 2010 Francesco Cottone, http://www.kesiev.com/, licensed under the MIT
 
 (function ($, fg) {
+	'use strict';
+
 	var
 		overrides = {}
 	;

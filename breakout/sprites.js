@@ -1,7 +1,9 @@
 /*global jQuery, friGame, G */
-/*jslint sloppy: true, white: true, browser: true */
+/*jslint white: true, browser: true */
 
 (function ($, fg) {
+	'use strict';
+
 	var
 		animationFromBlock,
 		powerUpCounter = 0
@@ -154,7 +156,7 @@
 				this.setAnimation({animation: 'paddlelg'});
 				fg.r.recover.play();
 			}
-		}, G.REFRESH_RATE);
+		});
 	};
 
 	G.addPowerdown = function (x, y) {
@@ -176,7 +178,7 @@
 		;
 
 		fg.s[name].registerCallback(function () {
-			this.move({centery: this.centery + (80 / G.REFRESH_RATE)});
+			this.move({centery: this.centery + (80 / (fg.REFRESH_RATE * 2))});
 
 			if (this.collideRect(fg.s.paddle)) {
 				fg.r.sndPowerdown.play();
@@ -189,7 +191,7 @@
 			} else if (this.top >= fg.s.playground.height) {
 				this.remove();
 			}
-		}, G.REFRESH_RATE);
+		});
 	};
 
 	G.addPowerup = function (x, y) {
@@ -211,7 +213,7 @@
 		;
 
 		fg.s[name].registerCallback(function () {
-			this.move({centery: this.centery + (80 / G.REFRESH_RATE)});
+			this.move({centery: this.centery + (80 / (fg.REFRESH_RATE * 2))});
 
 			if (this.collideRect(fg.s.paddle)) {
 				fg.r.sndPowerup.play();
@@ -220,7 +222,7 @@
 			} else if (this.top >= fg.s.playground.height) {
 				this.remove();
 			}
-		}, G.REFRESH_RATE);
+		});
 	};
 
 	function countdownCallback() {

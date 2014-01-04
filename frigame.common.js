@@ -1,7 +1,7 @@
 /*global jQuery, friGame, requestAnimFrame, performance */
-/*jslint sloppy: true, white: true, browser: true */
+/*jslint white: true, browser: true */
 
-// Copyright (c) 2011-2013 Franco Bugnano
+// Copyright (c) 2011-2014 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,22 @@
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
 (function ($) {
+	'use strict';
+
 	var
-		fg = {}
+		fg = {},
+
+		// shim layer with setTimeout fallback by Paul Irish
+		requestAnimFrame = (function () {
+			return window.requestAnimationFrame ||
+				window.webkitRequestAnimationFrame ||
+				window.mozRequestAnimationFrame ||
+				window.oRequestAnimationFrame ||
+				window.msRequestAnimationFrame ||
+				function (callback) {
+					window.setTimeout(callback, 1000 / 60);
+				};
+		}())
 	;
 
 	// The friGame namespace
@@ -41,20 +55,6 @@
 		};
 	}
 
-	// shim layer with setTimeout fallback by Paul Irish
-	if (!window.requestAnimFrame) {
-		window.requestAnimFrame = (function () {
-			return window.requestAnimationFrame ||
-				window.webkitRequestAnimationFrame ||
-				window.mozRequestAnimationFrame ||
-				window.oRequestAnimationFrame ||
-				window.msRequestAnimationFrame ||
-				function (callback) {
-					window.setTimeout(callback, 1000 / 60);
-				};
-		}());
-	}
-
 	// Date.now() by Mozilla
 	if (!Date.now) {
 		Date.now = function () {
@@ -63,15 +63,19 @@
 	}
 
 	// performance.now by Tony Gentilcore
-	window.performance = window.performance || {};
-	performance.now = (function() {
-		return	performance.now ||
-				performance.mozNow ||
-				performance.msNow ||
-				performance.oNow ||
-				performance.webkitNow ||
-				Date.now;
-	}());
+	if (!window.performance) {
+		window.performance = {};
+	}
+
+	if (!window.performance.now) {
+		window.performance.now = (function() {
+			return	window.performance.mozNow ||
+					window.performance.msNow ||
+					window.performance.oNow ||
+					window.performance.webkitNow ||
+					Date.now;
+		}());
+	}
 
 	$.extend(fg, {
 		// Public constants
@@ -276,17 +280,19 @@
 				}
 				start_callbacks.splice(0, len_start_callbacks);
 
+				// Trigger the update before the completeCallback in order to allow calling stopGame
+				// from the completeCallback
+				if ((fg.idUpdate === null) && (fg.s.playground)) {
+					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
+					fg.idUpdate = setTimeout(fg.update, 4);
+					requestAnimFrame(fg.draw);
+				}
+
 				if (completeCallback) {
 					// Set to null the completeCallback before calling the completeCallback
 					// in order to enable recursion
 					resourceManager.completeCallback = null;
 					completeCallback.call(fg);
-				}
-
-				if ((fg.idUpdate === null) && (fg.s.playground)) {
-					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setTimeout(fg.update, 4);
-					requestAnimFrame(fg.draw);
 				}
 			}
 		}
