@@ -493,7 +493,7 @@
 					old_options.multiy = multiy;
 				}
 
-				if (update_position || ((options.idleCounter === 0) && (animation_options.numberOfFrame !== 1))) {
+				if (update_position || (currentFrame !== old_options.currentFrame)) {
 					css_options['background-position'] = [
 						String(-(animation_options.offsetx + multix + (currentFrame * animation_options.deltax))),
 						'px ',
@@ -501,6 +501,8 @@
 						'px'
 					].join('');
 					update_css = true;
+
+					old_options.currentFrame = currentFrame;
 				}
 
 				if	(
