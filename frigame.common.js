@@ -1395,7 +1395,6 @@
 
 			if (new_options.rate !== undefined) {
 				animation_options.rate = Math.round(new_options.rate / fg.REFRESH_RATE) || 1;
-				animation_redefined = true;
 			}
 
 			if (new_options.once !== undefined) {
