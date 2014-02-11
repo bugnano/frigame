@@ -1349,6 +1349,8 @@
 			if (animation_redefined) {
 				animation = fg.r[new_options.animation];
 				my_options.animation = animation;
+				my_options.callback = null;
+				my_options.paused = false;
 
 				// Force new width and height based on the animation frame size
 				if (animation) {
