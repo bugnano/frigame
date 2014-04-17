@@ -588,6 +588,10 @@
 			return fg.fx.tween.call(this, fg.fx.hooks, properties, options);
 		},
 
+		removeTweens: function () {
+			fg.fx.remove.call(this);
+		},
+
 		remove: function () {
 			fg.fx.remove.call(this);
 

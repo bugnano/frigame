@@ -627,6 +627,10 @@
 				return fg.fx.tween.call(this, fg.sound.hooks, properties, options);
 			},
 
+			removeTweens: function () {
+				fg.fx.remove.call(this);
+			},
+
 			remove: function () {
 				fg.fx.remove.call(this);
 
