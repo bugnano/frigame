@@ -284,7 +284,7 @@
 				// from the completeCallback
 				if ((fg.idUpdate === null) && (fg.s.playground)) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setTimeout(fg.update, 4);
+					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
 					requestAnimFrame(fg.draw);
 				}
 
@@ -1919,7 +1919,7 @@
 
 				if (fg.idUpdate === null) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setTimeout(fg.update, 4);
+					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
 					requestAnimFrame(fg.draw);
 				}
 			}
@@ -1952,7 +1952,7 @@
 
 		stopGame: function () {
 			if (fg.idUpdate !== null) {
-				clearTimeout(fg.idUpdate);
+				clearInterval(fg.idUpdate);
 				fg.idUpdate = null;
 			}
 
@@ -1997,9 +1997,6 @@
 
 				fg.needsRedraw = true;
 			}
-
-			// Avoid the spiral of death by always leaving at least 4 ms between updates
-			fg.idUpdate = setTimeout(fg.update, 4);
 		},
 
 		draw: function () {
