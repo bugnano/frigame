@@ -223,7 +223,7 @@
 				ctx = fg.ctx
 			;
 
-			if (this.insidePlayground && animation && alpha && scaleh && scalev && !options.hidden) {
+			if (fg.insidePlayground(this) && animation && alpha && scaleh && scalev && !options.hidden) {
 				ctx.save();
 
 				ctx.translate(this.centerx, this.centery);
@@ -341,7 +341,7 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
-				insidePlayground = this.insidePlayground,
+				insidePlayground = fg.insidePlayground(this),
 				background = insidePlayground && options.background,
 				old_background = old_options.background,
 				angle = options.angle,

@@ -108,7 +108,9 @@
 		playgroundCallbacks: [],
 		idUpdate: null,
 		nextUpdate: 0,
-		needsRedraw: false
+		needsRedraw: false,
+		absLeft: 0,
+		absTop: 0
 	});
 
 	// r is mapped to resources and s is mapped to sprites in order to have a more convenient
@@ -833,9 +835,6 @@
 			this.name = name;
 			this.parent = parent;
 
-			// A public read-only rect that is always relative to the playground
-			this.absRect = fg.Rect(options);
-
 			// A public userData property can be useful to the game
 			this.userData = null;
 
@@ -869,42 +868,6 @@
 			}
 
 			delete fg.s[name];
-		},
-
-		resize: function (options) {
-			this.absRect.resize(options);
-
-			fg.PRect.resize.call(this, options);
-
-			return this;
-		},
-
-		move: function (options) {
-			var
-				absRect = this.absRect,
-				parentAbsRect
-			;
-
-			fg.PRect.move.call(this, options);
-
-			if (this.parent) {
-				parentAbsRect = fg.s[this.parent].absRect;
-				absRect.move({
-					left: parentAbsRect.left + this.left,
-					top: parentAbsRect.top + this.top
-				});
-
-				this.insidePlayground = absRect.collideRect(fg.s.playground);
-			} else {
-				absRect.move({
-					left: this.left,
-					top: this.top
-				});
-
-				this.insidePlayground = true;
-			}
-
-			return this;
 		},
 
 		registerCallback: function (callback, rate) {
@@ -1686,14 +1649,6 @@
 			return this;
 		},
 
-		move: function (options) {
-			fg.PBaseSprite.move.call(this, options);
-
-			this.moveChildrenAbsRect();
-
-			return this;
-		},
-
 		clear: function () {
 			var
 				layers = this.layers
@@ -1835,45 +1790,22 @@
 
 		draw: function () {
 			var
+				left = this.left,
+				top = this.top,
 				layers = this.layers,
 				len_layers = layers.length,
 				i
 			;
+
+			fg.absLeft += left;
+			fg.absTop += top;
 
 			for (i = 0; i < len_layers; i += 1) {
 				layers[i].obj.draw();
 			}
-		},
 
-		moveChildrenAbsRect: function () {
-			var
-				absRect = this.absRect,
-				myAbsLeft = absRect.left,
-				myAbsTop = absRect.top,
-				playground = fg.s.playground,
-				layers = this.layers,
-				len_layers = layers.length,
-				layer_obj,
-				layerAbsRect,
-				i
-			;
-
-			for (i = 0; i < len_layers; i += 1) {
-				// Update the child node absRect
-				layer_obj = layers[i].obj;
-				layerAbsRect = layer_obj.absRect;
-				layerAbsRect.move({
-					left: myAbsLeft + layer_obj.left,
-					top: myAbsTop + layer_obj.top
-				});
-
-				layer_obj.insidePlayground = layerAbsRect.collideRect(playground);
-
-				// If this node has children, they must be updated too
-				if (layer_obj.moveChildrenAbsRect) {
-					layer_obj.moveChildrenAbsRect();
-				}
-			}
+			fg.absLeft -= left;
+			fg.absTop -= top;
 		}
 	});
 
@@ -2013,6 +1945,25 @@
 
 				fg.needsRedraw = false;
 			}
+		},
+
+		insidePlayground: function (sprite) {
+			var
+				playground = fg.s.playground,
+				sprite_left = fg.absLeft + sprite.left,
+				sprite_top = fg.absTop + sprite.top
+			;
+
+			return	(
+						(
+							((sprite_left >= 0) && (sprite_left < playground.right))
+						||	((0 >= sprite_left) && (0 < (sprite_left + sprite.width)))
+						)
+					&&	(
+							((sprite_top >= 0) && (sprite_top < playground.bottom))
+						||	((0 >= sprite_top) && (0 < (sprite_top + sprite.height)))
+						)
+			);
 		}
 	});
 }(jQuery));

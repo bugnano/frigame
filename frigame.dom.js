@@ -382,7 +382,7 @@
 				currentFrame = options.currentFrame,
 				animation = options.animation,
 				animation_options = this.animation_options,
-				insidePlayground = this.insidePlayground,
+				insidePlayground = fg.insidePlayground(this),
 				dom = this.dom,
 				left = this.left,
 				top = this.top,
