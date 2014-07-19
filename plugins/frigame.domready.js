@@ -1,4 +1,4 @@
-/*global friGame */
+/*global friGame, self, top */
 /*jslint white: true, browser: true */
 
 // Copyright (c) 2011-2014 Franco Bugnano
@@ -72,16 +72,20 @@
 			callback();
 		} else {
 			if (hack) {
-				(function () {
-					try {
-						testEl.doScroll('left');
-					} catch (e) {
-						return setTimeout(function () { fg.ready(callback); }, 50);
-					}
+				if (self !== top) {
+					fns.push(callback);
+				} else {
+					(function () {
+						try {
+							testEl.doScroll('left');
+						} catch (e) {
+							return setTimeout(function () { fg.ready(callback); }, 50);
+						}
 
-					loaded = 1;
-					callback();
-				}());
+						loaded = 1;
+						callback();
+					}());
+				}
 			} else {
 				fns.push(callback);
 			}
