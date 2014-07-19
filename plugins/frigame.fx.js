@@ -1,4 +1,4 @@
-/*global jQuery, friGame */
+/*global friGame */
 /*jslint forin: true, nomen: true, white: true, browser: true */
 
 // Copyright (c) 2011-2014 Franco Bugnano
@@ -25,7 +25,7 @@
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 // based on easing equations from Robert Penner (http://www.robertpenner.com/easing)
 
-(function ($, fg) {
+(function (fg) {
 	'use strict';
 
 	var
@@ -113,7 +113,7 @@
 			'clearCallbacks'
 		]);
 
-		$.extend(this, {
+		fg.extend(this, {
 			fx: {
 				queue: [],
 				inprogress: false
@@ -603,7 +603,7 @@
 		'remove'
 	]);
 
-	$.extend(fg.PBaseSprite, {
+	fg.extend(fg.PBaseSprite, {
 		tween: function (properties, options) {
 			return fg.fx.tween.call(this, fg.fx.hooks, properties, options);
 		},
@@ -639,5 +639,5 @@
 			});
 		}
 	});
-}(jQuery, friGame));
+}(friGame));
 

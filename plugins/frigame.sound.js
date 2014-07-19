@@ -1,4 +1,4 @@
-/*global jQuery, friGame, soundManager, Audio, AudioContext */
+/*global friGame, soundManager, Audio, AudioContext */
 /*jslint white: true, browser: true */
 
 // Copyright (c) 2011-2014 Franco Bugnano
@@ -24,14 +24,14 @@
 // Uses ideas and APIs inspired by:
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
-(function ($, fg) {
+(function (fg) {
 	'use strict';
 
 	var
 		overrides = {},
 		sm2_loaded = false,
 		audio_initialized = false,
-		onError = $.noop,
+		onError = fg.noop,
 		context
 	;
 
@@ -125,16 +125,16 @@
 			}
 
 			// Set default options
-			$.extend(my_options, {
+			fg.extend(my_options, {
 				// Public options
 				streaming: false
 
 				// Implementation details
 			});
 
-			$.extend(my_options, fg.pick(new_options, ['streaming']));
+			fg.extend(my_options, fg.pick(new_options, ['streaming']));
 
-			$.extend(this, {
+			fg.extend(this, {
 				// Public options
 				muted: false,
 				volume: 1,
@@ -145,7 +145,7 @@
 				initialized: false
 			});
 
-			$.extend(this, fg.pick(new_options, ['muted', 'volume']));
+			fg.extend(this, fg.pick(new_options, ['muted', 'volume']));
 		},
 
 		// Public functions
@@ -528,7 +528,7 @@
 						}
 					} else {
 						// Sound type not supported -- It is not a fatal error
-						$.noop();
+						fg.noop();
 					}
 				}
 
@@ -622,7 +622,7 @@
 			'remove'
 		]);
 
-		$.extend(fg.PSound, {
+		fg.extend(fg.PSound, {
 			tween: function (properties, options) {
 				return fg.fx.tween.call(this, fg.sound.hooks, properties, options);
 			},
@@ -644,5 +644,5 @@
 			}
 		});
 	}
-}(jQuery, friGame));
+}(friGame));
 

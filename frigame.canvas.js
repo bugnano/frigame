@@ -1,4 +1,4 @@
-/*global jQuery, friGame */
+/*global friGame */
 /*jslint white: true, browser: true */
 
 // Copyright (c) 2011-2014 Franco Bugnano
@@ -26,7 +26,7 @@
 // Uses the safeDrawImage function taken from:
 // Akihabara Copyright (c) 2010 Francesco Cottone, http://www.kesiev.com/, licensed under the MIT
 
-(function ($, fg) {
+(function (fg) {
 	'use strict';
 
 	var
@@ -39,7 +39,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	$.extend(fg.PGradient, {
+	fg.extend(fg.PGradient, {
 		initCanvas: function () {
 			var
 				startColor = this.startColor,
@@ -126,7 +126,7 @@
 						if (gradient_groups[name]) {
 							// Remove the group from the dimension
 							delete gradient_groups[name];
-							if ($.isEmptyObject(gradient_groups)) {
+							if (fg.isEmptyObject(gradient_groups)) {
 								// If no groups are using this dimension, delete the gradient
 								delete gradients[dimension];
 							}
@@ -166,7 +166,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	$.extend(fg.PAnimation, {
+	fg.extend(fg.PAnimation, {
 		drawBackground: function (ctx, group) {
 			var
 				img = this.options.img,
@@ -206,7 +206,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	$.extend(fg.PSprite, {
+	fg.extend(fg.PSprite, {
 		draw: function () {
 			var
 				options = this.options,
@@ -274,33 +274,12 @@
 		'draw'
 	]);
 
-	$.extend(fg.PSpriteGroup, {
+	fg.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
-			var
-				dom,
-				width,
-				height
-			;
-
 			this.old_options = {};
 
 			if (!parent) {
-				width = String(options.width);
-				height = String(options.height);
-
-				dom = $(['<canvas id="', fg.domPrefix, name, '" width ="', width, '" height="', height, '"></canvas>'].join('')).prependTo(options.parentDOM);
-				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
-				dom.css({
-					'left': '0px',
-					'top': '0px',
-					'width': [width, 'px'].join(''),
-					'height': [height, 'px'].join(''),
-					'overflow': 'hidden'
-				});
-
-				this.dom = dom;
-
-				fg.ctx = dom.get(0).getContext('2d');
+				fg.ctx = options.parentDOM.getContext('2d');
 			}
 
 			// Call the overridden function last, in order to have the callbacks called once the object has been fully initialized
@@ -323,10 +302,6 @@
 
 			if (background && background.removeGroup) {
 				background.removeGroup(this);
-			}
-
-			if (this.dom) {
-				this.dom.remove();
 			}
 		},
 
@@ -499,5 +474,5 @@
 			tox.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 		}
 	};
-}(jQuery, friGame));
+}(friGame));
 

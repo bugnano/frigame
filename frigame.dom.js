@@ -622,7 +622,7 @@
 			this.old_options = {};
 
 			if (!parent) {
-				dom = $(['<div id="', fg.domPrefix, name, '"></div>'].join('')).prependTo(options.parentDOM);
+				dom = $(['<div id="', fg.domPrefix, name, '"></div>'].join('')).prependTo($(options.parentDOM));
 				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 				dom.css({
 					'left': '0px',

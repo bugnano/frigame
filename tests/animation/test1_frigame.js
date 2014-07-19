@@ -1,4 +1,4 @@
-$(function () {
+friGame.ready(function () {
 	var
 		fg = friGame
 	;
@@ -121,10 +121,14 @@ $(function () {
 		fg.sprites.multiHorizontal.setAnimation({animationIndex: 1});
 		fg.sprites.multiPingpong.setAnimation({animationIndex: 1});
 		fg.sprites.pingpong.setAnimation({callback: function () {
-			$('<p>Forwards Done</p>').appendTo('#playground').css({position: 'absolute', top: '64px'});
+			if (window.$) {
+				$('<p>Forwards Done</p>').appendTo('#playground').css({position: 'absolute', top: '64px'});
+			}
 		}});
 		fg.sprites.backPingpong.setAnimation({callback: function () {
-			$('<p>Backwards Done</p>').appendTo('#playground').css({position: 'absolute', top: '88px'});
+			if (window.$) {
+				$('<p>Backwards Done</p>').appendTo('#playground').css({position: 'absolute', top: '88px'});
+			}
 		}});
 	});
 });

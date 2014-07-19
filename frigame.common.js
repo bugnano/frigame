@@ -1,5 +1,5 @@
-/*global jQuery, friGame, requestAnimFrame, performance */
-/*jslint white: true, browser: true */
+/*global friGame, requestAnimFrame, performance */
+/*jslint white: true, browser: true, forin: true */
 
 // Copyright (c) 2011-2014 Franco Bugnano
 
@@ -24,7 +24,7 @@
 // Uses ideas and APIs inspired by:
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
-(function ($) {
+(function () {
 	'use strict';
 
 	var
@@ -77,7 +77,28 @@
 		}());
 	}
 
-	$.extend(fg, {
+	// Extend a given object with all the properties of the source object
+	fg.extend = function (obj, source) {
+		var
+			prop,
+			copy
+		;
+
+		if (source) {
+			for (prop in source) {
+				copy = source[prop];
+
+				// Prevent never-ending loop and don't bring in undefined values
+				if ((obj !== copy) && (copy !== undefined)) {
+					obj[prop] = copy;
+				}
+			}
+		}
+
+		return obj;
+	};
+
+	fg.extend(fg, {
 		// Public constants
 
 		GRADIENT_VERTICAL: 0,
@@ -94,7 +115,7 @@
 		// Implementation details
 	});
 
-	$.extend(fg, {
+	fg.extend(fg, {
 		// Public options
 
 		cssClass: 'friGame',
@@ -124,7 +145,7 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	$.extend(fg, {
+	fg.extend(fg, {
 		Maker: function (proto) {
 			return function () {
 				var
@@ -135,6 +156,49 @@
 
 				return obj;
 			};
+		},
+
+		noop: function () {
+		},
+
+		isEmptyObject: function (obj) {
+			var
+				name
+			;
+
+			for (name in obj) {
+				return false;
+			}
+
+			return true;
+		},
+
+		each: function(obj, callback) {
+			var
+				value,
+				i,
+				length = obj.length
+			;
+
+			if (length >= 0) {
+				for (i = 0; i < length; i += 1) {
+					value = obj[i];
+
+					if (callback.call(value, i, value) === false) {
+						break;
+					}
+				}
+			} else {
+				for (i in obj) {
+					value = obj[i];
+
+					if (callback.call(value, i, value) === false) {
+						break;
+					}
+				}
+			}
+
+			return obj;
 		},
 
 		// Return a new object with only the keys defined in the keys array parameter
@@ -154,6 +218,31 @@
 			}
 
 			return result;
+		},
+
+		inArray: function (elem, arr, i) {
+			var
+				len
+			;
+
+			if (arr) {
+				len = arr.length;
+
+				i = i || 0;
+				if (i < 0) {
+					i = Math.max(0, len + i);
+				}
+
+				while (i < len) {
+					if (arr[i] === elem) {
+						return i;
+					}
+
+					i += 1;
+				}
+			}
+
+			return -1;
 		},
 
 		truncate: function (n) {
@@ -321,7 +410,7 @@
 			};
 
 			if (startColor) {
-				startColor = $.extend(this.startColor, fg.pick(startColor, ['r', 'g', 'b', 'a']));
+				startColor = fg.extend(this.startColor, fg.pick(startColor, ['r', 'g', 'b', 'a']));
 				startColor.r = clamp(round(startColor.r), 0, 255);
 				startColor.g = clamp(round(startColor.g), 0, 255);
 				startColor.b = clamp(round(startColor.b), 0, 255);
@@ -337,7 +426,7 @@
 					a: 1
 				};
 
-				endColor = $.extend(this.endColor, fg.pick(endColor, ['r', 'g', 'b', 'a']));
+				endColor = fg.extend(this.endColor, fg.pick(endColor, ['r', 'g', 'b', 'a']));
 				endColor.r = clamp(round(endColor.r), 0, 255);
 				endColor.g = clamp(round(endColor.g), 0, 255);
 				endColor.b = clamp(round(endColor.b), 0, 255);
@@ -366,7 +455,7 @@
 				gradient = this
 			;
 
-			$.each(fg.s, function () {
+			fg.each(fg.s, function () {
 				if (this.options.background === gradient) {
 					this.setBackground({background: null});
 				}
@@ -417,7 +506,7 @@
 			}
 
 			// Set default options
-			$.extend(my_options, {
+			fg.extend(my_options, {
 				// Public options
 				numberOfFrame: 1,
 				rate: fg.REFRESH_RATE,
@@ -441,7 +530,7 @@
 				multiy: 0
 			});
 
-			new_options = $.extend(my_options, fg.pick(new_options, [
+			new_options = fg.extend(my_options, fg.pick(new_options, [
 				'numberOfFrame',
 				'rate',
 				'type',
@@ -484,7 +573,7 @@
 			;
 
 			// Step 1: Remove myself from all the sprites
-			$.each(fg.s, function () {
+			fg.each(fg.s, function () {
 				if (this.options.animation === animation) {
 					this.setAnimation({animation: null});
 				}
@@ -578,7 +667,7 @@
 	fg.PRect = {
 		init: function (options) {
 			// Set default options
-			$.extend(this, {
+			fg.extend(this, {
 				// Public read-only properties
 				left: 0,
 				right: 0,
@@ -795,7 +884,7 @@
 	// ******************************************************************** //
 
 	fg.PBaseSprite = Object.create(fg.PRect);
-	$.extend(fg.PBaseSprite, {
+	fg.extend(fg.PBaseSprite, {
 		init: function (name, options, parent) {
 			var
 				my_options
@@ -809,7 +898,7 @@
 			}
 
 			// Set default options
-			$.extend(my_options, {
+			fg.extend(my_options, {
 				// Public options
 
 				// Implementation details
@@ -1254,7 +1343,7 @@
 	// ******************************************************************** //
 
 	fg.PSprite = Object.create(fg.PBaseSprite);
-	$.extend(fg.PSprite, {
+	fg.extend(fg.PSprite, {
 		init: function (name, options, parent) {
 			var
 				my_options,
@@ -1269,7 +1358,7 @@
 			}
 
 			// Set default options
-			$.extend(my_options, {
+			fg.extend(my_options, {
 				// Public options
 				animation: null,
 				animationIndex: 0,
@@ -1565,7 +1654,7 @@
 	// ******************************************************************** //
 
 	fg.PSpriteGroup = Object.create(fg.PBaseSprite);
-	$.extend(fg.PSpriteGroup, {
+	fg.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
 			var
 				my_options,
@@ -1580,7 +1669,7 @@
 			}
 
 			// Set default options
-			$.extend(my_options, {
+			fg.extend(my_options, {
 				// Public options
 				background: null,
 				backgroundType: fg.BACKGROUND_TILED,
@@ -1817,10 +1906,10 @@
 	// ******************************************************************** //
 	// ******************************************************************** //
 
-	$.extend(fg, {
+	fg.extend(fg, {
 		// Public functions
 
-		playground: function (parentDOM) {
+		playground: function (parentID) {
 			var
 				i,
 				playground = fg.s.playground,
@@ -1830,13 +1919,9 @@
 			;
 
 			if (!playground) {
-				if (parentDOM) {
-					dom = $(parentDOM);
-				} else {
-					dom = $('#playground');
-				}
+				dom = document.getElementById(parentID || 'playground');
 
-				playground = fg.SpriteGroup('playground', {width: dom.width(), height: dom.height(), parentDOM: dom}, '');
+				playground = fg.SpriteGroup('playground', {width: dom.offsetWidth, height: dom.offsetHeight, parentDOM: dom}, '');
 
 				// The playground cannot be resized or moved
 				playground.resize = null;
@@ -1966,5 +2051,5 @@
 			);
 		}
 	});
-}(jQuery));
+}());
 

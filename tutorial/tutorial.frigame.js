@@ -319,7 +319,7 @@
 				// Initialize the game:
 
 				// Initialize the background
-				fg.playground($('#playground'))
+				fg.playground('playground')
 					.addGroup('background', {width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
 						.addSprite('background1', {animation: 'background1', width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT})
 						.addSprite('background2', {animation: 'background2', width: PLAYGROUND_WIDTH, height: PLAYGROUND_HEIGHT, left: PLAYGROUND_WIDTH})
@@ -343,7 +343,7 @@
 				fg.sprites.player.userData = G.Player(fg.sprites.player);
 
 				//this is the HUD for the player life and shield
-				$(['<div id="overlay" style="position: absolute; left: 0px; top: 0px; width:', String(PLAYGROUND_WIDTH), 'px; height=', String(PLAYGROUND_HEIGHT), 'px"></div>'].join('')).appendTo($('#playground'));
+				$(['<div id="overlay" style="position: absolute; left: 0px; top: 0px; width:', String(PLAYGROUND_WIDTH), 'px; height=', String(PLAYGROUND_HEIGHT), 'px"></div>'].join('')).appendTo($('#playgroundContainer'));
 				$('#overlay').append('<div id="shieldHUD"style="color: white; width: 100px; position: absolute; font-family: verdana, sans-serif;"></div><div id="lifeHUD"style="color: white; width: 100px; position: absolute; right: 0px; font-family: verdana, sans-serif;"></div>');
 
 				// this is the function that control most of the game logic
@@ -392,7 +392,7 @@
 								//Does the player did get out of the screen?
 								if (fg.sprites.player.userData.respawn()) {
 									gameOver = true;
-									$('#playground').append('<div style="position: absolute; top: 50px; width: 700px; color: white; font-family: verdana, sans-serif;"><center><h1>Game Over</h1><br><a style="cursor: pointer;" id="restartbutton">Click here to restart the game!</a></center></div>');
+									$('#playgroundContainer').append('<div style="position: absolute; top: 50px; width: 700px; color: white; font-family: verdana, sans-serif;"><center><h1>Game Over</h1><br><a style="cursor: pointer;" id="restartbutton">Click here to restart the game!</a></center></div>');
 									$('#restartbutton').click(restartgame);
 									$.each(['actors', 'playerMissileLayer', 'enemiesMissileLayer'], function(index, value) {
 										fg.sprites[value].fadeTo(1000, 0);

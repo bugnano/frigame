@@ -1,4 +1,4 @@
-$(function () {
+friGame.ready(function () {
 	var
 		fg = friGame
 	;

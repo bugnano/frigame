@@ -127,7 +127,7 @@
 					width: fg.s.playground.width,
 					height: fg.s.playground.height
 				})
-				.appendTo('#playground')
+				.appendTo('#playgroundContainer')
 			;
 
 			G.initLevelSkipping();

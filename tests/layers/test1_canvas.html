@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 <html>
-    <head>
-		<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1" />
+	<head>
+		<meta charset="UTF-8" />
 
 		<link rel="stylesheet" type="text/css" href="../../frigame.css" />
 
-        <script src="../../deps/jquery.js"></script>
-        <script src="../../frigame.common.js"></script>
-        <script src="../../frigame.canvas.js"></script>
+		<script src="../../frigame.common.js"></script>
+		<script src="../../frigame.canvas.js"></script>
 
-        <script src="../../plugins/frigame.fx.js"></script>
-        <script src="../../plugins/frigame.mousetracker.js"></script>
-        <script src="../../plugins/frigame.sound.js"></script>
+		<script src="../../plugins/frigame.fx.js"></script>
+		<script src="../../plugins/frigame.sound.js"></script>
+		<script src="../../plugins/frigame.domready.js"></script>
 
-        <script src="test1_frigame.js"></script>
-    </head>
-    <body style="position: relative;">
-        <h2>Movable layers:</h2>
-        <div id="playground" style="position: relative; width: 512px; height: 512px; background: white"></div>
-        <div id="tracker_output"></div>
-    </body>
+		<script src="test1_frigame.js"></script>
+	</head>
+	<body style="position: relative;">
+		<h2>Movable layers:</h2>
+		<canvas id="playground" width="512" height="512" style="position: relative; width: 512px; height: 512px; background: white"></canvas>
+		<div id="tracker_output"></div>
+	</body>
 </html>
