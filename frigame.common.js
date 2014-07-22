@@ -1919,6 +1919,10 @@
 			;
 
 			if (!playground) {
+				if ((typeof parentID === 'string') && (parentID[0] === '#')) {
+					parentID = parentID.split('#')[1];
+				}
+
 				dom = document.getElementById(parentID || 'playground');
 
 				playground = fg.SpriteGroup('playground', {width: dom.offsetWidth, height: dom.offsetHeight, parentDOM: dom}, '');
