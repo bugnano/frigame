@@ -945,6 +945,12 @@
 				i
 			;
 
+			if (this.userData && this.userData.remove) {
+				this.userData.remove();
+			}
+
+			this.userData = null;
+
 			if (parent) {
 				parent_layers = fg.s[parent].layers;
 				len_parent_layers = parent_layers.length;
