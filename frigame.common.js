@@ -1005,12 +1005,14 @@
 
 		hide: function () {
 			this.options.hidden = true;
+			fg.needsRedraw = true;
 
 			return this;
 		},
 
 		show: function () {
 			this.options.hidden = false;
+			fg.needsRedraw = true;
 
 			return this;
 		},
@@ -1021,6 +1023,7 @@
 			}
 
 			this.options.hidden = !showOrHide;
+			fg.needsRedraw = true;
 
 			return this;
 		},
