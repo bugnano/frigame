@@ -1915,21 +1915,26 @@
 	fg.extend(fg, {
 		// Public functions
 
-		playground: function (parentID) {
+		playground: function (dom) {
 			var
 				i,
 				playground = fg.s.playground,
 				playground_callbacks = fg.playgroundCallbacks,
-				len_playground_callbacks = playground_callbacks.length,
-				dom
+				len_playground_callbacks = playground_callbacks.length
 			;
 
 			if (!playground) {
-				if ((typeof parentID === 'string') && (parentID[0] === '#')) {
-					parentID = parentID.split('#')[1];
-				}
+				if (typeof dom === 'string') {
+					// Allow the ID to start with the '#' symbol
+					if (dom[0] === '#') {
+						dom = dom.split('#')[1];
+					}
 
-				dom = document.getElementById(parentID || 'playground');
+					dom = document.getElementById(dom);
+				} else if (!dom) {
+					// Default to the element with id of 'playground'
+					dom = document.getElementById('playground');
+				}
 
 				playground = fg.SpriteGroup('playground', {width: dom.offsetWidth, height: dom.offsetHeight, parentDOM: dom}, '');
 
