@@ -38,7 +38,7 @@
 				window.oRequestAnimationFrame ||
 				window.msRequestAnimationFrame ||
 				function (callback) {
-					window.setTimeout(callback, 1000 / 60);
+					return window.setTimeout(callback, 1000 / 60);
 				};
 		}())
 	;
@@ -128,6 +128,7 @@
 
 		playgroundCallbacks: [],
 		idUpdate: null,
+		idDraw: null,
 		nextUpdate: 0,
 		needsRedraw: false,
 		absLeft: 0,
@@ -376,7 +377,7 @@
 				if ((fg.idUpdate === null) && (fg.s.playground)) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
-					requestAnimFrame(fg.draw);
+					fg.idDraw = requestAnimFrame(fg.draw);
 				}
 
 				if (completeCallback) {
@@ -1005,14 +1006,12 @@
 
 		hide: function () {
 			this.options.hidden = true;
-			fg.needsRedraw = true;
 
 			return this;
 		},
 
 		show: function () {
 			this.options.hidden = false;
-			fg.needsRedraw = true;
 
 			return this;
 		},
@@ -1023,7 +1022,6 @@
 			}
 
 			this.options.hidden = !showOrHide;
-			fg.needsRedraw = true;
 
 			return this;
 		},
@@ -1955,7 +1953,7 @@
 				if (fg.idUpdate === null) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
-					requestAnimFrame(fg.draw);
+					fg.idDraw = requestAnimFrame(fg.draw);
 				}
 			}
 
@@ -2012,6 +2010,14 @@
 			return this;
 		},
 
+		forceRedraw: function () {
+			fg.needsRedraw = true;
+
+			if (fg.idDraw === null) {
+				fg.idDraw = requestAnimFrame(fg.draw);
+			}
+		},
+
 		// Implementation details
 
 		update: function () {
@@ -2040,7 +2046,9 @@
 			;
 
 			if (fg.idUpdate !== null) {
-				requestAnimFrame(fg.draw);
+				fg.idDraw = requestAnimFrame(fg.draw);
+			} else {
+				fg.idDraw = null;
 			}
 
 			if (fg.needsRedraw) {
