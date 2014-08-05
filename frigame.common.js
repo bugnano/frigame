@@ -1935,6 +1935,8 @@
 				} else if (!dom) {
 					// Default to the element with id of 'playground'
 					dom = document.getElementById('playground');
+				} else if (dom.jquery) {
+					dom = dom.get(0);
 				}
 
 				playground = fg.SpriteGroup('playground', {width: dom.offsetWidth, height: dom.offsetHeight, parentDOM: dom}, '');
