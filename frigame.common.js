@@ -930,6 +930,7 @@
 
 			// Implementation details
 			this.callbacks = [];
+			this.needsUpdate = false;
 
 			// Call fg.PRect.init after setting this.parent
 			fg.PRect.init.call(this, options);
@@ -942,6 +943,8 @@
 				parent = this.parent,
 				parent_layers,
 				len_parent_layers,
+				parent_update_list,
+				len_parent_update_list,
 				name = this.name,
 				i
 			;
@@ -961,6 +964,16 @@
 						break;
 					}
 				}
+
+				this.needsUpdate = false;
+				parent_update_list = fg.s[parent].updateList;
+				len_parent_update_list = parent_update_list.length;
+				for (i = 0; i < len_parent_update_list; i += 1) {
+					if (parent_update_list[i].name === name) {
+						parent_update_list.splice(i, 1);
+						break;
+					}
+				}
 			}
 
 			delete fg.s[name];
@@ -970,6 +983,8 @@
 			rate = Math.round(rate / fg.REFRESH_RATE) || 1;
 
 			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
+
+			this.checkUpdate();
 
 			return this;
 		},
@@ -995,11 +1010,15 @@
 				callbacks.splice(remove_callbacks[i], 1);
 			}
 
+			this.checkUpdate();
+
 			return this;
 		},
 
 		clearCallbacks: function () {
 			this.callbacks.splice(0, this.callbacks.length);
+
+			this.checkUpdate();
 
 			return this;
 		},
@@ -1313,6 +1332,45 @@
 
 		// Implementation details
 
+		checkUpdate: function () {
+			var
+				oldNeedsUpdate = this.needsUpdate
+			;
+
+			if (this.callbacks.length === 0) {
+				this.needsUpdate = false;
+			} else {
+				this.needsUpdate = true;
+			}
+
+			this.updateNeedsUpdate(oldNeedsUpdate);
+		},
+
+		updateNeedsUpdate: function (oldNeedsUpdate) {
+			var
+				parent = this.parent,
+				name = this.name,
+				parent_update_list,
+				len_parent_update_list,
+				i
+			;
+
+			if (parent) {
+				if (this.needsUpdate && (!oldNeedsUpdate)) {
+					fg.s[parent].updateList.push({name: name, obj: this});
+				} else if ((!this.needsUpdate) && oldNeedsUpdate) {
+					parent_update_list = fg.s[parent].updateList;
+					len_parent_update_list = parent_update_list.length;
+					for (i = 0; i < len_parent_update_list; i += 1) {
+						if (parent_update_list[i].name === name) {
+							parent_update_list.splice(i, 1);
+							break;
+						}
+					}
+				}
+			}
+		},
+
 		update: function () {
 			var
 				callbacks = this.callbacks,
@@ -1434,8 +1492,6 @@
 					new_options.animationIndex = 0;
 					index_redefined = true;
 				}
-
-				// If the animation gets redefined, the callback could be reset here
 			}
 
 			animation_options = this.animation_options;
@@ -1493,12 +1549,38 @@
 				my_options.paused = new_options.paused;
 			}
 
+			this.checkUpdate();
+
 			return this;
 		},
 
 		resize: null,	// Sprites cannot be explicitly resized
 
 		// Implementation details
+
+		checkUpdate: function () {
+			var
+				options = this.options,
+				oldNeedsUpdate = this.needsUpdate
+			;
+
+			if	(
+					(this.callbacks.length === 0)
+				&&	(
+						(this.endAnimation || options.paused)
+					||	(
+							(!options.callback)
+						&&	((!options.animation) || (this.animation_options.numberOfFrame <= 1))
+						)
+					)
+				) {
+				this.needsUpdate = false;
+			} else {
+				this.needsUpdate = true;
+			}
+
+			this.updateNeedsUpdate(oldNeedsUpdate);
+		},
 
 		update: function () {
 			var
@@ -1694,6 +1776,9 @@
 
 			fg.PBaseSprite.init.apply(this, arguments);
 
+			this.needsUpdate = true;
+			this.updateList = [];
+
 			// If the background has not been defined, force
 			// the background to null in order to be
 			// symmetric with the sprite and setAnimation
@@ -1840,6 +1925,7 @@
 			;
 
 			this.layers.push({name: name, obj: group});
+			this.updateList.push({name: name, obj: group});
 
 			return group;
 		},
@@ -1850,6 +1936,7 @@
 			;
 
 			this.layers.unshift({name: name, obj: group});
+			this.updateList.unshift({name: name, obj: group});
 
 			return group;
 		},
@@ -1868,18 +1955,20 @@
 
 		// Implementation details
 
+		checkUpdate: fg.noop,
+
 		update: function () {
 			var
-				layers = this.layers,
-				len_layers = layers.length,
+				update_list = this.updateList,
+				len_update_list = update_list.length,
 				i
 			;
 
 			fg.PBaseSprite.update.call(this);
 
-			for (i = 0; i < len_layers; i += 1) {
-				if (layers[i]) {
-					layers[i].obj.update();
+			for (i = 0; i < len_update_list; i += 1) {
+				if (update_list[i]) {
+					update_list[i].obj.update();
 				}
 			}
 		},
