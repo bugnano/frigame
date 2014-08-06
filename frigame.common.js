@@ -1330,6 +1330,22 @@
 			return this;
 		},
 
+		getAbsRect: function () {
+			var
+				left = this.left,
+				top = this.top,
+				parent = fg.s[this.parent]
+			;
+
+			while (parent) {
+				left += parent.left;
+				top += parent.top;
+				parent = fg.s[parent.parent];
+			}
+
+			return fg.Rect({left: left, top: top, width: this.width, height: this.height});
+		},
+
 		// Implementation details
 
 		checkUpdate: function () {
