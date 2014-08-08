@@ -276,10 +276,43 @@
 
 	fg.extend(fg.PSpriteGroup, {
 		init: function (name, options, parent) {
+			var
+				dom,
+				width,
+				height,
+				canvas
+			;
+
 			this.old_options = {};
 
 			if (!parent) {
-				fg.ctx = options.parentDOM.getContext('2d');
+				dom = options.parentDOM;
+				if (dom.getContext) {
+					this.dom = null;
+
+					fg.ctx = dom.getContext('2d');
+				} else {
+					width = options.width;
+					height = options.height;
+
+					canvas = document.createElement('canvas');
+					canvas.id = [fg.domPrefix, name].join('');
+					canvas.width = width;
+					canvas.height = height;
+					dom.insertBefore(canvas, dom.firstChild);
+					canvas.className = fg.cssClass;	// Reset background properties set by external CSS
+					fg.extend(canvas.style, {
+						'left': '0px',
+						'top': '0px',
+						'width': [String(width), 'px'].join(''),
+						'height': [String(height), 'px'].join(''),
+						'overflow': 'hidden'
+					});
+
+					this.dom = canvas;
+
+					fg.ctx = canvas.getContext('2d');
+				}
 			}
 
 			// Call the overridden function last, in order to have the callbacks called once the object has been fully initialized
@@ -291,7 +324,8 @@
 		remove: function () {
 			var
 				background = this.options.background,
-				old_background = this.old_options.background
+				old_background = this.old_options.background,
+				dom = this.dom
 			;
 
 			overrides.PSpriteGroup.remove.apply(this, arguments);
@@ -302,6 +336,10 @@
 
 			if (background && background.removeGroup) {
 				background.removeGroup(this);
+			}
+
+			if (dom && dom.parentNode) {
+				dom.parentNode.removeChild(dom);
 			}
 		},
 

@@ -5,19 +5,13 @@ html, body {
 	background: black;
 }
 
-#playgroundContainer {
+#playground {
 	position: relative;
 	width: 320px;
 	height: 416px;
 	margin-left: auto;
 	margin-right: auto;
 	cursor: none;
-}
-
-#playground {
-	position: absolute;
-	width: 320px;
-	height: 416px;
 }
 
 #welcomeScreen {

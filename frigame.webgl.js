@@ -644,6 +644,7 @@
 		init: function (name, options, parent) {
 			var
 				gl,
+				dom,
 				width,
 				height,
 				canvas,
@@ -655,15 +656,42 @@
 			this.old_options = {};
 
 			if (!parent) {
+				dom = options.parentDOM;
 				width = options.width;
 				height = options.height;
 
-				try {
-					// Try to grab the standard context. If it fails, fallback to experimental.
-					canvas = options.parentDOM;
-					gl = canvas.getContext('webgl', {alpha: false}) || canvas.getContext('experimental-webgl', {alpha: false});
-				} catch (e) {
-					gl = null;
+				if (dom.getContext) {
+					this.dom = null;
+
+					try {
+						// Try to grab the standard context. If it fails, fallback to experimental.
+						gl = dom.getContext('webgl', {alpha: false}) || dom.getContext('experimental-webgl', {alpha: false});
+					} catch (e) {
+						gl = null;
+					}
+				} else {
+					canvas = document.createElement('canvas');
+					canvas.id = [fg.domPrefix, name].join('');
+					canvas.width = width;
+					canvas.height = height;
+					dom.insertBefore(canvas, dom.firstChild);
+					canvas.className = fg.cssClass;	// Reset background properties set by external CSS
+					fg.extend(canvas.style, {
+						'left': '0px',
+						'top': '0px',
+						'width': [String(width), 'px'].join(''),
+						'height': [String(height), 'px'].join(''),
+						'overflow': 'hidden'
+					});
+
+					this.dom = canvas;
+
+					try {
+						// Try to grab the standard context. If it fails, fallback to experimental.
+						gl = canvas.getContext('webgl', {alpha: false}) || canvas.getContext('experimental-webgl', {alpha: false});
+					} catch (e) {
+						gl = null;
+					}
 				}
 
 				if (gl) {
@@ -700,7 +728,8 @@
 		remove: function () {
 			var
 				background = this.options.background,
-				old_background = this.old_options.background
+				old_background = this.old_options.background,
+				dom = this.dom
 			;
 
 			overrides.PSpriteGroup.remove.apply(this, arguments);
@@ -711,6 +740,10 @@
 
 			if (background) {
 				background.removeGroup(this);
+			}
+
+			if (dom && dom.parentNode) {
+				dom.parentNode.removeChild(dom);
 			}
 		},
 

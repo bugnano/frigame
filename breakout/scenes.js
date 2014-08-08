@@ -39,7 +39,7 @@
 				})
 			;
 
-			$('#playgroundContainer').one('click', function () {
+			$('#playground').one('click', function () {
 				// Play a muted sound in an user event in order to have
 				// the sound working in mobile platforms
 				fg.r.countdownBlip.play({muted: true});
@@ -77,7 +77,7 @@
 				})
 			;
 
-			$('#playgroundContainer').one('click', function () {
+			$('#playground').one('click', function () {
 				G.Scene.title();
 			});
 
@@ -104,7 +104,7 @@
 				})
 			;
 
-			$('#playgroundContainer').one('click', function () {
+			$('#playground').one('click', function () {
 				G.Scene.title();
 			});
 
@@ -202,13 +202,8 @@
 	// Enable controlling the paddle with the touch events
 	fg.playgroundCallback(function (dom) {
 		var
-			element = $(dom).parent()
+			element = $(dom)
 		;
-
-		fg.mouseTracker = {
-			x: 0,
-			y: 0
-		};
 
 		element.on('touchmove', function (e) {
 			var
@@ -221,16 +216,6 @@
 
 			mouseTracker.x = touch.pageX - offset.left;
 			mouseTracker.y = touch.pageY - offset.top;
-		});
-
-		element.mousemove(function (e) {
-			var
-				mouseTracker = fg.mouseTracker,
-				offset = element.offset()
-			;
-
-			mouseTracker.x = e.pageX - offset.left;
-			mouseTracker.y = e.pageY - offset.top;
 		});
 	});
 
