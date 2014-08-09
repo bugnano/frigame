@@ -3,9 +3,10 @@
 	position: absolute;
 	margin: 0px;
 	padding: 0px;
-	border: none;
 	outline: none;
 	background: none;
+	border-width: 0;
+	border-style: solid;
 
 	-webkit-box-sizing: content-box;
 	-moz-box-sizing: content-box;

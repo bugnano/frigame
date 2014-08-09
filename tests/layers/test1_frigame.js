@@ -8,6 +8,7 @@ friGame.ready(function () {
 		.addAnimation('animation', 'sh.png', {type: fg.ANIMATION_HORIZONTAL, numberOfFrame: 4, rate: 300})
 		.addGradient('gradient', {r: 128}, {b: 255, a: 0.3}, fg.GRADIENT_HORIZONTAL)
 		.addGradient('red', {r: 128})
+		.addGradient('blue', {b: 255, a: 0.6})
 		.addAnimation('grassblock', 'grassblock.png')
 		.addAnimation('boy', 'boy.png')
 		.addAnimation('catgirl', 'catgirl.png')
@@ -30,7 +31,8 @@ friGame.ready(function () {
 			.insertGroup('background', {width: 1, height: 1})
 				.addSprite('ruler', {animation: 'background'})
 			.end()
-			.addGroup('rect1', {borderColor: 'red', left: 48, top: 48, width: 64, height: 64})
+			.addGroup('rect1', {background: 'red', borderColor: 'blue', borderRadius: 17, borderWidth: 12, left: 48, top: 48, width: 64, height: 64})
+				.addSprite('catgirl2', {animation: 'catgirl', left: 32, top: 32})
 			.end()
 		;
 
@@ -38,6 +40,7 @@ friGame.ready(function () {
 		fg.sprites.group1.resize({width: fg.sprites.group1.width - 64, height: fg.sprites.group1.height - 128});
 		fg.sprites.sprite1.rotate((45 * Math.PI) / 180);
 		fg.sprites.sprite2.scale(2);
+		fg.s.rect1.crop(true);
 
 		if (window.$) {
 			fg.playground().registerCallback(function () {

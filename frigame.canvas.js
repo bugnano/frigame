@@ -398,8 +398,7 @@
 				old_background = old_options.background,
 				border_radius = options.borderRadius,
 				border_width = options.borderWidth,
-				border_double_width = border_width * 2,
-				border_quad_width = border_width * 4,
+				border_half_width = border_width / 2,
 				border_color = insidePlayground && border_width && options.borderColor,
 				old_border_color = old_options.borderColor,
 				background_changed = background !== old_background,
@@ -503,40 +502,34 @@
 				}
 
 				if (border_color) {
-					// The border has to be drawn only outside the rect, to do so there are 2 ways:
-					// 1. Set the clip region outside the rect, and draw the rect with a double sized stroke
-					// 2. Draw a bigger rect with a normal stroke
-					// Here method 1 is used, as I don't know which one is faster (2 sounds faster...), and
-					// I don't know how to handle the border radius using option 2.
-					ctx.save();
-
-					ctx.beginPath();
-
-					ctx.rect(-border_double_width, -border_double_width, width + border_quad_width, height + border_quad_width);
-
-					fg.roundedRect(ctx, 0, 0, width, height, border_radius);
-
-					ctx.clip();
-
 					ctx.beginPath();
 
 					if (border_radius) {
-						fg.roundedRect(ctx, 0, 0, width, height, border_radius);
+						fg.roundedRect(ctx, -border_half_width, -border_half_width, width + border_width, height + border_width, border_radius + border_half_width);
 					} else {
-						ctx.rect(0, 0, width, height);
+						ctx.rect(-border_half_width, -border_half_width, width + border_width, height + border_width);
 					}
 
 					border_color.setStrokeStyle(ctx, this);
-					ctx.lineWidth = border_double_width;
+					ctx.lineWidth = border_width;
 					ctx.stroke();
-
-					ctx.restore();
 				}
 
 				if (crop) {
 					if (!context_saved) {
 						ctx.save();
 						context_saved = true;
+					}
+
+					if (border_color) {
+						// The border has created a new path, so the old path must be re-created here
+						ctx.beginPath();
+
+						if (border_radius) {
+							fg.roundedRect(ctx, 0, 0, width, height, border_radius);
+						} else {
+							ctx.rect(0, 0, width, height);
+						}
 					}
 
 					ctx.clip();
@@ -597,15 +590,21 @@
 	};
 
 	fg.roundedRect = function (ctx, x, y, width, height, radius) {
+		var
+			pi = Math.PI,
+			pi_2 = pi / 2,
+			pi_3_2 = pi * 1.5
+		;
+
 		ctx.moveTo(x, y + radius);
-		ctx.lineTo(x, y + height-radius);
-		ctx.quadraticCurveTo(x, y + height, x + radius, y + height);
+		ctx.lineTo(x, y + height - radius);
+		ctx.arc(x + radius, y + height - radius, radius, pi, pi_2, true);
 		ctx.lineTo(x + width - radius, y + height);
-		ctx.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
+		ctx.arc(x + width - radius, y + height - radius, radius, pi_2, 0, true);
 		ctx.lineTo(x + width, y + radius);
-		ctx.quadraticCurveTo(x + width, y, x + width - radius, y);
+		ctx.arc(x + width - radius, y + radius, radius, 0, pi_3_2, true);
 		ctx.lineTo(x + radius, y);
-		ctx.quadraticCurveTo(x, y, x, y + radius);
+		ctx.arc(x + radius, y + radius, radius, pi_3_2, pi, true);
 	};
 }(friGame));
 
