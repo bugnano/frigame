@@ -7,6 +7,7 @@ friGame.ready(function () {
 		.addAnimation('background', 'ruler.png')
 		.addAnimation('animation', 'sh.png', {type: fg.ANIMATION_HORIZONTAL, numberOfFrame: 4, rate: 300})
 		.addGradient('gradient', {r: 128}, {b: 255, a: 0.3}, fg.GRADIENT_HORIZONTAL)
+		.addGradient('red', {r: 128})
 		.addAnimation('grassblock', 'grassblock.png')
 		.addAnimation('boy', 'boy.png')
 		.addAnimation('catgirl', 'catgirl.png')
@@ -28,6 +29,8 @@ friGame.ready(function () {
 			.end()
 			.insertGroup('background', {width: 1, height: 1})
 				.addSprite('ruler', {animation: 'background'})
+			.end()
+			.addGroup('rect1', {borderColor: 'red', left: 48, top: 48, width: 64, height: 64})
 			.end()
 		;
 

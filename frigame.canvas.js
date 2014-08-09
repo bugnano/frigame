@@ -48,7 +48,7 @@
 
 			if (startColor === endColor) {
 				// Solid color
-				this.fillStyle = this.startColorStr;
+				this.style = this.startColorStr;
 			} else {
 				// Gradient
 				this.gradients = {};
@@ -90,7 +90,7 @@
 					gradient.addColorStop(1, this.endColorStr);
 
 					gradients[dimension] = {
-						fillStyle: gradient,
+						style: gradient,
 						groups: {}
 					};
 				}
@@ -136,16 +136,16 @@
 			}
 		},
 
-		drawBackground: function (ctx, group) {
+		setFillStyle: function (ctx, group) {
 			var
 				width = group.width,
 				height = group.height,
 				dimension
 			;
 
-			if (this.fillStyle) {
+			if (this.style) {
 				// Solid color
-				ctx.fillStyle = this.fillStyle;
+				ctx.fillStyle = this.style;
 			} else {
 				// Gradient
 				if (this.type === fg.GRADIENT_HORIZONTAL) {
@@ -154,9 +154,34 @@
 					dimension = height;
 				}
 
-				ctx.fillStyle = this.gradients[dimension].fillStyle;
+				ctx.fillStyle = this.gradients[dimension].style;
 			}
+		},
 
+		setStrokeStyle: function (ctx, group) {
+			var
+				width = group.width,
+				height = group.height,
+				dimension
+			;
+
+			if (this.style) {
+				// Solid color
+				ctx.strokeStyle = this.style;
+			} else {
+				// Gradient
+				if (this.type === fg.GRADIENT_HORIZONTAL) {
+					dimension = width;
+				} else {
+					dimension = height;
+				}
+
+				ctx.strokeStyle = this.gradients[dimension].style;
+			}
+		},
+
+		drawBackground: function (ctx, group) {
+			this.setFillStyle(ctx, group);
 			ctx.fill();
 		}
 	});
@@ -170,7 +195,7 @@
 		drawBackground: function (ctx, group) {
 			var
 				img = this.options.img,
-				fillStyle = this.fillStyle
+				style = this.style
 			;
 
 			if (group.options.backgroundType === fg.BACKGROUND_STRETCHED) {
@@ -189,12 +214,12 @@
 				);
 			} else {
 				// Tiled background
-				if (!fillStyle) {
-					fillStyle = ctx.createPattern(img, 'repeat');
-					this.fillStyle = fillStyle;
+				if (!style) {
+					style = ctx.createPattern(img, 'repeat');
+					this.style = style;
 				}
 
-				ctx.fillStyle = fillStyle;
+				ctx.fillStyle = style;
 				ctx.fill();
 			}
 		}
@@ -291,6 +316,10 @@
 					this.dom = null;
 
 					fg.ctx = dom.getContext('2d');
+
+					// Force the width and height of the sprite group the same as the ones defined for the canvas
+					options.width = dom.width || 300;
+					options.height = dom.height || 150;
 				} else {
 					width = options.width;
 					height = options.height;
@@ -325,6 +354,8 @@
 			var
 				background = this.options.background,
 				old_background = this.old_options.background,
+				border_color = this.options.borderColor,
+				old_border_color = this.old_options.borderColor,
 				dom = this.dom
 			;
 
@@ -336,6 +367,14 @@
 
 			if (background && background.removeGroup) {
 				background.removeGroup(this);
+			}
+
+			if (old_border_color && old_border_color.removeGroup) {
+				old_border_color.removeGroup(this);
+			}
+
+			if (border_color && border_color.removeGroup) {
+				border_color.removeGroup(this);
 			}
 
 			if (dom && dom.parentNode) {
@@ -357,6 +396,15 @@
 				insidePlayground = fg.insidePlayground(this),
 				background = insidePlayground && options.background,
 				old_background = old_options.background,
+				border_radius = options.borderRadius,
+				border_width = options.borderWidth,
+				border_double_width = border_width * 2,
+				border_quad_width = border_width * 4,
+				border_color = insidePlayground && border_width && options.borderColor,
+				old_border_color = old_options.borderColor,
+				background_changed = background !== old_background,
+				border_changed = border_color !== old_border_color,
+				size_changed = (width !== old_options.width) || (height !== old_options.height),
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
@@ -374,38 +422,37 @@
 			}
 
 			if (insidePlayground) {
-				if (background !== old_background) {
-					if (old_background && old_background.removeGroup) {
-						old_background.removeGroup(this);
+				if (background_changed || border_changed || size_changed) {
+					if (background_changed || size_changed) {
+						if (old_background && old_background.removeGroup) {
+							// TO DO -- If the background color and boder color were the same, and now the background color changes,
+							// this removeGroup will cause problems with the border, as this color is still used by this group.
+							old_background.removeGroup(this);
+						}
+
+						if (background && background.addGroup) {
+							background.addGroup(this);
+						}
 					}
 
-					if (background && background.addGroup) {
-						background.addGroup(this);
+					if (border_changed || size_changed) {
+						if (old_border_color && old_border_color.removeGroup) {
+							old_border_color.removeGroup(this);
+						}
+
+						if (border_color && border_color.addGroup) {
+							border_color.addGroup(this);
+						}
 					}
 
 					old_options.width = width;
 					old_options.height = height;
 					old_options.background = background;
-				} else {
-					if ((width !== old_options.width) || (height !== old_options.height)) {
-						// Reset the background in order to create a new one with the new width and height
-						if (background) {
-							if (background.removeGroup) {
-								background.removeGroup(this);
-							}
-
-							if (background.addGroup) {
-								background.addGroup(this);
-							}
-						}
-
-						old_options.width = width;
-						old_options.height = height;
-					}
+					old_options.borderColor = border_color;
 				}
 			}
 
-			if ((this.layers.length || background) && alpha && scaleh && scalev && !options.hidden) {
+			if ((this.layers.length || background || border_color) && alpha && scaleh && scalev && !options.hidden) {
 				if (angle || (scaleh !== 1) || (scalev !== 1)) {
 					ctx.save();
 					context_saved = true;
@@ -443,11 +490,47 @@
 				if (background || crop) {
 					// Prepare a rect path for the background and the clipping region
 					ctx.beginPath();
-					ctx.rect(0, 0, width, height);
+
+					if (border_radius) {
+						fg.roundedRect(ctx, 0, 0, width, height, border_radius);
+					} else {
+						ctx.rect(0, 0, width, height);
+					}
 				}
 
 				if (background) {
 					background.drawBackground(ctx, this);
+				}
+
+				if (border_color) {
+					// The border has to be drawn only outside the rect, to do so there are 2 ways:
+					// 1. Set the clip region outside the rect, and draw the rect with a double sized stroke
+					// 2. Draw a bigger rect with a normal stroke
+					// Here method 1 is used, as I don't know which one is faster (2 sounds faster...), and
+					// I don't know how to handle the border radius using option 2.
+					ctx.save();
+
+					ctx.beginPath();
+
+					ctx.rect(-border_double_width, -border_double_width, width + border_quad_width, height + border_quad_width);
+
+					fg.roundedRect(ctx, 0, 0, width, height, border_radius);
+
+					ctx.clip();
+
+					ctx.beginPath();
+
+					if (border_radius) {
+						fg.roundedRect(ctx, 0, 0, width, height, border_radius);
+					} else {
+						ctx.rect(0, 0, width, height);
+					}
+
+					border_color.setStrokeStyle(ctx, this);
+					ctx.lineWidth = border_double_width;
+					ctx.stroke();
+
+					ctx.restore();
 				}
 
 				if (crop) {
@@ -511,6 +594,18 @@
 		if ((sh > 0) && (sw > 0) && (sx < img.width) && (sy < img.height)) {
 			tox.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 		}
+	};
+
+	fg.roundedRect = function (ctx, x, y, width, height, radius) {
+		ctx.moveTo(x, y + radius);
+		ctx.lineTo(x, y + height-radius);
+		ctx.quadraticCurveTo(x, y + height, x + radius, y + height);
+		ctx.lineTo(x + width - radius, y + height);
+		ctx.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
+		ctx.lineTo(x + width, y + radius);
+		ctx.quadraticCurveTo(x + width, y, x + width - radius, y);
+		ctx.lineTo(x + radius, y);
+		ctx.quadraticCurveTo(x, y, x, y + radius);
 	};
 }(friGame));
 

@@ -669,6 +669,10 @@
 					} catch (e) {
 						gl = null;
 					}
+
+					// Force the width and height of the sprite group the same as the ones defined for the canvas
+					options.width = dom.width || 300;
+					options.height = dom.height || 150;
 				} else {
 					canvas = document.createElement('canvas');
 					canvas.id = [fg.domPrefix, name].join('');

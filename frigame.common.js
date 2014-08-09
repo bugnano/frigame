@@ -1778,9 +1778,13 @@
 				// Public options
 				background: null,
 				backgroundType: fg.BACKGROUND_TILED,
-				crop: false
+				crop: false,
+				borderRadius: 0,
+				borderWidth: 1,
+				borderColor: null,
 
 				// Implementation details
+				hasBorder: false
 			});
 
 			// The playground has a parentDOM property
@@ -1803,6 +1807,7 @@
 			}
 
 			this.setBackground(new_options);
+			this.setBorder(new_options);
 		},
 
 		// Public functions
@@ -1896,6 +1901,35 @@
 
 			if (new_options.backgroundType !== undefined) {
 				my_options.backgroundType = new_options.backgroundType;
+			}
+
+			return this;
+		},
+
+		setBorder: function (options) {
+			var
+				my_options = this.options,
+				new_options = options || {},
+				border_width
+			;
+
+			if (new_options.borderColor !== undefined) {
+				my_options.borderColor = fg.r[new_options.borderColor];
+			}
+
+			if (new_options.borderRadius !== undefined) {
+				my_options.borderRadius = new_options.borderRadius;
+			}
+
+			if (new_options.borderWidth !== undefined) {
+				border_width = new_options.borderWidth;
+				my_options.borderWidth = border_width;
+			}
+
+			if (my_options.borderColor && my_options.borderWidth) {
+				my_options.hasBorder = true;
+			} else {
+				my_options.hasBorder = false;
 			}
 
 			return this;
