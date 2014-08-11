@@ -346,6 +346,8 @@
 
 			// Call the overridden function last, in order to have the callbacks called once the object has been fully initialized
 			overrides.PSpriteGroup.init.apply(this, arguments);
+
+			this.gradients = {};
 		},
 
 		// Public functions
@@ -424,30 +426,48 @@
 				if (background_changed || border_changed || size_changed) {
 					if (background_changed || size_changed) {
 						if (old_background && old_background.removeGroup) {
-							// TO DO -- If the background color and boder color were the same, and now the background color changes,
-							// this removeGroup will cause problems with the border, as this color is still used by this group.
-							old_background.removeGroup(this);
+							this.gradients[old_background.name] -= 1;
+							if (size_changed || (!this.gradients[old_background.name])) {
+								old_background.removeGroup(this);
+							}
 						}
 
 						if (background && background.addGroup) {
+							if (!this.gradients[background.name]) {
+								this.gradients[background.name] = 1;
+							} else {
+								this.gradients[background.name] += 1;
+							}
+
 							background.addGroup(this);
 						}
+
+						old_options.background = background;
 					}
 
 					if (border_changed || size_changed) {
 						if (old_border_color && old_border_color.removeGroup) {
-							old_border_color.removeGroup(this);
+							this.gradients[old_border_color.name] -= 1;
+							if (size_changed || (!this.gradients[old_border_color.name])) {
+								old_border_color.removeGroup(this);
+							}
 						}
 
 						if (border_color && border_color.addGroup) {
+							if (!this.gradients[border_color.name]) {
+								this.gradients[border_color.name] = 1;
+							} else {
+								this.gradients[border_color.name] += 1;
+							}
+
 							border_color.addGroup(this);
 						}
+
+						old_options.borderColor = border_color;
 					}
 
 					old_options.width = width;
 					old_options.height = height;
-					old_options.background = background;
-					old_options.borderColor = border_color;
 				}
 			}
 
@@ -592,8 +612,7 @@
 	fg.roundedRect = function (ctx, x, y, width, height, radius) {
 		var
 			pi = Math.PI,
-			pi_2 = pi / 2,
-			pi_3_2 = pi * 1.5
+			pi_2 = pi / 2
 		;
 
 		ctx.moveTo(x, y + radius);
@@ -602,9 +621,9 @@
 		ctx.lineTo(x + width - radius, y + height);
 		ctx.arc(x + width - radius, y + height - radius, radius, pi_2, 0, true);
 		ctx.lineTo(x + width, y + radius);
-		ctx.arc(x + width - radius, y + radius, radius, 0, pi_3_2, true);
+		ctx.arc(x + width - radius, y + radius, radius, 0, -pi_2, true);
 		ctx.lineTo(x + radius, y);
-		ctx.arc(x + radius, y + radius, radius, pi_3_2, pi, true);
+		ctx.arc(x + radius, y + radius, radius, -pi_2, pi, true);
 	};
 }(friGame));
 
