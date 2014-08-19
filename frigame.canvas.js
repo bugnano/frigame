@@ -58,9 +58,8 @@
 			this.canvas_initialized = true;
 		},
 
-		addGroup: function (group) {
+		addGroup: function (ctx, group) {
 			var
-				ctx = fg.ctx,
 				width = group.width,
 				height = group.height,
 				dimension,
@@ -439,7 +438,7 @@
 								this.gradients[background.name] += 1;
 							}
 
-							background.addGroup(this);
+							background.addGroup(ctx, this);
 						}
 
 						old_options.background = background;
@@ -460,7 +459,7 @@
 								this.gradients[border_color.name] += 1;
 							}
 
-							border_color.addGroup(this);
+							border_color.addGroup(ctx, this);
 						}
 
 						old_options.borderColor = border_color;
