@@ -1910,7 +1910,7 @@
 			var
 				my_options = this.options,
 				new_options = options || {},
-				border_width
+				round = fg.truncate
 			;
 
 			if (new_options.borderColor !== undefined) {
@@ -1918,12 +1918,11 @@
 			}
 
 			if (new_options.borderRadius !== undefined) {
-				my_options.borderRadius = new_options.borderRadius;
+				my_options.borderRadius = round(new_options.borderRadius);
 			}
 
 			if (new_options.borderWidth !== undefined) {
-				border_width = new_options.borderWidth;
-				my_options.borderWidth = border_width;
+				my_options.borderWidth = round(new_options.borderWidth);
 			}
 
 			if (my_options.borderColor && my_options.borderWidth) {
