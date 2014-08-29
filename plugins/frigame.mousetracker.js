@@ -38,7 +38,7 @@
 			element = $(dom)
 		;
 
-		element.mousemove(function (e) {
+		$(document).mousemove(function (e) {
 			var
 				mouseTracker = fg.mouseTracker,
 				offset = element.offset()
@@ -48,11 +48,11 @@
 			mouseTracker.y = e.pageY - offset.top;
 		});
 
-		element.mousedown(function (e) {
+		$(document).mousedown(function (e) {
 			fg.mouseTracker[e.which] = true;
 		});
 
-		element.mouseup(function (e) {
+		$(document).mouseup(function (e) {
 			fg.mouseTracker[e.which] = false;
 		});
 	});

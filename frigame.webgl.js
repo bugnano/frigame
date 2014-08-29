@@ -675,6 +675,7 @@
 					options.height = dom.height || 150;
 				} else {
 					canvas = document.createElement('canvas');
+					canvas.screencanvas = true;	// Optimization for CocoonJS
 					canvas.id = [fg.domPrefix, name].join('');
 					canvas.width = width;
 					canvas.height = height;
