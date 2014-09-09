@@ -2105,7 +2105,7 @@
 				resourceManager = fg.resourceManager
 			;
 
-			if (callback) {
+			if (callback !== undefined) {
 				resourceManager.completeCallback = callback;
 			}
 
