@@ -1,7 +1,7 @@
 /*global Modernizr, btoa, jQuery, friGame */
 /*jslint white: true, browser: true */
 
-// Copyright (c) 2011-2014 Franco Bugnano
+// Copyright (c) 2011-2015 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -231,25 +231,26 @@
 		getBackground: function (background_type, css_options, ie_filters) {
 			var
 				support = fg.support,
-				apply_ie_filters = false
+				apply_ie_filters = false,
+				imageURL = this.options.frameset[0].imageURL
 			;
 
 			if (background_type === fg.BACKGROUND_STRETCHED) {
 				if (support.backgroundsize) {
 					// The proper way to stretch the background
-					css_options['background-image'] = ['url("', this.options.imageURL, '")'].join('');
+					css_options['background-image'] = ['url("', imageURL, '")'].join('');
 					css_options[support.backgroundsize] = '100% 100%';
 				} else if (support.ieFilter) {
 					// Background stretching supported through proprietary filter
-					ie_filters.image = ['progid:DXImageTransform.Microsoft.AlphaImageLoader(src="', this.options.imageURL, '",sizingMethod="scale")'].join('');
+					ie_filters.image = ['progid:DXImageTransform.Microsoft.AlphaImageLoader(src="', imageURL, '",sizingMethod="scale")'].join('');
 					apply_ie_filters = true;
 				} else {
 					// Background stretching not supported, fall back to tiled
-					css_options['background-image'] = ['url("', this.options.imageURL, '")'].join('');
+					css_options['background-image'] = ['url("', imageURL, '")'].join('');
 				}
 			} else {
 				// A simple tiled background
-				css_options['background-image'] = ['url("', this.options.imageURL, '")'].join('');
+				css_options['background-image'] = ['url("', imageURL, '")'].join('');
 			}
 
 			return apply_ie_filters;
@@ -390,9 +391,11 @@
 				options = this.options,
 				old_options = this.old_options,
 				parent = this.parent,
+				currentSpriteSheet = options.currentSpriteSheet,
 				currentFrame = options.currentFrame,
 				animation = options.animation,
-				animation_options = this.animation_options,
+				sprite_sheet,
+				imageURL,
 				insidePlayground = fg.insidePlayground(this),
 				dom = this.dom,
 				left = this.left,
@@ -477,11 +480,21 @@
 					old_options.top = top;
 				}
 
+				sprite_sheet = this.animation_options.frameset[currentSpriteSheet];
+				imageURL = sprite_sheet.imageURL;
+
+				if (imageURL !== old_options.imageURL) {
+					css_options['background-image'] = ['url("', imageURL, '")'].join('');
+					update_css = true;
+					update_position = true;
+
+					old_options.imageURL = imageURL;
+				}
+
 				if (animation !== old_options.animation) {
 					$.extend(css_options, {
 						'width': [String(this.width), 'px'].join(''),
-						'height': [String(this.height), 'px'].join(''),
-						'background-image': ['url("', animation_options.imageURL, '")'].join('')
+						'height': [String(this.height), 'px'].join('')
 					});
 					update_css = true;
 					update_position = true;
@@ -504,15 +517,16 @@
 					old_options.multiy = multiy;
 				}
 
-				if (update_position || (currentFrame !== old_options.currentFrame)) {
+				if (update_position || (currentSpriteSheet !== old_options.currentSpriteSheet) || (currentFrame !== old_options.currentFrame)) {
 					css_options['background-position'] = [
-						String(-(animation_options.offsetx + multix + (currentFrame * animation_options.deltax))),
+						String(-(sprite_sheet.offsetx + multix + (currentFrame * sprite_sheet.deltax))),
 						'px ',
-						String(-(animation_options.offsety + multiy + (currentFrame * animation_options.deltay))),
+						String(-(sprite_sheet.offsety + multiy + (currentFrame * sprite_sheet.deltay))),
 						'px'
 					].join('');
 					update_css = true;
 
+					old_options.currentSpriteSheet = currentSpriteSheet;
 					old_options.currentFrame = currentFrame;
 				}
 
@@ -585,6 +599,7 @@
 							'background-image': '',
 							'background-position': ''
 						});
+						old_options.imageURL = null;
 						old_options.animation = animation;
 					}
 

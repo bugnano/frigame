@@ -1,7 +1,7 @@
 /*global friGame */
 /*jslint white: true, browser: true */
 
-// Copyright (c) 2011-2014 Franco Bugnano
+// Copyright (c) 2011-2015 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -193,7 +193,7 @@
 	fg.extend(fg.PAnimation, {
 		drawBackground: function (ctx, group) {
 			var
-				img = this.options.img,
+				img = this.options.frameset[0].img,
 				style = this.style
 			;
 
@@ -240,7 +240,7 @@
 				scalev = options.scalev,
 				alpha = options.alpha,
 				old_alpha,
-				animation_options = this.animation_options,
+				sprite_sheet,
 				width = this.width,
 				height = this.height,
 				currentFrame = options.currentFrame,
@@ -266,11 +266,12 @@
 					ctx.globalAlpha = fg.globalAlpha;
 				}
 
+				sprite_sheet = this.animation_options.frameset[options.currentSpriteSheet];
 				fg.safeDrawImage(
 					ctx,
-					animation_options.img,
-					animation_options.offsetx + options.multix + (currentFrame * animation_options.deltax),
-					animation_options.offsety + options.multiy + (currentFrame * animation_options.deltay),
+					sprite_sheet.img,
+					sprite_sheet.offsetx + options.multix + (currentFrame * sprite_sheet.deltax),
+					sprite_sheet.offsety + options.multiy + (currentFrame * sprite_sheet.deltay),
 					width,
 					height,
 					-(this.halfWidth),

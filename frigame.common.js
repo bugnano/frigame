@@ -1,7 +1,7 @@
 /*global friGame, requestAnimFrame, performance */
 /*jslint white: true, browser: true, forin: true */
 
-// Copyright (c) 2011-2014 Franco Bugnano
+// Copyright (c) 2011-2015 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -494,10 +494,24 @@
 		init: function (imageURL, options) {
 			var
 				my_options,
-				new_options = options || {},
-				img,
-				PAnimation = fg.PAnimation
+				new_options,
+				sprite_sheet,
+				my_frameset,
+				frameset,
+				len_frameset,
+				i
 			;
+
+			// If imageURL is not a string, it means that it has been omitted,
+			// so let's adjust the variable names accordingly.
+			// Another way of omitting imageURL is by explicitly passing null,
+			// in that case no variable name change is necessary.
+			if (imageURL && (typeof imageURL !== 'string')) {
+				options = imageURL;
+				imageURL = null;
+			}
+
+			new_options = options || {};
 
 			if (this.options) {
 				my_options = this.options;
@@ -509,68 +523,99 @@
 			// Set default options
 			fg.extend(my_options, {
 				// Public options
-				numberOfFrame: 1,
 				rate: fg.REFRESH_RATE,
-				type: fg.ANIMATION_HORIZONTAL,
 				once: false,
 				pingpong: false,
 				backwards: false,
-				offsetx: 0,
-				offsety: 0,
 				frameWidth: 0,
 				frameHeight: 0,
+				frameset: [],
 
 				// Implementation details
-				imageURL: '',
-				img: null,
 				halfWidth: 0,
-				halfHeight: 0,
-				deltax: 0,
-				deltay: 0,
-				multix: 0,
-				multiy: 0
+				halfHeight: 0
 			});
 
-			new_options = fg.extend(my_options, fg.pick(new_options, [
-				'numberOfFrame',
+			fg.extend(my_options, fg.pick(new_options, [
 				'rate',
-				'type',
 				'once',
 				'pingpong',
 				'backwards',
-				'offsetx',
-				'offsety',
 				'frameWidth',
 				'frameHeight'
 			]));
 
-			new_options.rate = Math.round(new_options.rate / fg.REFRESH_RATE) || 1;
-			my_options.rate = new_options.rate;
+			my_options.rate = Math.round(new_options.rate / fg.REFRESH_RATE) || 1;
 
-			my_options.imageURL = imageURL;
+			my_frameset = my_options.frameset;
 
-			if (PAnimation.images[imageURL]) {
-				img = PAnimation.images[imageURL].img;
-				PAnimation.images[imageURL].refCount += 1;
-			} else {
-				img = new Image();
-				img.src = imageURL;
-				PAnimation.images[imageURL] = {
-					img: img,
-					refCount: 1
+			if (imageURL) {
+				// Set default options
+				sprite_sheet = {
+					imageURL: imageURL,
+					numberOfFrame: 1,
+					type: fg.ANIMATION_HORIZONTAL,
+					offsetx: 0,
+					offsety: 0
 				};
+
+				fg.extend(sprite_sheet, fg.pick(new_options, [
+					'numberOfFrame',
+					'type',
+					'offsetx',
+					'offsety'
+				]));
+
+				sprite_sheet.img = this.getImage(imageURL);
+
+				my_frameset.push(sprite_sheet);
 			}
 
-			my_options.img = img;
+			frameset = new_options.frameset;
+			if (frameset) {
+				len_frameset = frameset.length;
+				if (len_frameset) {
+					// The default imageURL is the one of the first element
+					if (!imageURL) {
+						imageURL = frameset[0].imageURL;
+					}
+
+					for (i = 0; i < len_frameset; i += 1) {
+						// Set default options
+						sprite_sheet = {
+							imageURL: imageURL,
+							numberOfFrame: 1,
+							type: fg.ANIMATION_HORIZONTAL,
+							offsetx: 0,
+							offsety: 0
+						};
+
+						fg.extend(sprite_sheet, fg.pick(frameset[i], [
+							'imageURL',
+							'numberOfFrame',
+							'type',
+							'offsetx',
+							'offsety'
+						]));
+
+						sprite_sheet.img = this.getImage(sprite_sheet.imageURL);
+
+						my_frameset.push(sprite_sheet);
+					}
+				}
+			}
 		},
 
 		// Public functions
 
 		remove: function () {
 			var
-				imageURL = this.options.imageURL,
+				imageURL,
 				PAnimation = fg.PAnimation,
-				animation = this
+				animation = this,
+				frameset = this.options.frameset,
+				len_frameset = frameset.length,
+				i
 			;
 
 			// Step 1: Remove myself from all the sprites
@@ -584,65 +629,122 @@
 				}
 			});
 
-			// Step 2: Decrease the image reference count
-			PAnimation.images[imageURL].refCount -= 1;
-			if (PAnimation.images[imageURL].refCount <= 0) {
-				delete PAnimation.images[imageURL];
+			// Step 2: Decrease the images reference count
+			for (i = 0; i < len_frameset; i += 1) {
+				imageURL = frameset[i].imageURL;
+				PAnimation.images[imageURL].refCount -= 1;
+				if (PAnimation.images[imageURL].refCount <= 0) {
+					delete PAnimation.images[imageURL];
+				}
 			}
 		},
 
 		// Implementation details
 
 		complete: function () {
-			return this.options.img.complete;
+			var
+				complete = true,
+				frameset = this.options.frameset,
+				len_frameset = frameset.length,
+				i
+			;
+
+			for (i = 0; i < len_frameset; i += 1) {
+				if (!frameset[i].img.complete) {
+					complete = false;
+					break;
+				}
+			}
+
+			return complete;
 		},
 
 		onLoad: function () {
 			var
 				options = this.options,
-				img = options.img,
-				round = fg.truncate
+				img,
+				round = fg.truncate,
+				frameWidth,
+				frameHeight,
+				sprite_sheet,
+				frameset = options.frameset,
+				len_frameset = frameset.length,
+				i
 			;
 
-			if (options.type === fg.ANIMATION_VERTICAL) {
-				// On multi vertical animations the frameWidth parameter is required
-				if (!options.frameWidth) {
-					options.frameWidth = img.width - options.offsetx;
-				}
+			if (len_frameset) {
+				// The first sprite sheet is used to calculate the frame dimensions
+				sprite_sheet = frameset[0];
+				img = sprite_sheet.img;
 
-				// On vertical animations the frameHeight parameter is optional
-				if (!options.frameHeight) {
-					options.frameHeight = round((img.height - options.offsety) / options.numberOfFrame);
-				}
+				if (sprite_sheet.type === fg.ANIMATION_VERTICAL) {
+					// On multi vertical animations the frameWidth parameter is required
+					if (!options.frameWidth) {
+						options.frameWidth = img.width - sprite_sheet.offsetx;
+					}
 
-				options.deltax = 0;
-				options.deltay = options.frameHeight;
-				options.multix = options.frameWidth;
-				options.multiy = 0;
-			} else {
-				// On horizontal animations the frameWidth parameter is optional
-				if (!options.frameWidth) {
-					options.frameWidth = round((img.width - options.offsetx) / options.numberOfFrame);
-				}
+					// On vertical animations the frameHeight parameter is optional
+					if (!options.frameHeight) {
+						options.frameHeight = round((img.height - sprite_sheet.offsety) / sprite_sheet.numberOfFrame);
+					}
+				} else {
+					// On horizontal animations the frameWidth parameter is optional
+					if (!options.frameWidth) {
+						options.frameWidth = round((img.width - sprite_sheet.offsetx) / sprite_sheet.numberOfFrame);
+					}
 
-				// On multi horizontal animations the frameHeight parameter is required
-				if (!options.frameHeight) {
-					options.frameHeight = img.height - options.offsety;
+					// On multi horizontal animations the frameHeight parameter is required
+					if (!options.frameHeight) {
+						options.frameHeight = img.height - sprite_sheet.offsety;
+					}
 				}
-
-				options.deltax = options.frameWidth;
-				options.deltay = 0;
-				options.multix = 0;
-				options.multiy = options.frameHeight;
 			}
 
-			options.halfWidth = round(options.frameWidth / 2);
-			options.halfHeight = round(options.frameHeight / 2);
+			frameWidth = options.frameWidth;
+			frameHeight = options.frameHeight;
+			for (i = 0; i < len_frameset; i += 1) {
+				sprite_sheet = frameset[i];
+				if (sprite_sheet.type === fg.ANIMATION_VERTICAL) {
+					sprite_sheet.deltax = 0;
+					sprite_sheet.deltay = frameHeight;
+					sprite_sheet.multix = frameWidth;
+					sprite_sheet.multiy = 0;
+				} else {
+					sprite_sheet.deltax = frameWidth;
+					sprite_sheet.deltay = 0;
+					sprite_sheet.multix = 0;
+					sprite_sheet.multiy = frameHeight;
+				}
+			}
 
-			this.width = options.frameWidth;
-			this.height = options.frameHeight;
+			options.halfWidth = round(frameWidth / 2);
+			options.halfHeight = round(frameHeight / 2);
+
+			this.width = frameWidth;
+			this.height = frameHeight;
 			this.halfWidth = options.halfWidth;
 			this.halfHeight = options.halfHeight;
+		},
+
+		getImage: function (imageURL) {
+			var
+				img,
+				PAnimation = fg.PAnimation
+			;
+
+			if (PAnimation.images[imageURL]) {
+				img = PAnimation.images[imageURL].img;
+				PAnimation.images[imageURL].refCount += 1;
+			} else {
+				img = new Image();
+				img.src = imageURL;
+				PAnimation.images[imageURL] = {
+					img: img,
+					refCount: 1
+				};
+			}
+
+			return img;
 		}
 	};
 
@@ -1447,6 +1549,9 @@
 
 				// Implementation details
 				idleCounter: 0,
+				lastSpriteSheet: 0,
+				currentSpriteSheet: 0,
+				numberOfFrame: 0,
 				currentFrame: 0,
 				frameIncrement: 1,
 				multix: 0,
@@ -1475,6 +1580,7 @@
 				animation,
 				index,
 				animation_options,
+				sprite_sheet,
 				animation_redefined = new_options.animation !== undefined,
 				index_redefined = new_options.animationIndex !== undefined
 			;
@@ -1512,20 +1618,6 @@
 
 			animation_options = this.animation_options;
 
-			if (index_redefined) {
-				index = new_options.animationIndex;
-				my_options.animationIndex = index;
-
-				animation = my_options.animation;
-				if (animation) {
-					my_options.multix = index * animation_options.multix;
-					my_options.multiy = index * animation_options.multiy;
-				} else {
-					my_options.multix = 0;
-					my_options.multiy = 0;
-				}
-			}
-
 			if (new_options.rate !== undefined) {
 				animation_options.rate = Math.round(new_options.rate / fg.REFRESH_RATE) || 1;
 			}
@@ -1547,14 +1639,41 @@
 
 			if (animation_redefined || index_redefined) {
 				if (animation_options && (animation_options.backwards)) {
-					my_options.currentFrame = animation_options.numberOfFrame - 1;
+					my_options.lastSpriteSheet = animation_options.frameset.length - 1;
+					my_options.currentSpriteSheet = my_options.lastSpriteSheet;
+					my_options.numberOfFrame = animation_options.frameset[my_options.currentSpriteSheet].numberOfFrame;
+					my_options.currentFrame = my_options.numberOfFrame - 1;
 					my_options.frameIncrement = -1;
 				} else {
+					my_options.currentSpriteSheet = 0;
+					if (animation_options) {
+						my_options.lastSpriteSheet = animation_options.frameset.length - 1;
+						my_options.numberOfFrame = animation_options.frameset[0].numberOfFrame;
+					} else {
+						my_options.lastSpriteSheet = 0;
+						my_options.numberOfFrame = 0;
+					}
 					my_options.currentFrame = 0;
 					my_options.frameIncrement = 1;
 				}
+
 				my_options.idleCounter = 0;
 				this.endAnimation = false;
+			}
+
+			if (index_redefined) {
+				index = new_options.animationIndex;
+				my_options.animationIndex = index;
+
+				animation = my_options.animation;
+				if (animation && index) {
+					sprite_sheet = animation_options.frameset[my_options.currentSpriteSheet];
+					my_options.multix = index * sprite_sheet.multix;
+					my_options.multiy = index * sprite_sheet.multiy;
+				} else {
+					my_options.multix = 0;
+					my_options.multiy = 0;
+				}
 			}
 
 			if (new_options.callback !== undefined) {
@@ -1586,7 +1705,7 @@
 						(this.endAnimation || options.paused)
 					||	(
 							(!options.callback)
-						&&	((!options.animation) || (this.animation_options.numberOfFrame <= 1))
+						&&	((!options.animation) || ((options.lastSpriteSheet <= 0) && (options.numberOfFrame <= 1)))
 						)
 					)
 				) {
@@ -1604,6 +1723,7 @@
 				callback = options.callback,
 				animation = options.animation,
 				animation_options = this.animation_options,
+				currentSpriteSheet = options.currentSpriteSheet,
 				currentFrame = options.currentFrame
 			;
 
@@ -1619,37 +1739,61 @@
 							// Backwards animations
 							if (animation_options.pingpong) {
 								// In pingpong animations the end is when the frame returns to the last frame
-								if (currentFrame >= animation_options.numberOfFrame) {
-									options.frameIncrement = -1;
-									if (animation_options.once) {
-										currentFrame -= 1;
-										options.idleCounter = 1;
-										this.endAnimation = true;
+								if (currentFrame >= options.numberOfFrame) {
+									if (currentSpriteSheet < options.lastSpriteSheet) {
+										currentSpriteSheet += 1;
+										options.currentSpriteSheet = currentSpriteSheet;
+										options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+										options.currentFrame = 0;
 									} else {
-										// The first frame has already been displayed, start from the second
-										if (animation_options.numberOfFrame > 1) {
-											currentFrame -= 2;
-										} else {
+										options.frameIncrement = -1;
+										if (animation_options.once) {
 											currentFrame -= 1;
+											options.idleCounter = 1;
+											this.endAnimation = true;
+										} else {
+											// The first frame has already been displayed, start from the second
+											if (options.numberOfFrame > 1) {
+												currentFrame -= 2;
+											} else if (options.lastSpriteSheet > 0) {
+												currentSpriteSheet -= 1;
+												options.currentSpriteSheet = currentSpriteSheet;
+												options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+												currentFrame = options.numberOfFrame - 1;
+											} else {
+												currentFrame -= 1;
+											}
+										}
+
+										// Update the details before the callback
+										options.currentFrame = currentFrame;
+
+										if (callback) {
+											callback.call(this, this);
 										}
 									}
-
-									// Update the details before the callback
-									options.currentFrame = currentFrame;
-
-									if (callback) {
-										callback.call(this, this);
-									}
 								} else if (currentFrame < 0) {
-									// Last frame reached, change animation direction
-									options.frameIncrement = 1;
-									// The first frame has already been displayed, start from the second
-									if (animation_options.numberOfFrame > 1) {
-										currentFrame = 1;
+									if (currentSpriteSheet > 0) {
+										currentSpriteSheet -= 1;
+										options.currentSpriteSheet = currentSpriteSheet;
+										options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+										options.currentFrame = options.numberOfFrame - 1;
 									} else {
-										currentFrame = 0;
+										// Last frame reached, change animation direction
+										options.frameIncrement = 1;
+										// The first frame has already been displayed, start from the second
+										if (options.numberOfFrame > 1) {
+											currentFrame = 1;
+										} else if (options.lastSpriteSheet > 0) {
+											currentSpriteSheet += 1;
+											options.currentSpriteSheet = currentSpriteSheet;
+											options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+											currentFrame = 0;
+										} else {
+											currentFrame = 0;
+										}
+										options.currentFrame = currentFrame;
 									}
-									options.currentFrame = currentFrame;
 								} else {
 									// This is no particular frame, simply update the details
 									options.currentFrame = currentFrame;
@@ -1657,20 +1801,30 @@
 							} else {
 								// Normal animation
 								if (currentFrame < 0) {
-									// Last frame reached
-									if (animation_options.once) {
-										currentFrame = 0;
-										options.idleCounter = 1;
-										this.endAnimation = true;
+									if (currentSpriteSheet > 0) {
+										currentSpriteSheet -= 1;
+										options.currentSpriteSheet = currentSpriteSheet;
+										options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+										options.currentFrame = options.numberOfFrame - 1;
 									} else {
-										currentFrame = animation_options.numberOfFrame - 1;
-									}
+										// Last frame reached
+										if (animation_options.once) {
+											currentFrame = 0;
+											options.idleCounter = 1;
+											this.endAnimation = true;
+										} else {
+											currentSpriteSheet = options.lastSpriteSheet;
+											options.currentSpriteSheet = currentSpriteSheet;
+											options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+											currentFrame = options.numberOfFrame - 1;
+										}
 
-									// Update the details before the callback
-									options.currentFrame = currentFrame;
+										// Update the details before the callback
+										options.currentFrame = currentFrame;
 
-									if (callback) {
-										callback.call(this, this);
+										if (callback) {
+											callback.call(this, this);
+										}
 									}
 								} else {
 									// This is no particular frame, simply update the details
@@ -1682,56 +1836,90 @@
 							if (animation_options.pingpong) {
 								// In pingpong animations the end is when the frame goes below 0
 								if (currentFrame < 0) {
-									options.frameIncrement = 1;
-									if (animation_options.once) {
-										currentFrame = 0;
-										options.idleCounter = 1;
-										this.endAnimation = true;
+									if (currentSpriteSheet > 0) {
+										currentSpriteSheet -= 1;
+										options.currentSpriteSheet = currentSpriteSheet;
+										options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+										options.currentFrame = options.numberOfFrame - 1;
 									} else {
-										// The first frame has already been displayed, start from the second
-										if (animation_options.numberOfFrame > 1) {
-											currentFrame = 1;
-										} else {
+										options.frameIncrement = 1;
+										if (animation_options.once) {
 											currentFrame = 0;
+											options.idleCounter = 1;
+											this.endAnimation = true;
+										} else {
+											// The first frame has already been displayed, start from the second
+											if (options.numberOfFrame > 1) {
+												currentFrame = 1;
+											} else if (options.lastSpriteSheet > 0) {
+												currentSpriteSheet += 1;
+												options.currentSpriteSheet = currentSpriteSheet;
+												options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+												currentFrame = 0;
+											} else {
+												currentFrame = 0;
+											}
+										}
+
+										// Update the details before the callback
+										options.currentFrame = currentFrame;
+
+										if (callback) {
+											callback.call(this, this);
 										}
 									}
-
-									// Update the details before the callback
-									options.currentFrame = currentFrame;
-
-									if (callback) {
-										callback.call(this, this);
-									}
-								} else if (currentFrame >= animation_options.numberOfFrame) {
-									// Last frame reached, change animation direction
-									options.frameIncrement = -1;
-									if (animation_options.numberOfFrame > 1) {
-										currentFrame -= 2;
+								} else if (currentFrame >= options.numberOfFrame) {
+									if (currentSpriteSheet < options.lastSpriteSheet) {
+										currentSpriteSheet += 1;
+										options.currentSpriteSheet = currentSpriteSheet;
+										options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+										options.currentFrame = 0;
 									} else {
-										currentFrame -= 1;
+										// Last frame reached, change animation direction
+										options.frameIncrement = -1;
+										if (options.numberOfFrame > 1) {
+											currentFrame -= 2;
+										} else if (options.lastSpriteSheet > 0) {
+											currentSpriteSheet -= 1;
+											options.currentSpriteSheet = currentSpriteSheet;
+											options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+											currentFrame = options.numberOfFrame - 1;
+										} else {
+											currentFrame -= 1;
+										}
+										options.currentFrame = currentFrame;
 									}
-									options.currentFrame = currentFrame;
 								} else {
 									// This is no particular frame, simply update the details
 									options.currentFrame = currentFrame;
 								}
 							} else {
 								// Normal animation
-								if (currentFrame >= animation_options.numberOfFrame) {
-									// Last frame reached
-									if (animation_options.once) {
-										currentFrame -= 1;
-										options.idleCounter = 1;
-										this.endAnimation = true;
+								if (currentFrame >= options.numberOfFrame) {
+									if (currentSpriteSheet < options.lastSpriteSheet) {
+										currentSpriteSheet += 1;
+										options.currentSpriteSheet = currentSpriteSheet;
+										options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+										options.currentFrame = 0;
 									} else {
-										currentFrame = 0;
-									}
+										// Last frame reached
+										if (animation_options.once) {
+											currentFrame -= 1;
+											options.idleCounter = 1;
+											this.endAnimation = true;
+										} else {
+											currentSpriteSheet = 0;
+											options.currentSpriteSheet = currentSpriteSheet;
+											options.numberOfFrame = animation_options.frameset[currentSpriteSheet].numberOfFrame;
+											currentFrame = 0;
+										}
 
-									// Update the details before the callback
-									options.currentFrame = currentFrame;
+										// Update the details before the callback
+										options.currentFrame = currentFrame;
 
-									if (callback) {
-										callback.call(this, this);
+										if (callback) {
+											callback.call(this, this);
+										}
 									}
 								} else {
 									// This is no particular frame, simply update the details
