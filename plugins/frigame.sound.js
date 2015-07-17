@@ -1,4 +1,4 @@
-/*global friGame, soundManager, Audio, AudioContext, ext */
+/*global friGame, soundManager, Audio, AudioContext */
 /*jslint white: true, browser: true */
 
 // Copyright (c) 2011-2014 Franco Bugnano
@@ -522,13 +522,6 @@
 							request.send();
 						} else {
 							// Sound supported through HTML5 Audio
-							if (this.options.streaming) {
-								// Tell CocoonJS to treat this sound as a music
-								if (window.ext && ext.IDTK_APP) {
-									ext.IDTK_APP.makeCall('addForceMusic', sound_url);
-								}
-							}
-
 							audio = new Audio(sound_url);
 							audio.load();
 							this.audio = audio;
