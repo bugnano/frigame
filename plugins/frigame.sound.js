@@ -170,16 +170,10 @@
 
 			if (muted_redefined) {
 				this.muted = new_options.muted;
-				if (audio) {
-					audio.muted = this.muted;
-				}
 			}
 
 			if (volume_redefined) {
 				this.volume = fg.clamp(new_options.volume, 0, 1);
-				if (audio) {
-					audio.volume = this.volume;
-				}
 			}
 
 			if (muted_redefined || volume_redefined) {
@@ -188,6 +182,16 @@
 						sound.setVolume(0);
 					} else {
 						sound.setVolume(Math.round(this.volume * 100));
+					}
+				} else if (audio) {
+					audio.muted = this.muted;
+
+					// Some HTML5 Audio implementations do not support the muted attribute,
+					// so the audio is muted by setting its volume to 0 too.
+					if (this.muted) {
+						audio.volume = 0;
+					} else {
+						audio.volume = this.volume;
 					}
 				}
 
@@ -217,18 +221,20 @@
 				audioBuffer = this.audioBuffer,
 				gainNode = this.gainNode,
 				source,
-				sound_object = this
+				sound_object = this,
+				muted_redefined = new_options.muted !== undefined,
+				volume_redefined = new_options.volume !== undefined
 			;
 
 			// Make sure the audio is stopped before changing its options
 			this.stop();
 
 			if (sound) {
-				if (new_options.muted !== undefined) {
+				if (muted_redefined) {
 					this.muted = new_options.muted;
 				}
 
-				if (new_options.volume !== undefined) {
+				if (volume_redefined) {
 					this.volume = fg.clamp(new_options.volume, 0, 1);
 				}
 
@@ -250,14 +256,24 @@
 
 				sound.play(sound_options);
 			} else if (audio) {
-				if (new_options.muted !== undefined) {
+				if (muted_redefined) {
 					this.muted = new_options.muted;
-					audio.muted = this.muted;
 				}
 
-				if (new_options.volume !== undefined) {
+				if (volume_redefined) {
 					this.volume = fg.clamp(new_options.volume, 0, 1);
-					audio.volume = this.volume;
+				}
+
+				if (muted_redefined || volume_redefined) {
+					audio.muted = this.muted;
+
+					// Some HTML5 Audio implementations do not support the muted attribute,
+					// so the audio is muted by setting its volume to 0 too.
+					if (this.muted) {
+						audio.volume = 0;
+					} else {
+						audio.volume = this.volume;
+					}
 				}
 
 				if (new_options.loop) {
@@ -281,11 +297,11 @@
 				source.buffer = audioBuffer;
 				source.connect(gainNode);
 
-				if (new_options.muted !== undefined) {
+				if (muted_redefined) {
 					this.muted = new_options.muted;
 				}
 
-				if (new_options.volume !== undefined) {
+				if (volume_redefined) {
 					this.volume = fg.clamp(new_options.volume, 0, 1);
 				}
 
