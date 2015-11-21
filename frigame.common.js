@@ -377,7 +377,9 @@
 				if ((fg.idUpdate === null) && (fg.s.playground)) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
-					fg.idDraw = requestAnimFrame(fg.draw);
+					if (fg.idDraw === null) {
+						fg.idDraw = requestAnimFrame(fg.draw);
+					}
 				}
 
 				if (completeCallback) {
@@ -646,11 +648,14 @@
 				complete = true,
 				frameset = this.options.frameset,
 				len_frameset = frameset.length,
+				img,
 				i
 			;
 
 			for (i = 0; i < len_frameset; i += 1) {
-				if (!frameset[i].img.complete) {
+				img = frameset[i].img;
+				// Apparently there are some cases where img.complete is true, even if its width and height are not known yet
+				if (!(img.complete && img.width && img.height)) {
 					complete = false;
 					break;
 				}
@@ -2281,7 +2286,9 @@
 				if (fg.idUpdate === null) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
-					fg.idDraw = requestAnimFrame(fg.draw);
+					if (fg.idDraw === null) {
+						fg.idDraw = requestAnimFrame(fg.draw);
+					}
 				}
 			}
 
