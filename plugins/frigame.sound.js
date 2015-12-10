@@ -1,5 +1,5 @@
-/*global friGame, soundManager, Audio, AudioContext */
-/*jslint white: true, browser: true */
+/*global friGame, soundManager, AudioContext */
+/*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: true, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
 // Copyright (c) 2011-2014 Franco Bugnano
 
@@ -48,8 +48,8 @@
 
 		if (window.Audio) {
 			a = new Audio();
-			if (a.canPlayType('audio/wav; codecs="1"') === 'probably') {
-				canPlay.wav = true;
+			if (a.canPlayType('audio/ogg; codecs="opus"') === 'probably') {
+				canPlay.opus = true;
 			}
 
 			if (a.canPlayType('audio/ogg; codecs="vorbis"') === 'probably') {
@@ -59,6 +59,16 @@
 
 			if (a.canPlayType('audio/mpeg; codecs="mp3"') === 'probably') {
 				canPlay.mp3 = true;
+			}
+
+			if ((a.canPlayType('audio/mp4; codecs="mp4a.40.5"') === 'probably') || (a.canPlayType('audio/mp4; codecs="mp4a.40.2"') === 'probably')) {
+				canPlay.aac = true;
+				canPlay.m4a = true;
+				canPlay.mp4 = true;
+			}
+
+			if (a.canPlayType('audio/wav; codecs="1"') === 'probably') {
+				canPlay.wav = true;
 			}
 
 			// Setup Web Audio API
