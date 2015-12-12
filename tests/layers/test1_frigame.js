@@ -31,7 +31,7 @@ friGame.ready(function () {
 			.insertGroup('background', {width: 1, height: 1})
 				.addSprite('ruler', {animation: 'background'})
 			.end()
-			.addGroup('rect1', {background: 'red', borderColor: 'blue', borderRadius: 17, borderWidth: 12, left: 48, top: 48, width: 64, height: 64})
+			.addGroup('rect1', {background: 'red', borderColor: 'blue', borderRadius: [17, 5, 23, 11], borderWidth: 12, left: 48, top: 48, width: 64, height: 64})
 				.addSprite('catgirl2', {animation: 'catgirl', left: 32, top: 32})
 			.end()
 		;

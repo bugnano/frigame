@@ -1,7 +1,7 @@
 /*global friGame */
 /*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: true, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
-// Copyright (c) 2011-2014 Franco Bugnano
+// Copyright (c) 2011-2015 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -496,6 +496,56 @@
 				},
 				set: function (s, value) {
 					s.opacity(value);
+				}
+			},
+
+			// Hooks only for sprite groups
+			borderRadius: {
+				get: function (s) {
+					return s.options.borderTopLeftRadius;
+				},
+				set: function (s, value) {
+					s.setBorder({borderRadius: value});
+				}
+			},
+			borderTopLeftRadius: {
+				get: function (s) {
+					return s.options.borderTopLeftRadius;
+				},
+				set: function (s, value) {
+					s.setBorder({borderTopLeftRadius: value});
+				}
+			},
+			borderTopRightRadius: {
+				get: function (s) {
+					return s.options.borderTopRightRadius;
+				},
+				set: function (s, value) {
+					s.setBorder({borderTopRightRadius: value});
+				}
+			},
+			borderBottomRightRadius: {
+				get: function (s) {
+					return s.options.borderBottomRightRadius;
+				},
+				set: function (s, value) {
+					s.setBorder({borderBottomRightRadius: value});
+				}
+			},
+			borderBottomLeftRadius: {
+				get: function (s) {
+					return s.options.borderBottomLeftRadius;
+				},
+				set: function (s, value) {
+					s.setBorder({borderBottomLeftRadius: value});
+				}
+			},
+			borderWidth: {
+				get: function (s) {
+					return s.options.borderWidth;
+				},
+				set: function (s, value) {
+					s.setBorder({borderWidth: value});
 				}
 			}
 		},

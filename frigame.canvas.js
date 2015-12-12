@@ -342,6 +342,9 @@
 
 					fg.ctx = canvas.getContext('2d');
 				}
+
+				// Set default options for the context
+				fg.ctx.lineCap = 'square';
 			}
 
 			// Call the overridden function last, in order to have the callbacks called once the object has been fully initialized
@@ -398,7 +401,11 @@
 				insidePlayground = fg.insidePlayground(this),
 				background = insidePlayground && options.background,
 				old_background = old_options.background,
-				border_radius = options.borderRadius,
+				top_left_radius = options.borderTopLeftRadius,
+				top_right_radius = options.borderTopRightRadius,
+				bottom_right_radius = options.borderBottomRightRadius,
+				bottom_left_radius = options.borderBottomLeftRadius,
+				border_radius = top_left_radius || top_right_radius || bottom_right_radius || bottom_left_radius,
 				border_width = options.borderWidth,
 				border_half_width = border_width / 2,
 				border_color = insidePlayground && border_width && options.borderColor,
@@ -418,7 +425,7 @@
 			;
 
 			if (!parent) {
-				fg.ctx.clearRect(0, 0, width, height);
+				ctx.clearRect(0, 0, width, height);
 				fg.globalAlpha = 1;
 			}
 
@@ -511,7 +518,7 @@
 					ctx.beginPath();
 
 					if (border_radius) {
-						fg.roundedRect(ctx, 0, 0, width, height, border_radius);
+						fg.roundedRect(ctx, 0, 0, width, height, top_left_radius, top_right_radius, bottom_right_radius, bottom_left_radius);
 					} else {
 						ctx.rect(0, 0, width, height);
 					}
@@ -525,7 +532,12 @@
 					ctx.beginPath();
 
 					if (border_radius) {
-						fg.roundedRect(ctx, -border_half_width, -border_half_width, width + border_width, height + border_width, border_radius + border_half_width);
+						fg.roundedRect(ctx, -border_half_width, -border_half_width, width + border_width, height + border_width,
+							top_left_radius ? top_left_radius + border_half_width : 0,
+							top_right_radius ? top_right_radius + border_half_width : 0,
+							bottom_right_radius ? bottom_right_radius + border_half_width : 0,
+							bottom_left_radius ? bottom_left_radius + border_half_width : 0
+						);
 					} else {
 						ctx.rect(-border_half_width, -border_half_width, width + border_width, height + border_width);
 					}
@@ -546,7 +558,7 @@
 						ctx.beginPath();
 
 						if (border_radius) {
-							fg.roundedRect(ctx, 0, 0, width, height, border_radius);
+							fg.roundedRect(ctx, 0, 0, width, height, top_left_radius, top_right_radius, bottom_right_radius, bottom_left_radius);
 						} else {
 							ctx.rect(0, 0, width, height);
 						}
@@ -609,21 +621,36 @@
 		}
 	};
 
-	fg.roundedRect = function (ctx, x, y, width, height, radius) {
+	fg.roundedRect = function (ctx, x, y, width, height, top_left_radius, top_right_radius, bottom_right_radius, bottom_left_radius) {
 		var
 			pi = Math.PI,
 			pi_2 = pi / 2
 		;
 
-		ctx.moveTo(x, y + radius);
-		ctx.lineTo(x, y + height - radius);
-		ctx.arc(x + radius, y + height - radius, radius, pi, pi_2, true);
-		ctx.lineTo(x + width - radius, y + height);
-		ctx.arc(x + width - radius, y + height - radius, radius, pi_2, 0, true);
-		ctx.lineTo(x + width, y + radius);
-		ctx.arc(x + width - radius, y + radius, radius, 0, -pi_2, true);
-		ctx.lineTo(x + radius, y);
-		ctx.arc(x + radius, y + radius, radius, -pi_2, pi, true);
+		ctx.moveTo(x, y + top_left_radius);
+		ctx.lineTo(x, y + height - bottom_left_radius);
+
+		if (bottom_left_radius) {
+			ctx.arc(x + bottom_left_radius, y + height - bottom_left_radius, bottom_left_radius, pi, pi_2, true);
+		}
+
+		ctx.lineTo(x + width - bottom_right_radius, y + height);
+
+		if (bottom_right_radius) {
+			ctx.arc(x + width - bottom_right_radius, y + height - bottom_right_radius, bottom_right_radius, pi_2, 0, true);
+		}
+
+		ctx.lineTo(x + width, y + top_right_radius);
+
+		if (top_right_radius) {
+			ctx.arc(x + width - top_right_radius, y + top_right_radius, top_right_radius, 0, -pi_2, true);
+		}
+
+		ctx.lineTo(x + top_left_radius, y);
+
+		if (top_left_radius) {
+			ctx.arc(x + top_left_radius, y + top_left_radius, top_left_radius, -pi_2, pi, true);
+		}
 	};
 }(friGame));
 

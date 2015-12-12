@@ -1971,7 +1971,10 @@
 				background: null,
 				backgroundType: fg.BACKGROUND_TILED,
 				crop: false,
-				borderRadius: 0,
+				borderTopLeftRadius: 0,
+				borderTopRightRadius: 0,
+				borderBottomRightRadius: 0,
+				borderBottomLeftRadius: 0,
 				borderWidth: 1,
 				borderColor: null,
 
@@ -2102,6 +2105,8 @@
 			var
 				my_options = this.options,
 				new_options = options || {},
+				borderRadius = new_options.borderRadius,
+				radius_length,
 				round = fg.truncate
 			;
 
@@ -2109,8 +2114,55 @@
 				my_options.borderColor = fg.r[new_options.borderColor];
 			}
 
-			if (new_options.borderRadius !== undefined) {
-				my_options.borderRadius = round(new_options.borderRadius);
+			// Support the borderRadius shorthand property both as a single number and
+			// as an array, in order to set the radius for multiple corners at once
+			if (borderRadius !== undefined) {
+				if (typeof borderRadius === 'number') {
+					borderRadius = round(borderRadius);
+					my_options.borderTopLeftRadius = borderRadius;
+					my_options.borderTopRightRadius = borderRadius;
+					my_options.borderBottomRightRadius = borderRadius;
+					my_options.borderBottomLeftRadius = borderRadius;
+				} else {
+					radius_length = borderRadius.length;
+					if (radius_length >= 4) {
+						my_options.borderTopLeftRadius = round(borderRadius[0]);
+						my_options.borderTopRightRadius = round(borderRadius[1]);
+						my_options.borderBottomRightRadius = round(borderRadius[2]);
+						my_options.borderBottomLeftRadius = round(borderRadius[3]);
+					} else if (radius_length === 3) {
+						my_options.borderTopLeftRadius = round(borderRadius[0]);
+						my_options.borderTopRightRadius = round(borderRadius[1]);
+						my_options.borderBottomRightRadius = round(borderRadius[2]);
+						my_options.borderBottomLeftRadius = round(borderRadius[1]);
+					} else if (radius_length === 2) {
+						my_options.borderTopLeftRadius = round(borderRadius[0]);
+						my_options.borderTopRightRadius = round(borderRadius[1]);
+						my_options.borderBottomRightRadius = round(borderRadius[0]);
+						my_options.borderBottomLeftRadius = round(borderRadius[1]);
+					} else {
+						my_options.borderTopLeftRadius = round(borderRadius[0]);
+						my_options.borderTopRightRadius = round(borderRadius[0]);
+						my_options.borderBottomRightRadius = round(borderRadius[0]);
+						my_options.borderBottomLeftRadius = round(borderRadius[0]);
+					}
+				}
+			}
+
+			if (new_options.borderTopLeftRadius !== undefined) {
+				my_options.borderTopLeftRadius = round(new_options.borderTopLeftRadius);
+			}
+
+			if (new_options.borderTopRightRadius !== undefined) {
+				my_options.borderTopRightRadius = round(new_options.borderTopRightRadius);
+			}
+
+			if (new_options.borderBottomRightRadius !== undefined) {
+				my_options.borderBottomRightRadius = round(new_options.borderBottomRightRadius);
+			}
+
+			if (new_options.borderBottomLeftRadius !== undefined) {
+				my_options.borderBottomLeftRadius = round(new_options.borderBottomLeftRadius);
 			}
 
 			if (new_options.borderWidth !== undefined) {

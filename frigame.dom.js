@@ -56,7 +56,10 @@
 	}
 
 	if (Modernizr.borderradius) {
-		fg.support.borderradius = Modernizr.prefixed('borderRadius');
+		fg.support.borderTopLeftRadius = Modernizr.prefixed('borderTopLeftRadius');
+		fg.support.borderTopRightRadius = Modernizr.prefixed('borderTopRightRadius');
+		fg.support.borderBottomRightRadius = Modernizr.prefixed('borderBottomRightRadius');
+		fg.support.borderBottomLeftRadius = Modernizr.prefixed('borderBottomLeftRadius');
 	}
 
 	// ******************************************************************** //
@@ -703,7 +706,10 @@
 				background = options.background,
 				backgroundType = options.backgroundType,
 				has_border = options.hasBorder,
-				border_radius = options.borderRadius,
+				top_left_radius = options.borderTopLeftRadius,
+				top_right_radius = options.borderTopRightRadius,
+				bottom_right_radius = options.borderBottomRightRadius,
+				bottom_left_radius = options.borderBottomLeftRadius,
 				border_width = (has_border && options.borderWidth) || 0,
 				border_color = has_border && options.borderColor,
 				border_width_changed = border_width !== old_options.borderWidth,
@@ -898,16 +904,54 @@
 					old_options.backgroundType = backgroundType;
 				}
 
-				if (support.borderradius && ((border_radius !== old_options.borderRadius) || border_width_changed)) {
-					if (border_radius) {
-						css_options[support.borderradius] = [String(border_radius + border_width), 'px'].join('');
-					} else {
-						css_options[support.borderradius] = '';
+				if (support.borderTopLeftRadius) {
+					if ((top_left_radius !== old_options.borderTopLeftRadius) || border_width_changed) {
+						if (top_left_radius) {
+							css_options[support.borderTopLeftRadius] = [String(top_left_radius + border_width), 'px'].join('');
+						} else {
+							css_options[support.borderTopLeftRadius] = '';
+						}
+
+						update_css = true;
+
+						old_options.borderTopLeftRadius = top_left_radius;
 					}
 
-					update_css = true;
+					if ((top_right_radius !== old_options.borderTopRightRadius) || border_width_changed) {
+						if (top_right_radius) {
+							css_options[support.borderTopRightRadius] = [String(top_right_radius + border_width), 'px'].join('');
+						} else {
+							css_options[support.borderTopRightRadius] = '';
+						}
 
-					old_options.borderRadius = border_radius;
+						update_css = true;
+
+						old_options.borderTopRightRadius = top_right_radius;
+					}
+
+					if ((bottom_right_radius !== old_options.borderBottomRightRadius) || border_width_changed) {
+						if (bottom_right_radius) {
+							css_options[support.borderBottomRightRadius] = [String(bottom_right_radius + border_width), 'px'].join('');
+						} else {
+							css_options[support.borderBottomRightRadius] = '';
+						}
+
+						update_css = true;
+
+						old_options.borderBottomRightRadius = bottom_right_radius;
+					}
+
+					if ((bottom_left_radius !== old_options.borderBottomLeftRadius) || border_width_changed) {
+						if (bottom_left_radius) {
+							css_options[support.borderBottomLeftRadius] = [String(bottom_left_radius + border_width), 'px'].join('');
+						} else {
+							css_options[support.borderBottomLeftRadius] = '';
+						}
+
+						update_css = true;
+
+						old_options.borderBottomLeftRadius = bottom_left_radius;
+					}
 				}
 
 				if (border_width_changed) {
