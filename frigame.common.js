@@ -1,4 +1,4 @@
-/*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: true, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
+/*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
 // Copyright (c) 2011-2015 Franco Bugnano
 
@@ -802,17 +802,18 @@
 			var
 				new_options = options || {},
 				round = fg.truncate,
+				max = Math.max,
 				change_radius
 			;
 
 			// width MUST have priority over halfWidth
 			if (new_options.width !== undefined) {
-				this.width = round(new_options.width);
-				this.halfWidth = round(new_options.width / 2);
+				this.width = max(round(new_options.width), 0);
+				this.halfWidth = max(round(new_options.width / 2), 0);
 				change_radius = true;
 			} else if (new_options.halfWidth !== undefined) {
-				this.width = round(new_options.halfWidth * 2);
-				this.halfWidth = round(new_options.halfWidth);
+				this.width = max(round(new_options.halfWidth * 2), 0);
+				this.halfWidth = max(round(new_options.halfWidth), 0);
 				change_radius = true;
 			} else {
 				// No width is being redefined
@@ -821,12 +822,12 @@
 
 			// height MUST have priority over halfHeight
 			if (new_options.height !== undefined) {
-				this.height = round(new_options.height);
-				this.halfHeight = round(new_options.height / 2);
+				this.height = max(round(new_options.height), 0);
+				this.halfHeight = max(round(new_options.height / 2), 0);
 				change_radius = true;
 			} else if (new_options.halfHeight !== undefined) {
-				this.height = round(new_options.halfHeight * 2);
-				this.halfHeight = round(new_options.halfHeight);
+				this.height = max(round(new_options.halfHeight * 2), 0);
+				this.halfHeight = max(round(new_options.halfHeight), 0);
 				change_radius = true;
 			} else {
 				// No height is being redefined
@@ -834,11 +835,11 @@
 			}
 
 			if (change_radius) {
-				this.radius = Math.max(this.halfWidth, this.halfHeight);
+				this.radius = max(this.halfWidth, this.halfHeight);
 			} else {
 				// Check if the radius is redefined only if width or height are not redefined
 				if (new_options.radius !== undefined) {
-					this.radius = round(new_options.radius);
+					this.radius = max(round(new_options.radius), 0);
 
 					this.width = this.radius * 2;
 					this.height = this.width;
@@ -2106,6 +2107,7 @@
 				my_options = this.options,
 				new_options = options || {},
 				borderRadius = new_options.borderRadius,
+				max = Math.max,
 				radius_length,
 				round = fg.truncate
 			;
@@ -2118,7 +2120,7 @@
 			// as an array, in order to set the radius for multiple corners at once
 			if (borderRadius !== undefined) {
 				if (typeof borderRadius === 'number') {
-					borderRadius = round(borderRadius);
+					borderRadius = max(round(borderRadius), 0);
 					my_options.borderTopLeftRadius = borderRadius;
 					my_options.borderTopRightRadius = borderRadius;
 					my_options.borderBottomRightRadius = borderRadius;
@@ -2126,47 +2128,47 @@
 				} else {
 					radius_length = borderRadius.length;
 					if (radius_length >= 4) {
-						my_options.borderTopLeftRadius = round(borderRadius[0]);
-						my_options.borderTopRightRadius = round(borderRadius[1]);
-						my_options.borderBottomRightRadius = round(borderRadius[2]);
-						my_options.borderBottomLeftRadius = round(borderRadius[3]);
+						my_options.borderTopLeftRadius = max(round(borderRadius[0]), 0);
+						my_options.borderTopRightRadius = max(round(borderRadius[1]), 0);
+						my_options.borderBottomRightRadius = max(round(borderRadius[2]), 0);
+						my_options.borderBottomLeftRadius = max(round(borderRadius[3]), 0);
 					} else if (radius_length === 3) {
-						my_options.borderTopLeftRadius = round(borderRadius[0]);
-						my_options.borderTopRightRadius = round(borderRadius[1]);
-						my_options.borderBottomRightRadius = round(borderRadius[2]);
-						my_options.borderBottomLeftRadius = round(borderRadius[1]);
+						my_options.borderTopLeftRadius = max(round(borderRadius[0]), 0);
+						my_options.borderTopRightRadius = max(round(borderRadius[1]), 0);
+						my_options.borderBottomRightRadius = max(round(borderRadius[2]), 0);
+						my_options.borderBottomLeftRadius = max(round(borderRadius[1]), 0);
 					} else if (radius_length === 2) {
-						my_options.borderTopLeftRadius = round(borderRadius[0]);
-						my_options.borderTopRightRadius = round(borderRadius[1]);
-						my_options.borderBottomRightRadius = round(borderRadius[0]);
-						my_options.borderBottomLeftRadius = round(borderRadius[1]);
+						my_options.borderTopLeftRadius = max(round(borderRadius[0]), 0);
+						my_options.borderTopRightRadius = max(round(borderRadius[1]), 0);
+						my_options.borderBottomRightRadius = max(round(borderRadius[0]), 0);
+						my_options.borderBottomLeftRadius = max(round(borderRadius[1]), 0);
 					} else {
-						my_options.borderTopLeftRadius = round(borderRadius[0]);
-						my_options.borderTopRightRadius = round(borderRadius[0]);
-						my_options.borderBottomRightRadius = round(borderRadius[0]);
-						my_options.borderBottomLeftRadius = round(borderRadius[0]);
+						my_options.borderTopLeftRadius = max(round(borderRadius[0]), 0);
+						my_options.borderTopRightRadius = max(round(borderRadius[0]), 0);
+						my_options.borderBottomRightRadius = max(round(borderRadius[0]), 0);
+						my_options.borderBottomLeftRadius = max(round(borderRadius[0]), 0);
 					}
 				}
 			}
 
 			if (new_options.borderTopLeftRadius !== undefined) {
-				my_options.borderTopLeftRadius = round(new_options.borderTopLeftRadius);
+				my_options.borderTopLeftRadius = max(round(new_options.borderTopLeftRadius), 0);
 			}
 
 			if (new_options.borderTopRightRadius !== undefined) {
-				my_options.borderTopRightRadius = round(new_options.borderTopRightRadius);
+				my_options.borderTopRightRadius = max(round(new_options.borderTopRightRadius), 0);
 			}
 
 			if (new_options.borderBottomRightRadius !== undefined) {
-				my_options.borderBottomRightRadius = round(new_options.borderBottomRightRadius);
+				my_options.borderBottomRightRadius = max(round(new_options.borderBottomRightRadius), 0);
 			}
 
 			if (new_options.borderBottomLeftRadius !== undefined) {
-				my_options.borderBottomLeftRadius = round(new_options.borderBottomLeftRadius);
+				my_options.borderBottomLeftRadius = max(round(new_options.borderBottomLeftRadius), 0);
 			}
 
 			if (new_options.borderWidth !== undefined) {
-				my_options.borderWidth = round(new_options.borderWidth);
+				my_options.borderWidth = max(round(new_options.borderWidth), 0);
 			}
 
 			if (my_options.borderColor && my_options.borderWidth) {

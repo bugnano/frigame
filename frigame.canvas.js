@@ -1,5 +1,5 @@
 /*global friGame */
-/*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: true, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
+/*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
 // Copyright (c) 2011-2015 Franco Bugnano
 
@@ -342,9 +342,6 @@
 
 					fg.ctx = canvas.getContext('2d');
 				}
-
-				// Set default options for the context
-				fg.ctx.lineCap = 'square';
 			}
 
 			// Call the overridden function last, in order to have the callbacks called once the object has been fully initialized
@@ -627,29 +624,30 @@
 			pi_2 = pi / 2
 		;
 
-		ctx.moveTo(x, y + top_left_radius);
-		ctx.lineTo(x, y + height - bottom_left_radius);
+		ctx.moveTo(x + top_left_radius, y);
 
-		if (bottom_left_radius) {
-			ctx.arc(x + bottom_left_radius, y + height - bottom_left_radius, bottom_left_radius, pi, pi_2, true);
-		}
-
-		ctx.lineTo(x + width - bottom_right_radius, y + height);
-
-		if (bottom_right_radius) {
-			ctx.arc(x + width - bottom_right_radius, y + height - bottom_right_radius, bottom_right_radius, pi_2, 0, true);
-		}
-
-		ctx.lineTo(x + width, y + top_right_radius);
+		ctx.lineTo(x + width - top_right_radius, y);
 
 		if (top_right_radius) {
-			ctx.arc(x + width - top_right_radius, y + top_right_radius, top_right_radius, 0, -pi_2, true);
+			ctx.arc(x + width - top_right_radius, y + top_right_radius, top_right_radius, -pi_2, 0);
 		}
 
-		ctx.lineTo(x + top_left_radius, y);
+		ctx.lineTo(x + width, y + height - bottom_right_radius);
+
+		if (bottom_right_radius) {
+			ctx.arc(x + width - bottom_right_radius, y + height - bottom_right_radius, bottom_right_radius, 0, pi_2);
+		}
+
+		ctx.lineTo(x + bottom_left_radius, y + height);
+
+		if (bottom_left_radius) {
+			ctx.arc(x + bottom_left_radius, y + height - bottom_left_radius, bottom_left_radius, pi_2, pi);
+		}
+
+		ctx.lineTo(x, y + top_left_radius);
 
 		if (top_left_radius) {
-			ctx.arc(x + top_left_radius, y + top_left_radius, top_left_radius, -pi_2, pi, true);
+			ctx.arc(x + top_left_radius, y + top_left_radius, top_left_radius, pi, -pi_2);
 		}
 	};
 }(friGame));
