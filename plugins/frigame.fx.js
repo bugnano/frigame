@@ -579,7 +579,7 @@
 				target_obj: target_obj,
 				remove: false,
 				current_step: 0,
-				num_step: Math.round(speed / fg.REFRESH_RATE) || 1,
+				num_step: Math.max(Math.round(speed / fg.REFRESH_RATE), 1) || 1,
 				easing: easing_list[new_options.easing] || easing_list.swing,
 				callback: new_options.callback,
 				property_list: []
