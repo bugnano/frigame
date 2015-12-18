@@ -621,33 +621,40 @@
 	fg.roundedRect = function (ctx, x, y, width, height, top_left_radius, top_right_radius, bottom_right_radius, bottom_left_radius) {
 		var
 			pi = Math.PI,
-			pi_2 = pi / 2
+			pi_2 = pi / 2,
+			right = x + width,
+			bottom = y + height,
+			top_left_x = x + top_left_radius,
+			top_right_x = right - top_right_radius,
+			bottom_right_y = bottom - bottom_right_radius,
+			bottom_left_x = x + bottom_left_radius,
+			top_left_y = y + top_left_radius
 		;
 
-		ctx.moveTo(x + top_left_radius, y);
+		ctx.moveTo(top_left_x, y);
 
-		ctx.lineTo(x + width - top_right_radius, y);
+		ctx.lineTo(top_right_x, y);
 
 		if (top_right_radius) {
-			ctx.arc(x + width - top_right_radius, y + top_right_radius, top_right_radius, -pi_2, 0);
+			ctx.arc(top_right_x, y + top_right_radius, top_right_radius, -pi_2, 0);
 		}
 
-		ctx.lineTo(x + width, y + height - bottom_right_radius);
+		ctx.lineTo(right, bottom_right_y);
 
 		if (bottom_right_radius) {
-			ctx.arc(x + width - bottom_right_radius, y + height - bottom_right_radius, bottom_right_radius, 0, pi_2);
+			ctx.arc(right - bottom_right_radius, bottom_right_y, bottom_right_radius, 0, pi_2);
 		}
 
-		ctx.lineTo(x + bottom_left_radius, y + height);
+		ctx.lineTo(bottom_left_x, bottom);
 
 		if (bottom_left_radius) {
-			ctx.arc(x + bottom_left_radius, y + height - bottom_left_radius, bottom_left_radius, pi_2, pi);
+			ctx.arc(bottom_left_x, bottom - bottom_left_radius, bottom_left_radius, pi_2, pi);
 		}
 
-		ctx.lineTo(x, y + top_left_radius);
+		ctx.lineTo(x, top_left_y);
 
 		if (top_left_radius) {
-			ctx.arc(x + top_left_radius, y + top_left_radius, top_left_radius, pi, -pi_2);
+			ctx.arc(top_left_x, top_left_y, top_left_radius, pi, -pi_2);
 		}
 	};
 }(friGame));

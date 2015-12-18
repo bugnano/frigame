@@ -284,15 +284,30 @@
 		},
 
 		removeResource: function (name) {
-			if (fg.r[name]) {
-				if (fg.r[name].remove) {
-					fg.r[name].remove();
+			var
+				resource = fg.r[name],
+				resourceManager = fg.resourceManager,
+				preload_list = resourceManager.preloadList,
+				len_preload_list = preload_list.length,
+				i
+			;
+
+			if (resource) {
+				if (resource.remove) {
+					resource.remove();
+				}
+
+				for (i = 0; i < len_preload_list; i += 1) {
+					if (preload_list[i] === resource) {
+						preload_list.splice(i, 1);
+						break;
+					}
 				}
 
 				delete fg.r[name];
 			}
 
-			return fg.resourceManager;
+			return resourceManager;
 		},
 
 		clear: function () {
@@ -546,7 +561,7 @@
 				'frameHeight'
 			]));
 
-			my_options.rate = Math.round(new_options.rate / fg.REFRESH_RATE) || 1;
+			my_options.rate = Math.max(Math.round(new_options.rate / fg.REFRESH_RATE), 1);
 
 			my_frameset = my_options.frameset;
 
@@ -1053,14 +1068,17 @@
 				parent_update_list,
 				len_parent_update_list,
 				name = this.name,
+				userData = this.userData,
 				i
 			;
 
-			if (this.userData && this.userData.remove) {
-				this.userData.remove();
-			}
-
+			// Set userData to null before calling its remove() method,
+			// in order to allow calling this.remove() inside userData.remove()
 			this.userData = null;
+
+			if (userData && userData.remove) {
+				userData.remove();
+			}
 
 			if (parent) {
 				parent_layers = fg.s[parent].layers;
@@ -1083,11 +1101,13 @@
 				}
 			}
 
-			delete fg.s[name];
+			if (fg.s[name]) {
+				delete fg.s[name];
+			}
 		},
 
 		registerCallback: function (callback, rate) {
-			rate = Math.round(rate / fg.REFRESH_RATE) || 1;
+			rate = Math.max(Math.round(rate / fg.REFRESH_RATE), 1);
 
 			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
 
@@ -1624,7 +1644,7 @@
 			animation_options = this.animation_options;
 
 			if (new_options.rate !== undefined) {
-				animation_options.rate = Math.round(new_options.rate / fg.REFRESH_RATE) || 1;
+				animation_options.rate = Math.max(Math.round(new_options.rate / fg.REFRESH_RATE), 1);
 			}
 
 			if (new_options.once !== undefined) {
@@ -1731,8 +1751,6 @@
 				currentSpriteSheet = options.currentSpriteSheet,
 				currentFrame = options.currentFrame
 			;
-
-			fg.PBaseSprite.update.call(this);
 
 			if (!(this.endAnimation || options.paused)) {
 				if (animation) {
@@ -1940,6 +1958,8 @@
 					}
 				}
 			}
+
+			fg.PBaseSprite.update.call(this);
 		}
 	});
 
@@ -2259,13 +2279,13 @@
 				i
 			;
 
-			fg.PBaseSprite.update.call(this);
-
 			for (i = 0; i < len_update_list; i += 1) {
 				if (update_list[i]) {
 					update_list[i].obj.update();
 				}
 			}
+
+			fg.PBaseSprite.update.call(this);
 		},
 
 		draw: function () {
