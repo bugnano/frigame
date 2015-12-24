@@ -689,5 +689,13 @@
 			});
 		}
 	});
+
+	fg.delay = function(duration, callback) {
+		return fg.fx.tween.call(fg, fg.fx.hooks, {}, {
+			easing: 'linear',
+			duration: duration,
+			callback: callback
+		});
+	};
 }(friGame));
 
