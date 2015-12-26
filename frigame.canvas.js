@@ -519,6 +519,8 @@
 					} else {
 						ctx.rect(0, 0, width, height);
 					}
+
+					ctx.closePath();
 				}
 
 				if (background) {
@@ -538,6 +540,8 @@
 					} else {
 						ctx.rect(-border_half_width, -border_half_width, width + border_width, height + border_width);
 					}
+
+					ctx.closePath();
 
 					border_color.setStrokeStyle(ctx, this);
 					ctx.lineWidth = border_width;
@@ -559,6 +563,8 @@
 						} else {
 							ctx.rect(0, 0, width, height);
 						}
+
+						ctx.closePath();
 					}
 
 					ctx.clip();
@@ -636,25 +642,25 @@
 		ctx.lineTo(top_right_x, y);
 
 		if (top_right_radius) {
-			ctx.arc(top_right_x, y + top_right_radius, top_right_radius, -pi_2, 0);
+			ctx.arc(top_right_x, y + top_right_radius, top_right_radius, -pi_2, 0, false);
 		}
 
 		ctx.lineTo(right, bottom_right_y);
 
 		if (bottom_right_radius) {
-			ctx.arc(right - bottom_right_radius, bottom_right_y, bottom_right_radius, 0, pi_2);
+			ctx.arc(right - bottom_right_radius, bottom_right_y, bottom_right_radius, 0, pi_2, false);
 		}
 
 		ctx.lineTo(bottom_left_x, bottom);
 
 		if (bottom_left_radius) {
-			ctx.arc(bottom_left_x, bottom - bottom_left_radius, bottom_left_radius, pi_2, pi);
+			ctx.arc(bottom_left_x, bottom - bottom_left_radius, bottom_left_radius, pi_2, pi, false);
 		}
 
 		ctx.lineTo(x, top_left_y);
 
 		if (top_left_radius) {
-			ctx.arc(top_left_x, top_left_y, top_left_radius, pi, -pi_2);
+			ctx.arc(top_left_x, top_left_y, top_left_radius, pi, -pi_2, false);
 		}
 	};
 }(friGame));

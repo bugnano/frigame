@@ -1,7 +1,7 @@
 /*global friGame, self */
 /*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
-// Copyright (c) 2011-2014 Franco Bugnano
+// Copyright (c) 2011-2015 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,9 +32,8 @@
 		fns = [],
 		fn,
 		testEl = document.documentElement,
-		hack = testEl.doScroll,
-		loadedRegex = hack ? /^loaded|^c/ : /^loaded|c/,
-		loaded = loadedRegex.test(document.readyState)
+		hack = (!document.addEventListener) && testEl.doScroll,
+		loaded = document.readyState === 'complete'
 	;
 
 	function flush() {
@@ -45,31 +44,40 @@
 		loaded = 1;
 		while (fns.length) {
 			f = fns.shift();
-			f();
+			f.call(fg, fg);
 		}
 	}
 
 	if (document.addEventListener) {
 		fn = function () {
 			document.removeEventListener('DOMContentLoaded', fn, false);
+			document.removeEventListener('load', fn, false);
 			flush();
 		};
 
 		document.addEventListener('DOMContentLoaded', fn, false);
+
+		// A fallback to window.onload, that will always work
+		document.addEventListener('load', fn, false);
 	} else if (document.attachEvent) {
 		fn = function () {
-			if (/^c/.test(document.readyState)) {
+			if (document.readyState === 'complete') {
 				document.detachEvent('onreadystatechange', fn);
+				document.detachEvent('onload', fn);
 				flush();
 			}
 		};
 
 		document.attachEvent('onreadystatechange', fn);
+
+		// A fallback to window.onload, that will always work
+		document.attachEvent('onload', fn);
 	}
 
 	fg.ready = function (callback) {
 		if (loaded) {
-			callback();
+			// Handle it asynchronously to allow scripts the opportunity to delay ready
+			setTimeout(function () { callback.call(fg, fg); }, 1);
 		} else {
 			if (hack) {
 				if (self !== top) {
@@ -79,17 +87,20 @@
 						try {
 							testEl.doScroll('left');
 						} catch (e) {
-							return setTimeout(function () { fg.ready(callback); }, 50);
+							setTimeout(function () { fg.ready(callback); }, 50);
+							return fg;
 						}
 
 						loaded = 1;
-						callback();
+						setTimeout(function () { callback.call(fg, fg); }, 1);
 					}());
 				}
 			} else {
 				fns.push(callback);
 			}
 		}
+
+		return fg;
 	};
 }(friGame));
 
