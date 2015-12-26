@@ -51,19 +51,19 @@
 	if (document.addEventListener) {
 		fn = function () {
 			document.removeEventListener('DOMContentLoaded', fn, false);
-			document.removeEventListener('load', fn, false);
+			window.removeEventListener('load', fn, false);
 			flush();
 		};
 
 		document.addEventListener('DOMContentLoaded', fn, false);
 
 		// A fallback to window.onload, that will always work
-		document.addEventListener('load', fn, false);
+		window.addEventListener('load', fn, false);
 	} else if (document.attachEvent) {
 		fn = function () {
 			if (document.readyState === 'complete') {
 				document.detachEvent('onreadystatechange', fn);
-				document.detachEvent('onload', fn);
+				window.detachEvent('onload', fn);
 				flush();
 			}
 		};
@@ -71,7 +71,7 @@
 		document.attachEvent('onreadystatechange', fn);
 
 		// A fallback to window.onload, that will always work
-		document.attachEvent('onload', fn);
+		window.attachEvent('onload', fn);
 	}
 
 	fg.ready = function (callback) {

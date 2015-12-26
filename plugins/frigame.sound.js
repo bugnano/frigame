@@ -87,7 +87,9 @@
 
 			// Setup Web Audio API
 			// Not all implementations have the window.onload event, so a fallback to the DOM Ready must be provided
-			if (window.onload !== undefined) {
+			if (document.readyState === 'complete') {
+				init();
+			} else if (window.onload !== undefined) {
 				window.addEventListener('load', init, false);
 			} else {
 				fg.ready(init);
