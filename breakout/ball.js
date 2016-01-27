@@ -5,7 +5,8 @@
 	'use strict';
 
 	var
-		ballCounter = 0
+		ballCounter = 0,
+		ballSpeed = 0.3 * fg.REFRESH_RATE
 	;
 
 	G.addBall = function (active) {
@@ -36,15 +37,16 @@
 	G.PBall = {
 		init: function (name, active) {
 			this.node = fg.s[name];
-			this.speed = 170 / (fg.REFRESH_RATE * 2);
 			this.active = active;
-			this.vel = {
-				x: this.speed,
-				y: this.speed
-			};
 
-			this.prevX = this.node.centerx;
-			this.prevY = this.node.centery;
+			this.vel = {};
+			fg.Vec2.fromMagAngle(this.vel, ballSpeed, Math.PI / 4);
+
+			this.x = this.node.centerx;
+			this.y = this.node.centery;
+
+			this.prevX = this.x;
+			this.prevY = this.y;
 		},
 
 		update: function () {
@@ -52,12 +54,15 @@
 				return;
 			}
 
-			this.prevX = this.node.centerx;
-			this.prevY = this.node.centery;
+			this.prevX = this.x;
+			this.prevY = this.y;
+
+			this.x += this.vel.x;
+			this.y += this.vel.y;
 
 			this.node.move({
-				centerx: this.node.centerx + this.vel.x,
-				centery: this.node.centery + this.vel.y
+				centerx: this.x,
+				centery: this.y
 			});
 
 			// did the ball get past the paddle?
@@ -89,8 +94,9 @@
 		checkWallCollision: function () {
 			// hit a vertical wall?
 			if ((this.node.left < 16) || (this.node.right >= (fg.s.playground.width - 16))) {
+				this.x = this.prevX;
 				this.node.move({
-					centerx: this.prevX
+					centerx: this.x
 				});
 				this.vel.x *= - 1;
 				return;
@@ -98,8 +104,9 @@
 
 			// or the top horizontal wall?
 			if (this.node.top < 16) {
+				this.y = this.prevY;
 				this.node.move({
-					centery: this.prevY
+					centery: this.y
 				});
 				this.vel.y *= - 1;
 				return;
@@ -115,26 +122,30 @@
 			$.each(G.blocks, function (name, block) {
 				if (block.collidePointRect(ball.centerx, ball.top) && (ball_data.vel.y < 0)) {
 					G.onBlockDeath(block);
+					ball_data.y = ball_data.prevY;
 					ball.move({
-						centery: ball_data.prevY
+						centery: ball_data.y
 					});
 					ball_data.vel.y *= -1;
 				} else if (block.collidePointRect(ball.centerx, ball.bottom) && (ball_data.vel.y > 0)) {
 					G.onBlockDeath(block);
+					ball_data.y = ball_data.prevY;
 					ball.move({
-						centery: ball_data.prevY
+						centery: ball_data.y
 					});
 					ball_data.vel.y *= -1;
 				} else if (block.collidePointRect(ball.left, ball.centery) && (ball_data.vel.x < 0)) {
 					G.onBlockDeath(block);
+					ball_data.x = ball_data.prevX;
 					ball.move({
-						centerx: ball_data.prevX
+						centerx: ball_data.x
 					});
 					ball_data.vel.x *= -1;
 				} else if (block.collidePointRect(ball.right, ball.centery) && (ball_data.vel.x > 0)) {
 					G.onBlockDeath(block);
+					ball_data.x = ball_data.prevX;
 					ball.move({
-						centerx: ball_data.prevX
+						centerx: ball_data.x
 					});
 					ball_data.vel.x *= -1;
 				}
@@ -144,19 +155,23 @@
 		checkPaddleCollision: function () {
 			if (this.vel.y > 0) {
 				if (fg.s.paddle.collidePointRect(this.node.centerx, this.node.bottom) && (this.vel.y > 0)) {
+					this.x = this.prevX;
+					this.y = this.prevY;
 					this.node.move({
-						centery: this.prevY
+						centerx: this.x,
+						centery: this.y
 					});
-					this.vel.x = this.determineBounceVelocity();
-					this.vel.y *= -1;
+					this.determineBounceVelocity();
 				} else if (fg.s.paddle.collidePointRect(this.node.left, this.node.centery) && (this.vel.x < 0)) {
+					this.x = this.prevX;
 					this.node.move({
-						centerx: this.prevX
+						centerx: this.x
 					});
 					this.vel.x *= -1;
 				} else if (fg.s.paddle.collidePointRect(this.node.right, this.node.centery) && (this.vel.x > 0)) {
+					this.x = this.prevX;
 					this.node.move({
-						centerx: this.prevX
+						centerx: this.x
 					});
 					this.vel.x *= -1;
 				}
@@ -165,18 +180,13 @@
 
 		determineBounceVelocity: function () {
 			var
-				dx = fg.s.paddle.centerx - this.node.centerx,
-				dy = fg.s.paddle.centery - this.node.centery,
-				distance = Math.sqrt((dx * dx) + (dy * dy)),
-				magnitude = distance - this.node.halfHeight - fg.s.paddle.halfHeight,
-				ratio = magnitude / fg.s.paddle.halfWidth * 2.5
+				delta = {
+					x: this.prevX - fg.s.paddle.centerx,
+					y: this.prevY - fg.s.paddle.centery
+				}
 			;
 
-			if (this.node.centerx < fg.s.paddle.centerx) {
-				ratio *= -1;
-			}
-
-			return this.speed * ratio;
+			fg.Vec2.fromMagAngle(this.vel, ballSpeed, fg.Vec2.azimuth(delta));
 		}
 	};
 
