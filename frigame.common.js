@@ -126,6 +126,7 @@
 		// Implementation details
 
 		playgroundCallbacks: [],
+		running: false,
 		idUpdate: null,
 		idDraw: null,
 		nextUpdate: 0,
@@ -388,12 +389,9 @@
 
 				// Trigger the update before the completeCallback in order to allow calling stopGame
 				// from the completeCallback
-				if ((fg.idUpdate === null) && (fg.s.playground)) {
+				if (fg.running && (fg.idUpdate === null) && fg.s.playground) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
-					if (fg.idDraw === null) {
-						fg.idDraw = requestAnimFrame(fg.draw);
-					}
+					fg.idUpdate = setTimeout(fg.update, 4);
 				}
 
 				if (completeCallback) {
@@ -2356,12 +2354,9 @@
 				}
 				playground_callbacks.splice(0, len_playground_callbacks);
 
-				if (fg.idUpdate === null) {
+				if (fg.running && (fg.idUpdate === null)) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setInterval(fg.update, fg.REFRESH_RATE);
-					if (fg.idDraw === null) {
-						fg.idDraw = requestAnimFrame(fg.draw);
-					}
+					fg.idUpdate = setTimeout(fg.update, 4);
 				}
 			}
 
@@ -2372,6 +2367,8 @@
 			var
 				resourceManager = fg.resourceManager
 			;
+
+			fg.running = true;
 
 			if (callback !== undefined) {
 				resourceManager.completeCallback = callback;
@@ -2392,8 +2389,10 @@
 		},
 
 		stopGame: function () {
+			fg.running = false;
+
 			if (fg.idUpdate !== null) {
-				clearInterval(fg.idUpdate);
+				clearTimeout(fg.idUpdate);
 				fg.idUpdate = null;
 			}
 
@@ -2447,6 +2446,14 @@
 				fg.nextUpdate = next_update;
 
 				fg.needsRedraw = true;
+				if (fg.idDraw === null) {
+					fg.idDraw = requestAnimFrame(fg.draw);
+				}
+			}
+
+			if (fg.running) {
+				// Avoid the spiral of death by always leaving at least 4 ms between updates
+				fg.idUpdate = setTimeout(fg.update, 4);
 			}
 		},
 
@@ -2455,11 +2462,7 @@
 				playground = fg.s.playground
 			;
 
-			if (fg.idUpdate !== null) {
-				fg.idDraw = requestAnimFrame(fg.draw);
-			} else {
-				fg.idDraw = null;
-			}
+			fg.idDraw = null;
 
 			if (fg.needsRedraw) {
 				playground.draw();
