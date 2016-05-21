@@ -1107,7 +1107,7 @@
 		registerCallback: function (callback, rate) {
 			rate = Math.max(Math.round(rate / fg.REFRESH_RATE), 1) || 1;
 
-			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0});
+			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0, remove: false});
 
 			this.checkUpdate();
 
@@ -1118,32 +1118,34 @@
 			var
 				callbacks = this.callbacks,
 				len_callbacks = callbacks.length,
-				remove_callbacks = [],
-				len_remove_callbacks,
+				callback_obj,
 				i
 			;
 
 			for (i = 0; i < len_callbacks; i += 1) {
-				// The same callback function might have been registered more than once
-				if (callbacks[i].callback === callback) {
-					remove_callbacks.unshift(i);
+				callback_obj = callbacks[i];
+				if (callback_obj.callback === callback) {
+					// Mark the callback to be removed at the next update
+					callback_obj.remove = true;
+
+					// Don't end the loop here, as the same callback function might have been registered more than once
 				}
 			}
-
-			len_remove_callbacks = remove_callbacks.length;
-			for (i = 0; i < len_remove_callbacks; i += 1) {
-				callbacks.splice(remove_callbacks[i], 1);
-			}
-
-			this.checkUpdate();
 
 			return this;
 		},
 
 		clearCallbacks: function () {
-			this.callbacks.splice(0, this.callbacks.length);
+			var
+				callbacks = this.callbacks,
+				len_callbacks = callbacks.length,
+				i
+			;
 
-			this.checkUpdate();
+			for (i = 0; i < len_callbacks; i += 1) {
+				// Mark the callback to be removed at the next update
+				callbacks[i].remove = true;
+			}
 
 			return this;
 		},
@@ -1516,7 +1518,7 @@
 			var
 				callbacks = this.callbacks,
 				len_callbacks = callbacks.length,
-				callback,
+				callback_obj,
 				retval,
 				remove_callbacks = [],
 				len_remove_callbacks,
@@ -1524,20 +1526,28 @@
 			;
 
 			for (i = 0; i < len_callbacks; i += 1) {
-				callback = callbacks[i];
-				callback.idleCounter += 1;
-				if (callback.idleCounter >= callback.rate) {
-					callback.idleCounter = 0;
-					retval = callback.callback.call(this, this);
-					if (retval) {
-						remove_callbacks.unshift(i);
+				callback_obj = callbacks[i];
+				if (callback_obj.remove) {
+					remove_callbacks.unshift(i);
+				} else {
+					callback_obj.idleCounter += 1;
+					if (callback_obj.idleCounter >= callback_obj.rate) {
+						callback_obj.idleCounter = 0;
+						retval = callback_obj.callback.call(this, this);
+						if (retval) {
+							remove_callbacks.unshift(i);
+						}
 					}
 				}
 			}
 
 			len_remove_callbacks = remove_callbacks.length;
-			for (i = 0; i < len_remove_callbacks; i += 1) {
-				callbacks.splice(remove_callbacks[i], 1);
+			if (len_remove_callbacks) {
+				for (i = 0; i < len_remove_callbacks; i += 1) {
+					callbacks.splice(remove_callbacks[i], 1);
+				}
+
+				this.checkUpdate();
 			}
 		}
 	});
@@ -2453,7 +2463,7 @@
 
 			if (fg.running) {
 				// Avoid the spiral of death by always leaving at least 4 ms between updates
-				fg.idUpdate = setTimeout(fg.update, 4);
+				fg.idUpdate = setTimeout(fg.update, Math.max(4, refresh_rate - (performance.now() - now)));
 			}
 		},
 
