@@ -2422,7 +2422,17 @@
 		},
 
 		playgroundCallback: function (callback) {
-			fg.playgroundCallbacks.push(callback);
+			var
+				playground = fg.s.playground
+			;
+
+			if (!playground) {
+				fg.playgroundCallbacks.push(callback);
+			} else {
+				setTimeout(function () {
+					callback.call(playground, playground.parentDOM);
+				}, 0);
+			}
 
 			return this;
 		},
