@@ -305,6 +305,7 @@
 					}
 				}
 
+				fg.r[name] = null;
 				delete fg.r[name];
 			}
 
@@ -629,6 +630,7 @@
 				animation = this,
 				frameset = this.options.frameset,
 				len_frameset = frameset.length,
+				remove_images = [],
 				i
 			;
 
@@ -648,8 +650,23 @@
 				imageURL = frameset[i].imageURL;
 				PAnimation.images[imageURL].refCount -= 1;
 				if (PAnimation.images[imageURL].refCount <= 0) {
+					// Free the memory by setting the image src to a small one
+					PAnimation.images[imageURL].img.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
+					// Keep a reference to the small image, in order to trigger the delayed garbage collection
+					remove_images.push(PAnimation.images[imageURL].img);
+
+					PAnimation.images[imageURL] = null;
 					delete PAnimation.images[imageURL];
 				}
+			}
+
+			// If there are images to remove, delay their removal
+			if (remove_images.length) {
+				setTimeout(function () {
+					remove_images.splice(0, remove_images.length);
+					remove_images = null;
+				}, 60000);
 			}
 		},
 
@@ -1100,6 +1117,7 @@
 			}
 
 			if (fg.s[name]) {
+				fg.s[name] = null;
 				delete fg.s[name];
 			}
 		},

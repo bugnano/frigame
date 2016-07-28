@@ -175,16 +175,19 @@
 				if (gradient_groups[name] !== undefined) {
 					// Get the gradient dimension according to the group name
 					dimension = gradient_groups[name];
+					gradient_groups[name] = null;
 					delete gradient_groups[name];
 
 					if (gradients[dimension]) {
 						gradient_groups = gradients[dimension].groups;
 						if (gradient_groups[name]) {
 							// Remove the group from the dimension
+							gradient_groups[name] = null;
 							delete gradient_groups[name];
 							if (fg.isEmptyObject(gradient_groups)) {
 								// If no groups are using this dimension, delete the gradient
 								gl.deleteBuffer(gradients[dimension].vertexPositionBuffer);
+								gradients[dimension] = null;
 								delete gradients[dimension];
 							}
 						}
