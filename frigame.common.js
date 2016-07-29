@@ -630,7 +630,6 @@
 				animation = this,
 				frameset = this.options.frameset,
 				len_frameset = frameset.length,
-				remove_images = [],
 				i
 			;
 
@@ -650,23 +649,9 @@
 				imageURL = frameset[i].imageURL;
 				PAnimation.images[imageURL].refCount -= 1;
 				if (PAnimation.images[imageURL].refCount <= 0) {
-					// Free the memory by setting the image src to a small one
-					PAnimation.images[imageURL].img.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-
-					// Keep a reference to the small image, in order to trigger the delayed garbage collection
-					remove_images.push(PAnimation.images[imageURL].img);
-
 					PAnimation.images[imageURL] = null;
 					delete PAnimation.images[imageURL];
 				}
-			}
-
-			// If there are images to remove, delay their removal
-			if (remove_images.length) {
-				setTimeout(function () {
-					remove_images.splice(0, remove_images.length);
-					remove_images = null;
-				}, 60000);
 			}
 		},
 
@@ -1095,7 +1080,7 @@
 				userData.remove();
 			}
 
-			if (parent) {
+			if (parent && (!fg.s[parent].clearing)) {
 				parent_layers = fg.s[parent].layers;
 				len_parent_layers = parent_layers.length;
 				for (i = 0; i < len_parent_layers; i += 1) {
@@ -2041,6 +2026,8 @@
 			this.needsUpdate = true;
 			this.updateList = [];
 
+			this.clearing = false;
+
 			// If the background has not been defined, force
 			// the background to null in order to be
 			// symmetric with the sprite and setAnimation
@@ -2095,12 +2082,21 @@
 
 		clear: function () {
 			var
-				layers = this.layers
+				layers = this.layers,
+				len_layers = layers.length,
+				i
 			;
 
-			while (layers.length) {
-				layers[0].obj.remove();
+			this.clearing = true;
+
+			for (i = 0; i < len_layers; i += 1) {
+				layers[i].obj.remove();
 			}
+
+			this.clearing = false;
+
+			this.layers = [];
+			this.updateList = [];
 
 			return this;
 		},
