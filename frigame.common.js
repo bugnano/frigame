@@ -2499,7 +2499,11 @@
 				playground = fg.s.playground
 			;
 
-			fg.idDraw = requestAnimFrame(fg.draw);
+			if (fg.running) {
+				fg.idDraw = requestAnimFrame(fg.draw);
+			} else {
+				fg.idDraw = null;
+			}
 
 			if (fg.needsRedraw) {
 				playground.draw();
