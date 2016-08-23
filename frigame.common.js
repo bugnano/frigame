@@ -393,6 +393,9 @@
 				if (fg.running && (fg.idUpdate === null) && fg.s.playground) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setTimeout(fg.update, 4);
+					if (fg.idDraw === null) {
+						fg.idDraw = requestAnimFrame(fg.draw);
+					}
 				}
 
 				if (completeCallback) {
@@ -2381,6 +2384,9 @@
 				if (fg.running && (fg.idUpdate === null)) {
 					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
 					fg.idUpdate = setTimeout(fg.update, 4);
+					if (fg.idDraw === null) {
+						fg.idDraw = requestAnimFrame(fg.draw);
+					}
 				}
 			}
 
@@ -2480,9 +2486,6 @@
 				fg.nextUpdate = next_update;
 
 				fg.needsRedraw = true;
-				if (fg.idDraw === null) {
-					fg.idDraw = requestAnimFrame(fg.draw);
-				}
 			}
 
 			if (fg.running) {
@@ -2496,7 +2499,7 @@
 				playground = fg.s.playground
 			;
 
-			fg.idDraw = null;
+			fg.idDraw = requestAnimFrame(fg.draw);
 
 			if (fg.needsRedraw) {
 				playground.draw();
