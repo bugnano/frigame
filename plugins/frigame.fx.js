@@ -631,6 +631,7 @@
 
 		removeTween: function (name) {
 			var
+				found = false,
 				queue = fg.s.playground.fx.queue,
 				len_queue = queue.length,
 				i_queue,
@@ -640,9 +641,16 @@
 			for (i_queue = 0; i_queue < len_queue; i_queue += 1) {
 				tween_obj = queue[i_queue];
 				if ((tween_obj.target_obj === this) && (tween_obj.name === name)) {
+					found = true;
+
 					// Mark this object for removal
 					tween_obj.remove = true;
 				}
+			}
+
+			if (window.console && (!found)) {
+				console.warn(['Tween with name', name, 'does not exist'].join(' '));
+				console.trace();
 			}
 
 			return this;

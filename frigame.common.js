@@ -278,6 +278,11 @@
 		// Public functions
 
 		addResource: function (name, resource) {
+			if (window.console && fg.r[name]) {
+				console.error(['Resource with name', name, 'already exists'].join(' '));
+				console.trace();
+			}
+
 			fg.resourceManager.preloadList.push(resource);
 			fg.r[name] = resource;
 
@@ -307,6 +312,11 @@
 
 				fg.r[name] = null;
 				delete fg.r[name];
+			} else {
+				if (window.console) {
+					console.warn(['Resource with name', name, 'already removed'].join(' '));
+					console.trace();
+				}
 			}
 
 			return resourceManager;
@@ -1044,6 +1054,11 @@
 				posOffsetY: 0
 			});
 
+			if (window.console && fg.s[name]) {
+				console.error(['Sprite with name', name, 'already exists'].join(' '));
+				console.trace();
+			}
+
 			fg.s[name] = this;
 
 			// name and parent are public read-only properties
@@ -1107,6 +1122,11 @@
 			if (fg.s[name]) {
 				fg.s[name] = null;
 				delete fg.s[name];
+			} else {
+				if (window.console) {
+					console.warn(['Sprite with name', name, 'already removed'].join(' '));
+					console.trace();
+				}
 			}
 		},
 
@@ -1122,6 +1142,7 @@
 
 		removeCallback: function (callback) {
 			var
+				found = false,
 				callbacks = this.callbacks,
 				len_callbacks = callbacks.length,
 				callback_obj,
@@ -1131,11 +1152,18 @@
 			for (i = 0; i < len_callbacks; i += 1) {
 				callback_obj = callbacks[i];
 				if (callback_obj.callback === callback) {
+					found = true;
+
 					// Mark the callback to be removed at the next update
 					callback_obj.remove = true;
 
 					// Don't end the loop here, as the same callback function might have been registered more than once
 				}
+			}
+
+			if (window.console && (!found)) {
+				console.warn('No callbacks removed');
+				console.trace();
 			}
 
 			return this;
@@ -1637,6 +1665,11 @@
 					new_options.width = animation_options.frameWidth;
 					new_options.height = animation_options.frameHeight;
 				} else {
+					if (window.console && new_options.animation) {
+						console.error(['Animation with name', new_options.animation, 'does not exist'].join(' '));
+						console.trace();
+					}
+
 					animation_options = null;
 
 					new_options.width = 0;
@@ -2137,7 +2170,12 @@
 			;
 
 			if (new_options.background !== undefined) {
-				my_options.background = fg.r[new_options.background];
+				my_options.background = fg.r[new_options.background] || null;
+
+				if (window.console && new_options.background && (!my_options.background)) {
+					console.error(['Background with name', new_options.background, 'does not exist'].join(' '));
+					console.trace();
+				}
 			}
 
 			if (new_options.backgroundType !== undefined) {
@@ -2158,7 +2196,12 @@
 			;
 
 			if (new_options.borderColor !== undefined) {
-				my_options.borderColor = fg.r[new_options.borderColor];
+				my_options.borderColor = fg.r[new_options.borderColor] || null;
+
+				if (window.console && new_options.borderColor && (!my_options.borderColor)) {
+					console.error(['Color with name', new_options.borderColor, 'does not exist'].join(' '));
+					console.trace();
+				}
 			}
 
 			// Support the borderRadius shorthand property both as a single number and
