@@ -2444,6 +2444,13 @@
 			fg.running = true;
 
 			if (callback !== undefined) {
+				if (window.console && callback && resourceManager.completeCallback) {
+					if (window.console) {
+						console.warn('Overriding the existing startGame callback');
+						console.trace();
+					}
+				}
+
 				resourceManager.completeCallback = callback;
 			}
 
