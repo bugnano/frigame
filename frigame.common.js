@@ -1140,8 +1140,9 @@
 			return this;
 		},
 
-		removeCallback: function (callback) {
+		removeCallback: function (callback, options) {
 			var
+				new_options = options || {},
 				found = false,
 				callbacks = this.callbacks,
 				len_callbacks = callbacks.length,
@@ -1161,7 +1162,7 @@
 				}
 			}
 
-			if (window.console && (!found)) {
+			if (window.console && (!found) && (!new_options.suppressWarning)) {
 				console.warn('No callbacks removed');
 				console.trace();
 			}

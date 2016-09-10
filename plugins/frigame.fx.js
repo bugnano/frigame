@@ -629,8 +629,9 @@
 			}
 		},
 
-		removeTween: function (name) {
+		removeTween: function (name, options) {
 			var
+				new_options = options || {},
 				found = false,
 				queue = fg.s.playground.fx.queue,
 				len_queue = queue.length,
@@ -648,7 +649,7 @@
 				}
 			}
 
-			if (window.console && (!found)) {
+			if (window.console && (!found) && (!new_options.suppressWarning)) {
 				console.warn(['Tween with name', name, 'does not exist'].join(' '));
 				console.trace();
 			}
