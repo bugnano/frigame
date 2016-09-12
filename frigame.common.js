@@ -1269,6 +1269,29 @@
 			return this;
 		},
 
+		getDrawIndex: function () {
+			var
+				parent = this.parent,
+				parent_layers,
+				len_parent_layers,
+				name = this.name,
+				i
+			;
+
+			if (parent) {
+				parent_layers = fg.s[parent].layers;
+				len_parent_layers = parent_layers.length;
+
+				for (i = 0; i < len_parent_layers; i += 1) {
+					if (parent_layers[i].name === name) {
+						return i;
+					}
+				}
+			}
+
+			return 0;
+		},
+
 		drawTo: function (index) {
 			var
 				parent = this.parent,
@@ -1302,6 +1325,7 @@
 
 		drawBefore: function (name) {
 			var
+				found = false,
 				parent = this.parent,
 				parent_layers,
 				len_parent_layers,
@@ -1326,6 +1350,7 @@
 				// Step 2: Find the position and insert myself
 				for (i = 0; i < len_parent_layers; i += 1) {
 					if (parent_layers[i].name === name) {
+						found = true;
 						break;
 					}
 				}
@@ -1335,11 +1360,17 @@
 				}
 			}
 
+			if (window.console && (!found)) {
+				console.error(['Sprite with name', name, 'not found in the same sprite group'].join(' '));
+				console.trace();
+			}
+
 			return this;
 		},
 
 		drawAfter: function (name) {
 			var
+				found = false,
 				parent = this.parent,
 				parent_layers,
 				len_parent_layers,
@@ -1364,6 +1395,8 @@
 				// Step 2: Find the position and insert myself
 				for (i = 0; i < len_parent_layers; i += 1) {
 					if (parent_layers[i].name === name) {
+						found = true;
+
 						// The insertion is done after this one
 						i += 1;
 						break;
@@ -1373,6 +1406,11 @@
 				if (obj) {
 					parent_layers.splice(i, 0, obj);
 				}
+			}
+
+			if (window.console && (!found)) {
+				console.error(['Sprite with name', name, 'not found in the same sprite group'].join(' '));
+				console.trace();
 			}
 
 			return this;
