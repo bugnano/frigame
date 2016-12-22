@@ -210,6 +210,10 @@
 			return ((a.x * b.x) + (a.y * b.y));
 		},
 
+		cross: function (a, b) {
+			return ((a.x * b.y) - (a.y * b.x));
+		},
+
 		lerp: function (out, a, b, t) {
 			var
 				ax = a.x,
