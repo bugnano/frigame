@@ -34,6 +34,8 @@
 
 			out.x = Math.cos(angle);
 			out.y = Math.sin(angle);
+
+			return out;
 		},
 
 		random: function (out, scale) {
@@ -49,11 +51,15 @@
 			mag = Math.random() * scale;
 			out.x = Math.cos(angle) * mag;
 			out.y = Math.sin(angle) * mag;
+
+			return out;
 		},
 
 		clone: function (out, a) {
 			out.x = a.x;
 			out.y = a.y;
+
+			return out;
 		},
 
 		magnitude: function (a) {
@@ -81,21 +87,29 @@
 		fromMagAngle: function (out, mag, angle) {
 			out.x = Math.cos(angle) * mag;
 			out.y = Math.sin(angle) * mag;
+
+			return out;
 		},
 
 		fromValues: function (out, x, y) {
 			out.x = x;
 			out.y = y;
+
+			return out;
 		},
 
 		scale: function (out, value) {
 			out.x *= value;
 			out.y *= value;
+
+			return out;
 		},
 
 		invert: function (out) {
 			out.x *= -1;
 			out.y *= -1;
+
+			return out;
 		},
 
 		normalize: function (out) {
@@ -111,16 +125,22 @@
 
 			out.x = x * mag;
 			out.y = y * mag;
+
+			return out;
 		},
 
 		add: function (out, a) {
 			out.x += a.x;
 			out.y += a.y;
+
+			return out;
 		},
 
 		subtract: function (out, a) {
 			out.x -= a.x;
 			out.y -= a.y;
+
+			return out;
 		},
 
 		rotate: function (out, angle) {
@@ -133,6 +153,8 @@
 
 			out.x = (x * cos) - (y * sin);
 			out.y = (y * cos) + (x * sin);
+
+			return out;
 		},
 
 		rotateAroundPoint: function (out, a, axisPoint, angle) {
@@ -144,6 +166,8 @@
 			Vec2.subtract(out, axisPoint);
 			Vec2.rotate(out, angle);
 			Vec2.add(out, axisPoint);
+
+			return out;
 		},
 
 		equals: function (a, b) {
@@ -171,11 +195,15 @@
 		sum: function (out, a, b) {
 			out.x = a.x + b.x;
 			out.y = a.y + b.y;
+
+			return out;
 		},
 
 		difference: function (out, a, b) {
 			out.x = a.x - b.x;
 			out.y = a.y - b.y;
+
+			return out;
 		},
 
 		dot: function (a, b) {
@@ -190,6 +218,8 @@
 
 			out.x = ax + (t * (b.x - ax));
 			out.y = ay + (t * (b.y - ay));
+
+			return out;
 		}
 	};
 }(friGame));
