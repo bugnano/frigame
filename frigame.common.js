@@ -961,33 +961,20 @@
 
 		collidePointRect: function (x, y) {
 			return	(
-					((x >= this.left) && (x < this.right))
-				&&	((y >= this.top) && (y < this.bottom))
+					(x >= this.left)
+				&&	(x < this.right)
+				&&	(y >= this.top)
+				&&	(y < this.bottom)
 			);
 		},
 
 		collideRect: function (otherRect) {
-			var
-				my_left = this.left,
-				my_right = this.right,
-				my_top = this.top,
-				my_bottom = this.bottom,
-				other_left = otherRect.left,
-				other_right = otherRect.right,
-				other_top = otherRect.top,
-				other_bottom = otherRect.bottom
-			;
-
-			return	(
-						(
-							((my_left >= other_left) && (my_left < other_right))
-						||	((other_left >= my_left) && (other_left < my_right))
-						)
-					&&	(
-							((my_top >= other_top) && (my_top < other_bottom))
-						||	((other_top >= my_top) && (other_top < my_bottom))
-						)
-			);
+			return	(!(
+					(this.bottom <= otherRect.top)
+				||	(this.top >= otherRect.bottom)
+				||	(this.left >= otherRect.right)
+				||	(this.right <= otherRect.left)
+			));
 		},
 
 		collidePointCircle: function (x, y) {
