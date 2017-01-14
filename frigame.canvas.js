@@ -234,7 +234,7 @@
 	// ******************************************************************** //
 
 	fg.extend(fg.PSprite, {
-		draw: function () {
+		draw: function (interp) {
 			var
 				options = this.options,
 				animation = options.animation,
@@ -389,7 +389,7 @@
 
 		// Implementation details
 
-		draw: function () {
+		draw: function (interp) {
 			var
 				options = this.options,
 				old_options = this.old_options,

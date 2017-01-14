@@ -147,10 +147,9 @@
 
 		playgroundCallbacks: [],
 		running: false,
-		idUpdate: null,
 		idDraw: null,
-		nextUpdate: 0,
-		needsRedraw: false,
+		currentTime: 0,
+		accumulator: 0,
 		absLeft: 0,
 		absTop: 0
 	});
@@ -420,12 +419,10 @@
 
 				// Trigger the update before the completeCallback in order to allow calling stopGame
 				// from the completeCallback
-				if (fg.running && (fg.idUpdate === null) && fg.s.playground) {
-					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setTimeout(fg.update, 4);
-					if (fg.idDraw === null) {
-						fg.idDraw = requestAnimFrame(fg.draw);
-					}
+				if (fg.running && (fg.idDraw === null) && fg.s.playground) {
+					fg.accumulator = 0;
+					fg.currentTime = performance.now();
+					fg.idDraw = requestAnimFrame(fg.draw);
 				}
 
 				if (completeCallback) {
@@ -2402,7 +2399,7 @@
 			fg.PBaseSprite.update.call(this);
 		},
 
-		draw: function () {
+		draw: function (interp) {
 			var
 				left = this.left,
 				top = this.top,
@@ -2415,7 +2412,7 @@
 			fg.absTop += top;
 
 			for (i = 0; i < len_layers; i += 1) {
-				layers[i].obj.draw();
+				layers[i].obj.draw(interp);
 			}
 
 			fg.absLeft -= left;
@@ -2470,12 +2467,10 @@
 				}
 				playground_callbacks.splice(0, len_playground_callbacks);
 
-				if (fg.running && (fg.idUpdate === null)) {
-					fg.nextUpdate = performance.now() + fg.REFRESH_RATE;
-					fg.idUpdate = setTimeout(fg.update, 4);
-					if (fg.idDraw === null) {
-						fg.idDraw = requestAnimFrame(fg.draw);
-					}
+				if (fg.running && (fg.idDraw === null)) {
+					fg.accumulator = 0;
+					fg.currentTime = performance.now();
+					fg.idDraw = requestAnimFrame(fg.draw);
 				}
 			}
 
@@ -2517,11 +2512,6 @@
 		stopGame: function () {
 			fg.running = false;
 
-			if (fg.idUpdate !== null) {
-				clearTimeout(fg.idUpdate);
-				fg.idUpdate = null;
-			}
-
 			return this;
 		},
 
@@ -2554,8 +2544,6 @@
 		},
 
 		forceRedraw: function () {
-			fg.needsRedraw = true;
-
 			if (fg.idDraw === null) {
 				fg.idDraw = requestAnimFrame(fg.draw);
 			}
@@ -2565,47 +2553,43 @@
 
 		// Implementation details
 
-		update: function () {
+		draw: function (timestamp) {
 			var
 				playground = fg.s.playground,
-				now = performance.now(),
-				next_update = fg.nextUpdate,
-				refresh_rate = fg.REFRESH_RATE
-			;
-
-			if ((now - next_update) >= refresh_rate) {
-				while ((now - next_update) >= refresh_rate) {
-					playground.update();
-					next_update += refresh_rate;
-				}
-
-				fg.nextUpdate = next_update;
-
-				fg.needsRedraw = true;
-			}
-
-			if (fg.running) {
-				// Avoid the spiral of death by always leaving at least 4 ms between updates
-				fg.idUpdate = setTimeout(fg.update, Math.max(4, refresh_rate - (performance.now() - now)));
-			}
-		},
-
-		draw: function () {
-			var
-				playground = fg.s.playground
+				dt = fg.REFRESH_RATE,
+				numUpdateSteps = 0,
+				accumulator = fg.accumulator,
+				newTime = timestamp, //performance.now(),
+				frameTime = newTime - fg.currentTime
 			;
 
 			if (fg.running) {
 				fg.idDraw = requestAnimFrame(fg.draw);
+
+				fg.currentTime = newTime;
+				accumulator += frameTime;
+
+				if (accumulator >= dt) {
+					while (accumulator >= dt) {
+						playground.update();
+						accumulator -= dt;
+
+						// Avoid the spiral of death
+						numUpdateSteps += 1;
+						if (numUpdateSteps >= 240) {
+							accumulator = 0;
+							// TO DO -- Maybe a callback should be called here
+							break;
+						}
+					}
+				}
+
+				fg.accumulator = accumulator;
 			} else {
 				fg.idDraw = null;
 			}
 
-			if (fg.needsRedraw) {
-				playground.draw();
-
-				fg.needsRedraw = false;
-			}
+			playground.draw(accumulator / dt);
 		},
 
 		insidePlayground: function (sprite) {

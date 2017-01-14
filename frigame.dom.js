@@ -389,7 +389,7 @@
 
 		// Implementation details
 
-		draw: function () {
+		draw: function (interp) {
 			var
 				options = this.options,
 				old_options = this.old_options,
@@ -694,7 +694,7 @@
 
 		// Implementation details
 
-		draw: function () {
+		draw: function (interp) {
 			var
 				options = this.options,
 				old_options = this.old_options,
