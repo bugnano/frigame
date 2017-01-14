@@ -399,10 +399,12 @@
 				animation = options.animation,
 				sprite_sheet,
 				imageURL,
-				insidePlayground = fg.insidePlayground(this),
 				dom = this.dom,
 				left = this.left,
 				top = this.top,
+				width = this.width,
+				height = this.height,
+				insidePlayground = fg.insidePlayground(left, top, width, height),
 				multix = options.multix,
 				multiy = options.multiy,
 				angle = options.angle,
@@ -496,8 +498,8 @@
 
 				if (animation !== old_options.animation) {
 					$.extend(css_options, {
-						'width': [String(this.width), 'px'].join(''),
-						'height': [String(this.height), 'px'].join('')
+						'width': [String(width), 'px'].join(''),
+						'height': [String(height), 'px'].join('')
 					});
 					update_css = true;
 					update_position = true;

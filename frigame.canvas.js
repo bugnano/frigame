@@ -236,6 +236,7 @@
 	fg.extend(fg.PSprite, {
 		draw: function (interp) {
 			var
+				round = Math.round,
 				options = this.options,
 				animation = options.animation,
 				angle = options.angle,
@@ -244,16 +245,37 @@
 				alpha = options.alpha,
 				old_alpha,
 				sprite_sheet,
+				left = this.left,
+				top = this.top,
 				width = this.width,
 				height = this.height,
+				halfWidth = this.halfWidth,
+				halfHeight = this.halfHeight,
+				prevLeft = this.prevLeft,
+				prevTop = this.prevTop,
+				frameCounter = fg.frameCounter - 1,
+				insidePlayground,
 				currentFrame = options.currentFrame,
 				ctx = fg.ctx
 			;
 
-			if (fg.insidePlayground(this) && animation && alpha && scaleh && scalev && !options.hidden) {
+			if ((left !== prevLeft) || (top !== prevTop)) {
+				if (frameCounter !== this.frameCounterLastMove) {
+					this.prevLeft = left;
+					this.prevTop = top;
+					this.frameCounterLastMove = frameCounter;
+				} else {
+					top = round((top * interp) + (prevTop * (1 - interp)));
+					left = round((left * interp) + (prevLeft * (1 - interp)));
+				}
+			}
+
+			insidePlayground = fg.insidePlayground(left, top, width, height);
+
+			if (insidePlayground && animation && alpha && scaleh && scalev && !options.hidden) {
 				ctx.save();
 
-				ctx.translate(this.centerx, this.centery);
+				ctx.translate(left + halfWidth, top + halfHeight);
 
 				if (angle) {
 					ctx.rotate(angle);
@@ -277,8 +299,8 @@
 					sprite_sheet.offsety + options.multiy + (currentFrame * sprite_sheet.deltay),
 					width,
 					height,
-					-(this.halfWidth),
-					-(this.halfHeight),
+					-halfWidth,
+					-halfHeight,
 					width,
 					height
 				);
@@ -391,6 +413,7 @@
 
 		draw: function (interp) {
 			var
+				round = Math.round,
 				options = this.options,
 				old_options = this.old_options,
 				parent = this.parent,
@@ -398,8 +421,13 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
-				insidePlayground = fg.insidePlayground(this),
-				background = insidePlayground && options.background,
+				halfWidth = this.halfWidth,
+				halfHeight = this.halfHeight,
+				prevLeft = this.prevLeft,
+				prevTop = this.prevTop,
+				frameCounter = fg.frameCounter - 1,
+				insidePlayground,
+				background,
 				old_background = old_options.background,
 				top_left_radius = options.borderTopLeftRadius,
 				top_right_radius = options.borderTopRightRadius,
@@ -408,10 +436,10 @@
 				border_radius = top_left_radius || top_right_radius || bottom_right_radius || bottom_left_radius,
 				border_width = options.borderWidth,
 				border_half_width = border_width / 2,
-				border_color = insidePlayground && border_width && options.borderColor,
+				border_color,
 				old_border_color = old_options.borderColor,
-				background_changed = background !== old_background,
-				border_changed = border_color !== old_border_color,
+				background_changed,
+				border_changed,
 				size_changed = (width !== old_options.width) || (height !== old_options.height),
 				angle = options.angle,
 				scaleh = options.scaleh,
@@ -428,6 +456,23 @@
 				ctx.clearRect(0, 0, width, height);
 				fg.globalAlpha = 1;
 			}
+
+			if ((left !== prevLeft) || (top !== prevTop)) {
+				if (frameCounter !== this.frameCounterLastMove) {
+					this.prevLeft = left;
+					this.prevTop = top;
+					this.frameCounterLastMove = frameCounter;
+				} else {
+					top = round((top * interp) + (prevTop * (1 - interp)));
+					left = round((left * interp) + (prevLeft * (1 - interp)));
+				}
+			}
+
+			insidePlayground = fg.insidePlayground(left, top, width, height);
+			background = insidePlayground && options.background;
+			border_color = insidePlayground && border_width && options.borderColor;
+			background_changed = background !== old_background;
+			border_changed = border_color !== old_border_color;
 
 			if (insidePlayground) {
 				if (background_changed || border_changed || size_changed) {
@@ -483,7 +528,7 @@
 					ctx.save();
 					context_saved = true;
 
-					ctx.translate(this.centerx, this.centery);
+					ctx.translate(left + halfWidth, top + halfHeight);
 
 					if (angle) {
 						ctx.rotate(angle);
@@ -493,7 +538,7 @@
 						ctx.scale(scaleh, scalev);
 					}
 
-					ctx.translate(-this.halfWidth, -this.halfHeight);
+					ctx.translate(-halfWidth, -halfHeight);
 				} else if (left || top) {
 					ctx.save();
 					context_saved = true;

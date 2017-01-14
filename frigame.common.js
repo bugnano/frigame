@@ -151,7 +151,8 @@
 		currentTime: 0,
 		accumulator: 0,
 		absLeft: 0,
-		absTop: 0
+		absTop: 0,
+		frameCounter: 0
 	});
 
 	// r is mapped to resources and s is mapped to sprites in order to have a more convenient
@@ -1075,9 +1076,15 @@
 			// Implementation details
 			this.callbacks = [];
 			this.needsUpdate = false;
+			this.frameCounterLastMove = fg.frameCounter;
+			this.prevLeft = 0;
+			this.prevTop = 0;
 
 			// Call fg.PRect.init after setting this.parent
 			fg.PRect.init.call(this, options);
+
+			this.prevLeft = this.left;
+			this.prevTop = this.top;
 		},
 
 		// Public functions
@@ -1548,6 +1555,20 @@
 			}
 
 			return fg.Rect({left: left, top: top, width: this.width, height: this.height});
+		},
+
+		move: function (options) {
+			var
+				frameCounter = fg.frameCounter
+			;
+
+			if (frameCounter !== this.frameCounterLastMove) {
+				this.prevLeft = this.left;
+				this.prevTop = this.top;
+				this.frameCounterLastMove = frameCounter;
+			}
+
+			fg.PRect.move.apply(this, arguments);
 		},
 
 		// Implementation details
@@ -2401,8 +2422,9 @@
 
 		draw: function (interp) {
 			var
-				left = this.left,
-				top = this.top,
+				round = Math.round,
+				left = round((this.left * interp) + (this.prevLeft * (1 - interp))),
+				top = round((this.top * interp) + (this.prevTop * (1 - interp))),
 				layers = this.layers,
 				len_layers = layers.length,
 				i
@@ -2574,6 +2596,8 @@
 						playground.update();
 						accumulator -= dt;
 
+						fg.frameCounter += 1;
+
 						// Avoid the spiral of death
 						numUpdateSteps += 1;
 						if (numUpdateSteps >= 240) {
@@ -2592,23 +2616,19 @@
 			playground.draw(accumulator / dt);
 		},
 
-		insidePlayground: function (sprite) {
+		insidePlayground: function (left, top, width, height) {
 			var
 				playground = fg.s.playground,
-				sprite_left = fg.absLeft + sprite.left,
-				sprite_top = fg.absTop + sprite.top
+				sprite_left = fg.absLeft + left,
+				sprite_top = fg.absTop + top
 			;
 
-			return	(
-						(
-							((sprite_left >= 0) && (sprite_left < playground.right))
-						||	((0 >= sprite_left) && (0 < (sprite_left + sprite.width)))
-						)
-					&&	(
-							((sprite_top >= 0) && (sprite_top < playground.bottom))
-						||	((0 >= sprite_top) && (0 < (sprite_top + sprite.height)))
-						)
-			);
+			return	(!(
+					((sprite_top + height) <= 0)
+				||	(sprite_top >= playground.height)
+				||	(sprite_left >= playground.width)
+				||	((sprite_left + width) <= 0)
+			));
 		}
 	});
 }());
