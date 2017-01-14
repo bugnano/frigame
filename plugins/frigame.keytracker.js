@@ -1,7 +1,7 @@
-/*global jQuery, friGame */
+/*global friGame */
 /*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
-// Copyright (c) 2011-2016 Franco Bugnano
+// Copyright (c) 2011-2017 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 // Uses ideas and APIs inspired by:
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
-(function ($, fg) {
+(function (fg) {
 	'use strict';
 
 	// Some constants that map to the keyCode
@@ -76,33 +76,41 @@
 
 	fg.keyTracker = {};
 
+	function onKeydown(e) {
+		var
+			key = e.keyCode,
+			keycodes = fg.keyCodes
+		;
+
+		if (keycodes[key] !== undefined) {
+			key = keycodes[key];
+		}
+
+		fg.keyTracker[key] = true;
+	}
+
+	function onKeyup(e) {
+		var
+			key = e.keyCode,
+			keycodes = fg.keyCodes
+		;
+
+		if (keycodes[key] !== undefined) {
+			key = keycodes[key];
+		}
+
+		fg.keyTracker[key] = false;
+	}
+
 	// keyTracker inside a startCallback in order to have effect only after startGame
 	fg.startCallback(function () {
-		$(document).keydown(function (e) {
-			var
-				key = e.keyCode,
-				keycodes = fg.keyCodes
-			;
-
-			if (keycodes[key] !== undefined) {
-				key = keycodes[key];
-			}
-
-			fg.keyTracker[key] = true;
-		});
-
-		$(document).keyup(function (e) {
-			var
-				key = e.keyCode,
-				keycodes = fg.keyCodes
-			;
-
-			if (keycodes[key] !== undefined) {
-				key = keycodes[key];
-			}
-
-			fg.keyTracker[key] = false;
-		});
+		if (document.addEventListener) {
+			document.addEventListener('keydown', onKeydown, false);
+			document.addEventListener('keyup', onKeyup, false);
+		} else if (document.attachEvent) {
+			document.attachEvent('onkeydown', onKeydown);
+			document.attachEvent('onkeyup', onKeyup);
+		}
 	});
-}(jQuery, friGame));
+}(friGame));
 

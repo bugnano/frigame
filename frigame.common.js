@@ -1,6 +1,6 @@
 /*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
-// Copyright (c) 2011-2016 Franco Bugnano
+// Copyright (c) 2011-2017 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,16 +29,36 @@
 	var
 		fg = {},
 
-		// shim layer with setTimeout fallback by Paul Irish
+		// shim layer with setTimeout fallback by Paul Irish / Erik Moller
 		requestAnimFrame = (function () {
-			return window.requestAnimationFrame ||
-				window.webkitRequestAnimationFrame ||
-				window.mozRequestAnimationFrame ||
-				window.oRequestAnimationFrame ||
-				window.msRequestAnimationFrame ||
-				function (callback) {
-					return window.setTimeout(callback, 1000 / 60);
+			var
+				lastTime = 0,
+				vendors = ['ms', 'moz', 'webkit', 'o'],
+				request = window.requestAnimationFrame,
+				x
+			;
+
+			for (x = 0; (x < vendors.length) && (!request); x += 1) {
+				request = window[vendors[x] + 'RequestAnimationFrame'];
+			}
+
+			if (!request) {
+				request = function (callback) {
+					var
+						currTime = (new Date()).getTime(),
+						timeToCall = Math.max(0, 16 - (currTime - lastTime)),
+						id = window.setTimeout(function () {
+							callback(currTime + timeToCall);
+						}, timeToCall)
+					;
+
+					lastTime = currTime + timeToCall;
+
+					return id;
 				};
+			}
+
+			return request;
 		}())
 	;
 
