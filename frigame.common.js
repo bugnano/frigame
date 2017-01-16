@@ -28,51 +28,11 @@
 
 	var
 		fg = {},
-
-		// shim layer with setTimeout fallback by Paul Irish / Erik Moller
-		requestAnimFrame = (function () {
-			var
-				lastTime = 0,
-				vendors = ['ms', 'moz', 'webkit', 'o'],
-				request = window.requestAnimationFrame,
-				x
-			;
-
-			for (x = 0; (x < vendors.length) && (!request); x += 1) {
-				request = window[vendors[x] + 'RequestAnimationFrame'];
-			}
-
-			if (!request) {
-				request = function (callback) {
-					var
-						currTime = (new Date()).getTime(),
-						timeToCall = Math.max(0, 16 - (currTime - lastTime)),
-						id = window.setTimeout(function () {
-							callback(currTime + timeToCall);
-						}, timeToCall)
-					;
-
-					lastTime = currTime + timeToCall;
-
-					return id;
-				};
-			}
-
-			return request;
-		}())
+		requestAnimFrame
 	;
 
 	// The friGame namespace
 	window.friGame = fg;
-
-	// Prototypal Inheritance by Douglas Crockford
-	if (typeof Object.create !== 'function') {
-		Object.create = function (o) {
-			function F() {}
-			F.prototype = o;
-			return new F();
-		};
-	}
 
 	// Date.now() by Mozilla
 	if (!Date.now) {
@@ -94,6 +54,47 @@
 					window.performance.webkitNow ||
 					Date.now;
 		}());
+	}
+
+	// shim layer with setTimeout fallback by Paul Irish / Erik Moller
+	requestAnimFrame = (function () {
+		var
+			lastTime = 0,
+			vendors = ['ms', 'moz', 'webkit', 'o'],
+			request = window.requestAnimationFrame,
+			x
+		;
+
+		for (x = 0; (x < vendors.length) && (!request); x += 1) {
+			request = window[vendors[x] + 'RequestAnimationFrame'];
+		}
+
+		if (!request) {
+			request = function (callback) {
+				var
+					currTime = performance.now(),
+					timeToCall = Math.max(0, 16 - (currTime - lastTime)),
+					id = window.setTimeout(function () {
+						callback(currTime + timeToCall);
+					}, timeToCall)
+				;
+
+				lastTime = currTime + timeToCall;
+
+				return id;
+			};
+		}
+
+		return request;
+	}());
+
+	// Prototypal Inheritance by Douglas Crockford
+	if (typeof Object.create !== 'function') {
+		Object.create = function (o) {
+			function F() {}
+			F.prototype = o;
+			return new F();
+		};
 	}
 
 	// Extend a given object with all the properties of the source object
