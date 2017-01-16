@@ -269,12 +269,8 @@
 	$.extend(fg.PBaseSprite, {
 		// Implementation details
 
-		transform: function () {
+		transform: function (angle, scaleh, scalev) {
 			var
-				options = this.options,
-				angle = options.angle,
-				scaleh = options.scaleh,
-				scalev = options.scalev,
 				transform = []
 			;
 
@@ -289,12 +285,8 @@
 			return transform.join('');
 		},
 
-		ieTransform: function () {
+		ieTransform: function (angle, scaleh, scalev) {
 			var
-				options = this.options,
-				angle = options.angle,
-				scaleh = options.scaleh,
-				scalev = options.scalev,
 				cos,
 				sin,
 				filter
@@ -318,9 +310,8 @@
 			this.ieFilters.matrix = filter;
 		},
 
-		ieAlpha: function () {
+		ieAlpha: function (alpha) {
 			var
-				alpha = this.options.alpha,
 				filter
 			;
 
@@ -334,7 +325,7 @@
 			this.ieFilters.alpha = filter;
 		},
 
-		applyIeFilters: function () {
+		applyIeFilters: function (left, top, width, height) {
 			var
 				dom = this.dom,
 				options = this.options,
@@ -350,11 +341,11 @@
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
 			newHeight = dom.height();
-			options.posOffsetX = round((newWidth - this.width) / 2);
-			options.posOffsetY = round((newHeight - this.height) / 2);
+			options.posOffsetX = round((newWidth - width) / 2);
+			options.posOffsetY = round((newHeight - height) / 2);
 			dom.css({
-				'left': [String(this.left - options.posOffsetX), 'px'].join(''),
-				'top': [String(this.top - options.posOffsetY), 'px'].join('')
+				'left': [String(left - options.posOffsetX), 'px'].join(''),
+				'top': [String(top - options.posOffsetY), 'px'].join('')
 			});
 		}
 	});
@@ -391,6 +382,7 @@
 
 		draw: function (interp) {
 			var
+				round = Math.round,
 				options = this.options,
 				old_options = this.old_options,
 				parent = this.parent,
@@ -404,7 +396,10 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
-				insidePlayground = fg.insidePlayground(left, top, width, height),
+				prevLeft = this.prevLeft,
+				prevTop = this.prevTop,
+				frameCounter = fg.frameCounter - 1,
+				insidePlayground,
 				multix = options.multix,
 				multiy = options.multiy,
 				angle = options.angle,
@@ -421,6 +416,19 @@
 				apply_ie_filters = false,
 				last_sprite = fg.last_sprite
 			;
+
+			if ((left !== prevLeft) || (top !== prevTop)) {
+				if (frameCounter !== this.frameCounterLastMove) {
+					this.prevLeft = left;
+					this.prevTop = top;
+					this.frameCounterLastMove = frameCounter;
+				} else {
+					top = round((top * interp) + (prevTop * (1 - interp)));
+					left = round((left * interp) + (prevLeft * (1 - interp)));
+				}
+			}
+
+			insidePlayground = fg.insidePlayground(left, top, width, height);
 
 			if (insidePlayground && animation && alpha && scaleh && scalev && !options.hidden) {
 				if (!dom) {
@@ -545,10 +553,10 @@
 					}
 
 					if (transformFunction) {
-						css_options[transformFunction] = this.transform();
+						css_options[transformFunction] = this.transform(angle, scaleh, scalev);
 						update_css = true;
 					} else if (ieFilter) {
-						this.ieTransform();
+						this.ieTransform(angle, scaleh, scalev);
 						update_css = true;
 						apply_ie_filters = true;
 					} else {
@@ -573,7 +581,7 @@
 						}
 						update_css = true;
 					} else if (ieFilter) {
-						this.ieAlpha();
+						this.ieAlpha(alpha);
 						update_css = true;
 						apply_ie_filters = true;
 					} else {
@@ -588,7 +596,7 @@
 				}
 
 				if (ieFilter && apply_ie_filters) {
-					this.applyIeFilters();
+					this.applyIeFilters(left, top, width, height);
 				}
 			} else {
 				if (dom) {
@@ -698,6 +706,7 @@
 
 		draw: function (interp) {
 			var
+				round = Math.round,
 				options = this.options,
 				old_options = this.old_options,
 				parent = this.parent,
@@ -705,6 +714,9 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
+				prevLeft = this.prevLeft,
+				prevTop = this.prevTop,
+				frameCounter = fg.frameCounter - 1,
 				background = options.background,
 				backgroundType = options.backgroundType,
 				has_border = options.hasBorder,
@@ -736,6 +748,17 @@
 			if (!parent) {
 				last_sprite = name;
 				fg.last_sprite = last_sprite;
+			}
+
+			if ((left !== prevLeft) || (top !== prevTop)) {
+				if (frameCounter !== this.frameCounterLastMove) {
+					this.prevLeft = left;
+					this.prevTop = top;
+					this.frameCounterLastMove = frameCounter;
+				} else {
+					top = round((top * interp) + (prevTop * (1 - interp)));
+					left = round((left * interp) + (prevLeft * (1 - interp)));
+				}
 			}
 
 			if ((this.layers.length || background || border_color) && alpha && scaleh && scalev && !options.hidden) {
@@ -838,10 +861,10 @@
 					}
 
 					if (transformFunction) {
-						css_options[transformFunction] = this.transform();
+						css_options[transformFunction] = this.transform(angle, scaleh, scalev);
 						update_css = true;
 					} else if (ieFilter) {
-						this.ieTransform();
+						this.ieTransform(angle, scaleh, scalev);
 						update_css = true;
 						apply_ie_filters = true;
 					} else {
@@ -866,7 +889,7 @@
 						}
 						update_css = true;
 					} else if (ieFilter) {
-						this.ieAlpha();
+						this.ieAlpha(alpha);
 						update_css = true;
 						apply_ie_filters = true;
 					} else {
@@ -999,7 +1022,7 @@
 				}
 
 				if (ieFilter && apply_ie_filters) {
-					this.applyIeFilters();
+					this.applyIeFilters(left, top, width, height);
 				}
 
 				overrides.PSpriteGroup.draw.apply(this, arguments);
