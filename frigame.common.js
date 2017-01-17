@@ -47,7 +47,7 @@
 	}
 
 	if (!window.performance.now) {
-		window.performance.now = (function() {
+		window.performance.now = (function () {
 			return	window.performance.mozNow ||
 					window.performance.msNow ||
 					window.performance.oNow ||

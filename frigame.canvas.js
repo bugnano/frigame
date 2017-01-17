@@ -244,6 +244,7 @@
 				scalev = options.scalev,
 				alpha = options.alpha,
 				old_alpha,
+				alpha_changed,
 				sprite_sheet,
 				left = this.left,
 				top = this.top,
@@ -273,39 +274,63 @@
 			insidePlayground = fg.insidePlayground(left, top, width, height);
 
 			if (insidePlayground && animation && alpha && scaleh && scalev && !options.hidden) {
-				ctx.save();
-
-				ctx.translate(left + halfWidth, top + halfHeight);
-
-				if (angle) {
-					ctx.rotate(angle);
-				}
-
-				if ((scaleh !== 1) || (scalev !== 1)) {
-					ctx.scale(scaleh, scalev);
-				}
+				sprite_sheet = this.animation_options.frameset[options.currentSpriteSheet];
 
 				old_alpha = fg.globalAlpha;
 				if (alpha !== 1) {
+					// Don't save the entire context only for alpha changes
 					fg.globalAlpha *= alpha;
 					ctx.globalAlpha = fg.globalAlpha;
+					alpha_changed = true;
+				} else {
+					alpha_changed = false;
 				}
 
-				sprite_sheet = this.animation_options.frameset[options.currentSpriteSheet];
-				fg.safeDrawImage(
-					ctx,
-					sprite_sheet.img,
-					sprite_sheet.offsetx + options.multix + (currentFrame * sprite_sheet.deltax),
-					sprite_sheet.offsety + options.multiy + (currentFrame * sprite_sheet.deltay),
-					width,
-					height,
-					-halfWidth,
-					-halfHeight,
-					width,
-					height
-				);
+				if (angle || (scaleh !== 1) || (scalev !== 1)) {
+					ctx.save();
 
-				ctx.restore();
+					ctx.translate(left + halfWidth, top + halfHeight);
+
+					if (angle) {
+						ctx.rotate(angle);
+					}
+
+					if ((scaleh !== 1) || (scalev !== 1)) {
+						ctx.scale(scaleh, scalev);
+					}
+
+					fg.safeDrawImage(
+						ctx,
+						sprite_sheet.img,
+						sprite_sheet.offsetx + options.multix + (currentFrame * sprite_sheet.deltax),
+						sprite_sheet.offsety + options.multiy + (currentFrame * sprite_sheet.deltay),
+						width,
+						height,
+						-halfWidth,
+						-halfHeight,
+						width,
+						height
+					);
+
+					ctx.restore();
+				} else {
+					fg.safeDrawImage(
+						ctx,
+						sprite_sheet.img,
+						sprite_sheet.offsetx + options.multix + (currentFrame * sprite_sheet.deltax),
+						sprite_sheet.offsety + options.multiy + (currentFrame * sprite_sheet.deltay),
+						width,
+						height,
+						left,
+						top,
+						width,
+						height
+					);
+				}
+
+				if (alpha_changed) {
+					ctx.globalAlpha = old_alpha;
+				}
 
 				fg.globalAlpha = old_alpha;
 			}
