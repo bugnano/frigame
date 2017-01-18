@@ -66,11 +66,11 @@
 		}
 
 		for (i = 0; i <= 9; i += 1){
-			keycodes[i + 96] = ['num', String(i)].join ('');
+			keycodes[i + 96] = 'num' + String(i);
 		}
 
 		for (i = 1; i <= 12; i += 1){
-			keycodes[i + 111] = ['f', String(i)].join ('');
+			keycodes[i + 111] = 'f' + String(i);
 		}
 	}());
 

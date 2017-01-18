@@ -300,7 +300,7 @@
 
 		addResource: function (name, resource) {
 			if (window.console && fg.r[name]) {
-				console.error(['Resource with name', name, 'already exists'].join(' '));
+				console.error('Resource with name ' + name + ' already exists');
 				console.trace();
 			}
 
@@ -335,7 +335,7 @@
 				delete fg.r[name];
 			} else {
 				if (window.console) {
-					console.warn(['Resource with name', name, 'already removed'].join(' '));
+					console.warn('Resource with name ' + name + ' already removed');
 					console.trace();
 				}
 			}
@@ -463,7 +463,7 @@
 				startColor.g = clamp(round(startColor.g), 0, 255);
 				startColor.b = clamp(round(startColor.b), 0, 255);
 				startColor.a = clamp(startColor.a, 0, 1);
-				this.startColorStr = ['rgba(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ',', String(startColor.a), ')'].join('');
+				this.startColorStr = 'rgba(' + String(startColor.r) + ',' + String(startColor.g) + ',' + String(startColor.b) + ',' + String(startColor.a) + ')';
 			}
 
 			if (endColor) {
@@ -479,7 +479,7 @@
 				endColor.g = clamp(round(endColor.g), 0, 255);
 				endColor.b = clamp(round(endColor.b), 0, 255);
 				endColor.a = clamp(endColor.a, 0, 1);
-				this.endColorStr = ['rgba(', String(endColor.r), ',', String(endColor.g), ',', String(endColor.b), ',', String(endColor.a), ')'].join('');
+				this.endColorStr = 'rgba(' + String(endColor.r) + ',' + String(endColor.g) + ',' + String(endColor.b) + ',' + String(endColor.a) + ')';
 
 				if (this.startColorStr === this.endColorStr) {
 					this.endColor = this.startColor;
@@ -1061,7 +1061,7 @@
 			});
 
 			if (window.console && fg.s[name]) {
-				console.error(['Sprite with name', name, 'already exists'].join(' '));
+				console.error('Sprite with name ' + name + ' already exists');
 				console.trace();
 			}
 
@@ -1136,7 +1136,7 @@
 				delete fg.s[name];
 			} else {
 				if (window.console) {
-					console.warn(['Sprite with name', name, 'already removed'].join(' '));
+					console.warn('Sprite with name ' + name + ' already removed');
 					console.trace();
 				}
 			}
@@ -1373,7 +1373,7 @@
 			}
 
 			if (window.console && (!found)) {
-				console.error(['Sprite with name', name, 'not found in the same sprite group'].join(' '));
+				console.error('Sprite with name ' + name + ' not found in the same sprite group');
 				console.trace();
 			}
 
@@ -1421,7 +1421,7 @@
 			}
 
 			if (window.console && (!found)) {
-				console.error(['Sprite with name', name, 'not found in the same sprite group'].join(' '));
+				console.error('Sprite with name ' + name + ' not found in the same sprite group');
 				console.trace();
 			}
 
@@ -1731,7 +1731,7 @@
 					new_options.height = animation_options.frameHeight;
 				} else {
 					if (window.console && new_options.animation) {
-						console.error(['Animation with name', new_options.animation, 'does not exist'].join(' '));
+						console.error('Animation with name ' + new_options.animation + ' does not exist');
 						console.trace();
 					}
 
@@ -2238,7 +2238,7 @@
 				my_options.background = fg.r[new_options.background] || null;
 
 				if (window.console && new_options.background && (!my_options.background)) {
-					console.error(['Background with name', new_options.background, 'does not exist'].join(' '));
+					console.error('Background with name ' + new_options.background + ' does not exist');
 					console.trace();
 				}
 			}
@@ -2264,7 +2264,7 @@
 				my_options.borderColor = fg.r[new_options.borderColor] || null;
 
 				if (window.console && new_options.borderColor && (!my_options.borderColor)) {
-					console.error(['Color with name', new_options.borderColor, 'does not exist'].join(' '));
+					console.error('Color with name ' + new_options.borderColor + ' does not exist');
 					console.trace();
 				}
 			}

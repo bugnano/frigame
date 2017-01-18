@@ -650,7 +650,7 @@
 			}
 
 			if (window.console && (!found) && (!new_options.suppressWarning)) {
-				console.warn(['Tween with name', name, 'does not exist'].join(' '));
+				console.warn('Tween with name ' + name + ' does not exist');
 				console.trace();
 			}
 

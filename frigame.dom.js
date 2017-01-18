@@ -90,13 +90,13 @@
 
 			// If used as a border, only the solid color is supported
 			if (startColor.a === 1) {
-				this.solid_color = ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('');
+				this.solid_color = 'rgb(' + String(startColor.r) + ',' + String(startColor.g) + ',' + String(startColor.b) + ')';
 			} else {
 				if (support.rgba) {
 					this.solid_color = this.startColorStr;
 				} else {
 					// Alpha not supported, use a simple rgb color
-					this.solid_color = ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('');
+					this.solid_color = 'rgb(' + String(startColor.r) + ',' + String(startColor.g) + ',' + String(startColor.b) + ')';
 				}
 			}
 
@@ -104,7 +104,7 @@
 				// Solid color
 				if (startColor.a === 1) {
 					this.css_options = {
-						'background-color': ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('')
+						'background-color': 'rgb(' + String(startColor.r) + ',' + String(startColor.g) + ',' + String(startColor.b) + ')'
 					};
 				} else {
 					if (support.rgba) {
@@ -113,25 +113,25 @@
 						};
 					} else if (support.ieFilter) {
 						// Alpha supported through proprietary filter
-						str_a = ['0', Math.round(startColor.a * 255).toString(16).toUpperCase()].join('');
-						str_r = ['0', startColor.r.toString(16).toUpperCase()].join('');
-						str_g = ['0', startColor.g.toString(16).toUpperCase()].join('');
-						str_b = ['0', startColor.b.toString(16).toUpperCase()].join('');
-						start_color_string = ['#', str_a.slice(str_a.length - 2), str_r.slice(str_r.length - 2), str_g.slice(str_g.length - 2), str_b.slice(str_b.length - 2)].join('');
+						str_a = '0' + Math.round(startColor.a * 255).toString(16).toUpperCase();
+						str_r = '0' + startColor.r.toString(16).toUpperCase();
+						str_g = '0' + startColor.g.toString(16).toUpperCase();
+						str_b = '0' + startColor.b.toString(16).toUpperCase();
+						start_color_string = '#' + str_a.slice(str_a.length - 2) + str_r.slice(str_r.length - 2) + str_g.slice(str_g.length - 2) + str_b.slice(str_b.length - 2);
 
-						this.ie_filter = ['progid:DXImageTransform.Microsoft.Gradient(GradientType=0,startColorstr="', start_color_string, '",endColorstr="', start_color_string, '")'].join('');
+						this.ie_filter = 'progid:DXImageTransform.Microsoft.Gradient(GradientType=0,startColorstr="' + start_color_string + '",endColorstr="' + start_color_string + '")';
 					} else {
 						// Alpha not supported, use a simple rgb color
 						this.css_options = {
-							'background-color': ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('')
+							'background-color': 'rgb(' + String(startColor.r) + ',' + String(startColor.g) + ',' + String(startColor.b) + ')'
 						};
 					}
 				}
 			} else {
 				// Gradient
 				if (support.svg) {
-					start_color_string = ['rgb(', String(startColor.r), ',', String(startColor.g), ',', String(startColor.b), ')'].join('');
-					end_color_string = ['rgb(', String(endColor.r), ',', String(endColor.g), ',', String(endColor.b), ')'].join('');
+					start_color_string = 'rgb(' + String(startColor.r) + ',' + String(startColor.g) + ',' + String(startColor.b) + ')';
+					end_color_string = 'rgb(' + String(endColor.r) + ',' + String(endColor.g) + ',' + String(endColor.b) + ')';
 
 					if (this.type === fg.GRADIENT_HORIZONTAL) {
 						x2 = 100;
@@ -141,22 +141,22 @@
 						y2 = 100;
 					}
 
-					svg = [
-						'<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1 1" preserveAspectRatio="none">',
-							'<defs>',
-								'<linearGradient id="friGameGradient', String(fg.nextGradientId), '" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="', String(x2), '%" y2="', String(y2), '%">',
-									'<stop offset="0%" stop-color="', start_color_string, '" stop-opacity="', String(startColor.a), '" />',
-									'<stop offset="100%" stop-color="', end_color_string, '" stop-opacity="', String(endColor.a), '" />',
-								'</linearGradient>',
-							'</defs>',
+					svg = '' +
+						'<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1 1" preserveAspectRatio="none">' +
+							'<defs>' +
+								'<linearGradient id="friGameGradient' + String(fg.nextGradientId) + '" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="' + String(x2) + '%" y2="' + String(y2) + '%">' +
+									'<stop offset="0%" stop-color="' + start_color_string + '" stop-opacity="' + String(startColor.a) + '" />' +
+									'<stop offset="100%" stop-color="' + end_color_string + '" stop-opacity="' + String(endColor.a) + '" />' +
+								'</linearGradient>' +
+							'</defs>' +
 
-							'<rect x="0" y="0" width="1" height="1" fill="url(#friGameGradient', String(fg.nextGradientId), ')" />',
+							'<rect x="0" y="0" width="1" height="1" fill="url(#friGameGradient' + String(fg.nextGradientId) + ')" />' +
 						'</svg>'
-					].join('');
+					;
 					fg.nextGradientId += 1;
 
 					this.css_options = {
-						'background-image': ['url("data:image/svg+xml;base64,', btoa(svg), '")'].join('')
+						'background-image': 'url("data:image/svg+xml;base64,' + btoa(svg) + '")'
 					};
 
 					if (support.backgroundsize) {
@@ -164,17 +164,17 @@
 					}
 				} else if (support.ieFilter) {
 					// Gradient supported through proprietary filter
-					str_a = ['0', Math.round(startColor.a * 255).toString(16).toUpperCase()].join('');
-					str_r = ['0', startColor.r.toString(16).toUpperCase()].join('');
-					str_g = ['0', startColor.g.toString(16).toUpperCase()].join('');
-					str_b = ['0', startColor.b.toString(16).toUpperCase()].join('');
-					start_color_string = ['#', str_a.slice(str_a.length - 2), str_r.slice(str_r.length - 2), str_g.slice(str_g.length - 2), str_b.slice(str_b.length - 2)].join('');
+					str_a = '0' + Math.round(startColor.a * 255).toString(16).toUpperCase();
+					str_r = '0' + startColor.r.toString(16).toUpperCase();
+					str_g = '0' + startColor.g.toString(16).toUpperCase();
+					str_b = '0' + startColor.b.toString(16).toUpperCase();
+					start_color_string = '#' + str_a.slice(str_a.length - 2) + str_r.slice(str_r.length - 2) + str_g.slice(str_g.length - 2) + str_b.slice(str_b.length - 2);
 
-					str_a = ['0', Math.round(endColor.a * 255).toString(16).toUpperCase()].join('');
-					str_r = ['0', endColor.r.toString(16).toUpperCase()].join('');
-					str_g = ['0', endColor.g.toString(16).toUpperCase()].join('');
-					str_b = ['0', endColor.b.toString(16).toUpperCase()].join('');
-					end_color_string = ['#', str_a.slice(str_a.length - 2), str_r.slice(str_r.length - 2), str_g.slice(str_g.length - 2), str_b.slice(str_b.length - 2)].join('');
+					str_a = '0' + Math.round(endColor.a * 255).toString(16).toUpperCase();
+					str_r = '0' + endColor.r.toString(16).toUpperCase();
+					str_g = '0' + endColor.g.toString(16).toUpperCase();
+					str_b = '0' + endColor.b.toString(16).toUpperCase();
+					end_color_string = '#' + str_a.slice(str_a.length - 2) + str_r.slice(str_r.length - 2) + str_g.slice(str_g.length - 2) + str_b.slice(str_b.length - 2);
 
 					if (this.type === fg.GRADIENT_HORIZONTAL) {
 						type = 1;
@@ -182,7 +182,7 @@
 						type = 0;
 					}
 
-					this.ie_filter = ['progid:DXImageTransform.Microsoft.Gradient(GradientType=', type, ',startColorstr="', start_color_string, '",endColorstr="', end_color_string, '")'].join('');
+					this.ie_filter = 'progid:DXImageTransform.Microsoft.Gradient(GradientType=' + type + ',startColorstr="' + start_color_string + '",endColorstr="' + end_color_string + '")';
 				} else {
 					// Fallback to solid color
 					this.css_options = {
@@ -241,19 +241,19 @@
 			if (background_type === fg.BACKGROUND_STRETCHED) {
 				if (support.backgroundsize) {
 					// The proper way to stretch the background
-					css_options['background-image'] = ['url("', imageURL, '")'].join('');
+					css_options['background-image'] = 'url("' + imageURL + '")';
 					css_options[support.backgroundsize] = '100% 100%';
 				} else if (support.ieFilter) {
 					// Background stretching supported through proprietary filter
-					ie_filters.image = ['progid:DXImageTransform.Microsoft.AlphaImageLoader(src="', imageURL, '",sizingMethod="scale")'].join('');
+					ie_filters.image = 'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + imageURL + '",sizingMethod="scale")';
 					apply_ie_filters = true;
 				} else {
 					// Background stretching not supported, fall back to tiled
-					css_options['background-image'] = ['url("', imageURL, '")'].join('');
+					css_options['background-image'] = 'url("' + imageURL + '")';
 				}
 			} else {
 				// A simple tiled background
-				css_options['background-image'] = ['url("', imageURL, '")'].join('');
+				css_options['background-image'] = 'url("' + imageURL + '")';
 			}
 
 			return apply_ie_filters;
@@ -271,18 +271,18 @@
 
 		transform: function (angle, scaleh, scalev) {
 			var
-				transform = []
+				transform = ''
 			;
 
 			if (angle) {
-				Array.prototype.push.apply(transform, ['rotate(', String(angle), 'rad)']);
+				transform += 'rotate(' + String(angle) + 'rad)';
 			}
 
 			if ((scaleh !== 1) || (scalev !== 1)) {
-				Array.prototype.push.apply(transform, ['scale(', String(scaleh), ',', String(scalev), ')']);
+				transform += 'scale(' + String(scaleh) + ',' + String(scalev) + ')';
 			}
 
-			return transform.join('');
+			return transform;
 		},
 
 		ieTransform: function (angle, scaleh, scalev) {
@@ -296,13 +296,13 @@
 			if (angle || (scaleh !== 1) || (scalev !== 1)) {
 				cos = Math.cos(angle);
 				sin = Math.sin(angle);
-				filter = [
-					'progid:DXImageTransform.Microsoft.Matrix(M11=', String(cos * scaleh),
-					',M12=', String(-sin * scalev),
-					',M21=', String(sin * scaleh),
-					',M22=', String(cos * scalev),
+				filter = '' +
+					'progid:DXImageTransform.Microsoft.Matrix(M11=' + String(cos * scaleh) +
+					',M12=' + String(-sin * scalev) +
+					',M21=' + String(sin * scaleh) +
+					',M22=' + String(cos * scalev) +
 					',SizingMethod="auto expand",FilterType="nearest neighbor")'
-				].join('');
+				;
 			} else {
 				filter = '';
 			}
@@ -317,7 +317,7 @@
 
 			// Apply the opacity
 			if (alpha !== 1) {
-				filter = ['progid:DXImageTransform.Microsoft.Alpha(opacity=', String(Math.round(alpha * 100)), ')'].join('');
+				filter = 'progid:DXImageTransform.Microsoft.Alpha(opacity=' + String(Math.round(alpha * 100)) + ')';
 			} else {
 				filter = '';
 			}
@@ -336,7 +336,7 @@
 			;
 
 			// Step 1: Apply the filters
-			dom.css('filter', [filters.matrix, filters.alpha, filters.gradient, filters.image].join(''));
+			dom.css('filter', filters.matrix + filters.alpha + filters.gradient + filters.image);
 
 			// Step 2: Adjust the element position according to the new width and height
 			newWidth = dom.width();
@@ -344,8 +344,8 @@
 			options.posOffsetX = round((newWidth - width) / 2);
 			options.posOffsetY = round((newHeight - height) / 2);
 			dom.css({
-				'left': [String(left - options.posOffsetX), 'px'].join(''),
-				'top': [String(top - options.posOffsetY), 'px'].join('')
+				'left': String(left - options.posOffsetX) + 'px',
+				'top': String(top - options.posOffsetY) + 'px'
 			});
 		}
 	});
@@ -432,7 +432,7 @@
 
 			if (insidePlayground && animation && alpha && scaleh && scalev && !options.hidden) {
 				if (!dom) {
-					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
+					dom = $('<div id="' + fg.domPrefix + this.name + '"></div>');
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					if (last_sprite === parent) {
@@ -480,14 +480,14 @@
 				}
 
 				if (left !== old_options.left) {
-					css_options.left = [String(left - options.posOffsetX), 'px'].join('');
+					css_options.left = String(left - options.posOffsetX) + 'px';
 					update_css = true;
 
 					old_options.left = left;
 				}
 
 				if (top !== old_options.top) {
-					css_options.top = [String(top - options.posOffsetY), 'px'].join('');
+					css_options.top = String(top - options.posOffsetY) + 'px';
 					update_css = true;
 
 					old_options.top = top;
@@ -497,7 +497,7 @@
 				imageURL = sprite_sheet.imageURL;
 
 				if (imageURL !== old_options.imageURL) {
-					css_options['background-image'] = ['url("', imageURL, '")'].join('');
+					css_options['background-image'] = 'url("' + imageURL + '")';
 					update_css = true;
 					update_position = true;
 
@@ -506,8 +506,8 @@
 
 				if (animation !== old_options.animation) {
 					$.extend(css_options, {
-						'width': [String(width), 'px'].join(''),
-						'height': [String(height), 'px'].join('')
+						'width': String(width) + 'px',
+						'height': String(height) + 'px'
 					});
 					update_css = true;
 					update_position = true;
@@ -531,12 +531,12 @@
 				}
 
 				if (update_position || (currentSpriteSheet !== old_options.currentSpriteSheet) || (currentFrame !== old_options.currentFrame)) {
-					css_options['background-position'] = [
-						String(-(sprite_sheet.offsetx + multix + (currentFrame * sprite_sheet.deltax))),
-						'px ',
-						String(-(sprite_sheet.offsety + multiy + (currentFrame * sprite_sheet.deltay))),
+					css_options['background-position'] = '' +
+						String(-(sprite_sheet.offsetx + multix + (currentFrame * sprite_sheet.deltax))) +
+						'px ' +
+						String(-(sprite_sheet.offsety + multiy + (currentFrame * sprite_sheet.deltay))) +
 						'px'
-					].join('');
+					;
 					update_css = true;
 
 					old_options.currentSpriteSheet = currentSpriteSheet;
@@ -661,13 +661,13 @@
 			this.old_options = {};
 
 			if (!parent) {
-				dom = $(['<div id="', fg.domPrefix, name, '"></div>'].join('')).prependTo($(options.parentDOM));
+				dom = $('<div id="' + fg.domPrefix + name + '"></div>').prependTo($(options.parentDOM));
 				dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 				dom.css({
 					'left': '0px',
 					'top': '0px',
-					'width': [String(options.width), 'px'].join(''),
-					'height': [String(options.height), 'px'].join(''),
+					'width': String(options.width) + 'px',
+					'height': String(options.height) + 'px',
 					'overflow': 'hidden'
 				});
 
@@ -763,7 +763,7 @@
 
 			if ((this.layers.length || background || border_color) && alpha && scaleh && scalev && !options.hidden) {
 				if (!this.dom) {
-					dom = $(['<div id="', fg.domPrefix, this.name, '"></div>'].join(''));
+					dom = $('<div id="' + fg.domPrefix + this.name + '"></div>');
 					dom.addClass(fg.cssClass);	// Reset background properties set by external CSS
 
 					if (last_sprite === parent) {
@@ -808,21 +808,21 @@
 				}
 
 				if ((left !== old_options.left) || border_width_changed) {
-					css_options.left = [String(left - options.posOffsetX - border_width), 'px'].join('');
+					css_options.left = String(left - options.posOffsetX - border_width) + 'px';
 					update_css = true;
 
 					old_options.left = left;
 				}
 
 				if ((top !== old_options.top) || border_width_changed) {
-					css_options.top = [String(top - options.posOffsetY - border_width), 'px'].join('');
+					css_options.top = String(top - options.posOffsetY - border_width) + 'px';
 					update_css = true;
 
 					old_options.top = top;
 				}
 
 				if (width !== old_options.width) {
-					css_options.width = [String(width), 'px'].join('');
+					css_options.width = String(width) + 'px';
 					update_css = true;
 
 					if (ieFilter) {
@@ -837,7 +837,7 @@
 				}
 
 				if (height !== old_options.height) {
-					css_options.height = [String(height), 'px'].join('');
+					css_options.height = String(height) + 'px';
 					update_css = true;
 
 					if (ieFilter) {
@@ -932,7 +932,7 @@
 				if (support.borderTopLeftRadius) {
 					if ((top_left_radius !== old_options.borderTopLeftRadius) || border_width_changed) {
 						if (top_left_radius) {
-							css_options[support.borderTopLeftRadius] = [String(top_left_radius + border_width), 'px'].join('');
+							css_options[support.borderTopLeftRadius] = String(top_left_radius + border_width) + 'px';
 						} else {
 							css_options[support.borderTopLeftRadius] = '';
 						}
@@ -944,7 +944,7 @@
 
 					if ((top_right_radius !== old_options.borderTopRightRadius) || border_width_changed) {
 						if (top_right_radius) {
-							css_options[support.borderTopRightRadius] = [String(top_right_radius + border_width), 'px'].join('');
+							css_options[support.borderTopRightRadius] = String(top_right_radius + border_width) + 'px';
 						} else {
 							css_options[support.borderTopRightRadius] = '';
 						}
@@ -956,7 +956,7 @@
 
 					if ((bottom_right_radius !== old_options.borderBottomRightRadius) || border_width_changed) {
 						if (bottom_right_radius) {
-							css_options[support.borderBottomRightRadius] = [String(bottom_right_radius + border_width), 'px'].join('');
+							css_options[support.borderBottomRightRadius] = String(bottom_right_radius + border_width) + 'px';
 						} else {
 							css_options[support.borderBottomRightRadius] = '';
 						}
@@ -968,7 +968,7 @@
 
 					if ((bottom_left_radius !== old_options.borderBottomLeftRadius) || border_width_changed) {
 						if (bottom_left_radius) {
-							css_options[support.borderBottomLeftRadius] = [String(bottom_left_radius + border_width), 'px'].join('');
+							css_options[support.borderBottomLeftRadius] = String(bottom_left_radius + border_width) + 'px';
 						} else {
 							css_options[support.borderBottomLeftRadius] = '';
 						}
@@ -981,7 +981,7 @@
 
 				if (border_width_changed) {
 					if (border_width) {
-						css_options['border-width'] = [String(border_width), 'px'].join('');
+						css_options['border-width'] = String(border_width) + 'px';
 					} else {
 						css_options['border-width'] = '';
 					}

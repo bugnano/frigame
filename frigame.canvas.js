@@ -375,7 +375,7 @@
 					height = options.height;
 
 					canvas = document.createElement('canvas');
-					canvas.id = [fg.domPrefix, name].join('');
+					canvas.id = fg.domPrefix + name;
 					canvas.width = width;
 					canvas.height = height;
 					dom.insertBefore(canvas, dom.firstChild);
@@ -383,8 +383,8 @@
 					fg.extend(canvas.style, {
 						'left': '0px',
 						'top': '0px',
-						'width': [String(width), 'px'].join(''),
-						'height': [String(height), 'px'].join(''),
+						'width': String(width) + 'px',
+						'height': String(height) + 'px',
 						'overflow': 'hidden'
 					});
 
