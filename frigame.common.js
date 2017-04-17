@@ -310,8 +310,9 @@
 			return fg.resourceManager;
 		},
 
-		removeResource: function (name) {
+		removeResource: function (name, options) {
 			var
+				new_options = options || {},
 				resource = fg.r[name],
 				resourceManager = fg.resourceManager,
 				preload_list = resourceManager.preloadList,
@@ -334,7 +335,7 @@
 				fg.r[name] = null;
 				delete fg.r[name];
 			} else {
-				if (window.console) {
+				if (window.console && (!new_options.suppressWarning)) {
 					console.warn('Resource with name ' + name + ' already removed');
 					console.trace();
 				}
