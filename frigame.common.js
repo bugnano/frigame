@@ -1702,6 +1702,9 @@
 			}
 
 			this.setAnimation(new_options);
+
+			this.prevLeft = this.left;
+			this.prevTop = this.top;
 		},
 
 		// Public functions
