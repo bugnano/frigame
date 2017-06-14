@@ -1094,6 +1094,7 @@
 		remove: function () {
 			var
 				parent = this.parent,
+				parent_obj,
 				parent_layers,
 				len_parent_layers,
 				parent_update_list,
@@ -1111,24 +1112,29 @@
 				userData.remove();
 			}
 
-			if (parent && (!fg.s[parent].clearing)) {
-				parent_layers = fg.s[parent].layers;
-				len_parent_layers = parent_layers.length;
-				for (i = 0; i < len_parent_layers; i += 1) {
-					if (parent_layers[i].name === name) {
-						parent_layers.splice(i, 1);
-						break;
+			if (parent) {
+				parent_obj = fg.s[parent];
+				if (!parent_obj.clearing) {
+					parent_layers = parent_obj.layers;
+					len_parent_layers = parent_layers.length;
+					for (i = 0; i < len_parent_layers; i += 1) {
+						if (parent_layers[i].name === name) {
+							parent_layers.splice(i, 1);
+							break;
+						}
 					}
-				}
 
-				this.needsUpdate = false;
-				parent_update_list = fg.s[parent].updateList;
-				len_parent_update_list = parent_update_list.length;
-				for (i = 0; i < len_parent_update_list; i += 1) {
-					if (parent_update_list[i].name === name) {
-						parent_update_list.splice(i, 1);
-						break;
+					this.needsUpdate = false;
+					parent_update_list = parent_obj.updateList;
+					len_parent_update_list = parent_update_list.length;
+					for (i = 0; i < len_parent_update_list; i += 1) {
+						if (parent_update_list[i].name === name) {
+							parent_update_list.splice(i, 1);
+							break;
+						}
 					}
+
+					parent_obj.checkUpdate();
 				}
 			}
 
@@ -2128,7 +2134,6 @@
 
 			fg.PBaseSprite.init.apply(this, arguments);
 
-			this.needsUpdate = true;
 			this.updateList = [];
 
 			this.clearing = false;
@@ -2200,8 +2205,10 @@
 
 			this.clearing = false;
 
-			this.layers = [];
-			this.updateList = [];
+			this.layers.splice(0, len_layers);
+			this.updateList.splice(0, this.updateList.length);
+
+			this.checkUpdate();
 
 			return this;
 		},
@@ -2358,6 +2365,8 @@
 
 			this.layers.push({name: name, obj: sprite});
 
+			this.checkUpdate();
+
 			return this;
 		},
 
@@ -2368,6 +2377,8 @@
 
 			this.layers.unshift({name: name, obj: sprite});
 
+			this.checkUpdate();
+
 			return this;
 		},
 
@@ -2377,7 +2388,8 @@
 			;
 
 			this.layers.push({name: name, obj: group});
-			this.updateList.push({name: name, obj: group});
+
+			this.checkUpdate();
 
 			return group;
 		},
@@ -2388,7 +2400,8 @@
 			;
 
 			this.layers.unshift({name: name, obj: group});
-			this.updateList.unshift({name: name, obj: group});
+
+			this.checkUpdate();
 
 			return group;
 		},
@@ -2407,7 +2420,19 @@
 
 		// Implementation details
 
-		checkUpdate: fg.noop,
+		checkUpdate: function () {
+			var
+				oldNeedsUpdate = this.needsUpdate
+			;
+
+			if ((this.callbacks.length === 0) && (this.layers.length === 0)) {
+				this.needsUpdate = false;
+			} else {
+				this.needsUpdate = true;
+			}
+
+			this.updateNeedsUpdate(oldNeedsUpdate);
+		},
 
 		update: function () {
 			var
