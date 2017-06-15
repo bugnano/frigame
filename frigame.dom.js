@@ -62,6 +62,10 @@
 		fg.support.borderBottomLeftRadius = Modernizr.prefixed('borderBottomLeftRadius');
 	}
 
+	if (Modernizr.backgroundblendmode) {
+		fg.support.mixBlendMode = Modernizr.prefixed('mixBlendMode');
+	}
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -398,7 +402,7 @@
 				height = this.height,
 				prevLeft = this.prevLeft,
 				prevTop = this.prevTop,
-				frameCounter = fg.frameCounter - 1,
+				frameCounter,
 				insidePlayground,
 				multix = options.multix,
 				multiy = options.multiy,
@@ -407,6 +411,7 @@
 				scalev = options.scalev,
 				alpha = options.alpha,
 				hidden = options.hidden,
+				blendMode = options.blendMode,
 				css_options = {},
 				update_css = false,
 				update_position = false,
@@ -418,6 +423,8 @@
 			;
 
 			if ((left !== prevLeft) || (top !== prevTop)) {
+				frameCounter = fg.frameCounter - 1;
+
 				if (frameCounter !== this.frameCounterLastMove) {
 					this.prevLeft = left;
 					this.prevTop = top;
@@ -591,6 +598,19 @@
 					old_options.alpha = alpha;
 				}
 
+				if (blendMode !== old_options.blendMode) {
+					if (support.mixBlendMode) {
+						if (blendMode) {
+							css_options[support.mixBlendMode] = blendMode;
+						} else {
+							css_options[support.mixBlendMode] = '';
+						}
+						update_css = true;
+					}
+
+					old_options.blendMode = blendMode;
+				}
+
 				if (update_css) {
 					dom.css(css_options);
 				}
@@ -716,7 +736,7 @@
 				height = this.height,
 				prevLeft = this.prevLeft,
 				prevTop = this.prevTop,
-				frameCounter = fg.frameCounter - 1,
+				frameCounter,
 				background = options.background,
 				backgroundType = options.backgroundType,
 				has_border = options.hasBorder,
@@ -733,6 +753,7 @@
 				alpha = options.alpha,
 				hidden = options.hidden,
 				crop = options.crop,
+				blendMode = options.blendMode,
 				css_options = {},
 				update_css = false,
 				dom = this.dom,
@@ -751,6 +772,8 @@
 			}
 
 			if ((left !== prevLeft) || (top !== prevTop)) {
+				frameCounter = fg.frameCounter - 1;
+
 				if (frameCounter !== this.frameCounterLastMove) {
 					this.prevLeft = left;
 					this.prevTop = top;
@@ -897,6 +920,19 @@
 					}
 
 					old_options.alpha = alpha;
+				}
+
+				if (blendMode !== old_options.blendMode) {
+					if (support.mixBlendMode) {
+						if (blendMode) {
+							css_options[support.mixBlendMode] = blendMode;
+						} else {
+							css_options[support.mixBlendMode] = '';
+						}
+						update_css = true;
+					}
+
+					old_options.blendMode = blendMode;
 				}
 
 				if ((background !== old_options.background) || (backgroundType !== old_options.backgroundType)) {

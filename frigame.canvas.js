@@ -245,6 +245,8 @@
 				alpha = options.alpha,
 				old_alpha,
 				alpha_changed,
+				old_blend_mode,
+				blend_mode_changed,
 				sprite_sheet,
 				left = this.left,
 				top = this.top,
@@ -254,13 +256,15 @@
 				halfHeight = this.halfHeight,
 				prevLeft = this.prevLeft,
 				prevTop = this.prevTop,
-				frameCounter = fg.frameCounter - 1,
+				frameCounter,
 				insidePlayground,
 				currentFrame = options.currentFrame,
 				ctx = fg.ctx
 			;
 
 			if ((left !== prevLeft) || (top !== prevTop)) {
+				frameCounter = fg.frameCounter - 1;
+
 				if (frameCounter !== this.frameCounterLastMove) {
 					this.prevLeft = left;
 					this.prevTop = top;
@@ -276,14 +280,22 @@
 			if (insidePlayground && animation && alpha && scaleh && scalev && !options.hidden) {
 				sprite_sheet = this.animation_options.frameset[options.currentSpriteSheet];
 
-				old_alpha = fg.globalAlpha;
 				if (alpha !== 1) {
 					// Don't save the entire context only for alpha changes
+					old_alpha = fg.globalAlpha;
 					fg.globalAlpha *= alpha;
 					ctx.globalAlpha = fg.globalAlpha;
 					alpha_changed = true;
 				} else {
 					alpha_changed = false;
+				}
+
+				if (options.blendMode) {
+					old_blend_mode = ctx.globalCompositeOperation;
+					ctx.globalCompositeOperation = options.blendMode;
+					blend_mode_changed = true;
+				} else {
+					blend_mode_changed = false;
 				}
 
 				if (angle || (scaleh !== 1) || (scalev !== 1)) {
@@ -328,11 +340,14 @@
 					);
 				}
 
-				if (alpha_changed) {
-					ctx.globalAlpha = old_alpha;
+				if (blend_mode_changed) {
+					ctx.globalCompositeOperation = old_blend_mode;
 				}
 
-				fg.globalAlpha = old_alpha;
+				if (alpha_changed) {
+					ctx.globalAlpha = old_alpha;
+					fg.globalAlpha = old_alpha;
+				}
 			}
 		}
 	});
@@ -450,7 +465,7 @@
 				halfHeight = this.halfHeight,
 				prevLeft = this.prevLeft,
 				prevTop = this.prevTop,
-				frameCounter = fg.frameCounter - 1,
+				frameCounter,
 				insidePlayground,
 				background,
 				old_background = old_options.background,
@@ -473,6 +488,8 @@
 				crop = options.crop,
 				old_alpha,
 				alpha_changed,
+				old_blend_mode,
+				blend_mode_changed,
 				context_saved,
 				ctx = fg.ctx
 			;
@@ -483,6 +500,8 @@
 			}
 
 			if ((left !== prevLeft) || (top !== prevTop)) {
+				frameCounter = fg.frameCounter - 1;
+
 				if (frameCounter !== this.frameCounterLastMove) {
 					this.prevLeft = left;
 					this.prevTop = top;
@@ -573,14 +592,22 @@
 					context_saved = false;
 				}
 
-				old_alpha = fg.globalAlpha;
 				if (alpha !== 1) {
 					// Don't save the entire context only for alpha changes
+					old_alpha = fg.globalAlpha;
 					fg.globalAlpha *= alpha;
 					ctx.globalAlpha = fg.globalAlpha;
 					alpha_changed = true;
 				} else {
 					alpha_changed = false;
+				}
+
+				if (options.blendMode) {
+					old_blend_mode = ctx.globalCompositeOperation;
+					ctx.globalCompositeOperation = options.blendMode;
+					blend_mode_changed = true;
+				} else {
+					blend_mode_changed = false;
 				}
 
 				if (background || crop) {
@@ -646,15 +673,22 @@
 				overrides.PSpriteGroup.draw.apply(this, arguments);
 
 				if (context_saved) {
-					// ctx.restore restores also the globalAlpha value
+					// ctx.restore restores also the globalCompositeOperation and globalAlpha values
 					ctx.restore();
+
+					if (alpha_changed) {
+						fg.globalAlpha = old_alpha;
+					}
 				} else {
+					if (blend_mode_changed) {
+						ctx.globalCompositeOperation = old_blend_mode;
+					}
+
 					if (alpha_changed) {
 						ctx.globalAlpha = old_alpha;
+						fg.globalAlpha = old_alpha;
 					}
 				}
-
-				fg.globalAlpha = old_alpha;
 			}
 		}
 	});

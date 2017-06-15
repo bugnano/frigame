@@ -1056,6 +1056,8 @@
 				scaleh: 1,
 				scalev: 1,
 
+				blendMode: null,
+
 				// ieFilter specific
 				posOffsetX: 0,
 				posOffsetY: 0
