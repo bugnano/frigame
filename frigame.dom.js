@@ -66,6 +66,11 @@
 		fg.support.mixBlendMode = Modernizr.prefixed('mixBlendMode');
 	}
 
+	if (Modernizr.cssmask) {
+		fg.support.maskImage = Modernizr.prefixed('maskImage');
+		fg.support.maskSize = Modernizr.prefixed('maskSize');
+	}
+
 	// ******************************************************************** //
 	// ******************************************************************** //
 	// ******************************************************************** //
@@ -259,6 +264,26 @@
 				// A simple tiled background
 				css_options['background-image'] = 'url("' + imageURL + '")';
 			}
+
+			return apply_ie_filters;
+		},
+
+		getMask: function (mask_type, css_options, ie_filters) {
+			var
+				support = fg.support,
+				apply_ie_filters = false,
+				imageURL = this.options.frameset[0].imageURL
+			;
+
+			if (support.maskImage) {
+				css_options[support.maskImage] = 'url("' + imageURL + '")';
+
+				if (mask_type === fg.MASK_STRETCHED) {
+					css_options[support.maskSize] = '100% 100%';
+				}
+			}
+
+			// There are no fallback options here. If the CSS Mask is not supported, it is simply ignored
 
 			return apply_ie_filters;
 		}
@@ -739,6 +764,8 @@
 				frameCounter,
 				background = options.background,
 				backgroundType = options.backgroundType,
+				mask = options.mask,
+				maskType = options.maskType,
 				has_border = options.hasBorder,
 				top_left_radius = options.borderTopLeftRadius,
 				top_right_radius = options.borderTopRightRadius,
@@ -963,6 +990,25 @@
 
 					old_options.background = background;
 					old_options.backgroundType = backgroundType;
+				}
+
+				if ((mask !== old_options.mask) || (maskType !== old_options.maskType)) {
+					// Reset all the mask options before applying the new mask
+					if (support.maskImage) {
+						css_options[support.maskImage] = '';
+						css_options[support.maskSize] = '';
+					}
+
+					if (mask) {
+						if (mask.getMask(maskType, css_options, ie_filters)) {
+							apply_ie_filters = true;
+						}
+					}
+
+					update_css = true;
+
+					old_options.mask = mask;
+					old_options.maskType = maskType;
 				}
 
 				if (support.borderTopLeftRadius) {

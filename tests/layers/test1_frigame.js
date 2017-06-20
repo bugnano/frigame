@@ -34,6 +34,9 @@ friGame.ready(function () {
 			.addGroup('rect1', {background: 'red', borderColor: 'blue', borderRadius: [17, 5, 23, 11], borderWidth: 12, left: 48, top: 48, width: 64, height: 64})
 				.addSprite('catgirl2', {animation: 'catgirl', left: 32, top: 32})
 			.end()
+			.addGroup('group3', {left: 100, top: 370, width: 300, height: 100, background: 'grassblock', borderRadius: 20, borderColor: 'blue', borderWidth: 12, mask: 'catgirl', maskType: fg.MASK_STRETCHED})
+				.addSprite('catgirl3', {animation: 'catgirl', left: 32, top: 32})
+			.end()
 		;
 
 		fg.sprites.group1.move({left: 64, top: 128});

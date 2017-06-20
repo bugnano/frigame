@@ -38,6 +38,7 @@
 	;
 
 	function tweenStep() {
+		/*jshint validthis: true */
 		var
 			queue = this.fx.queue,
 			len_queue = queue.length,

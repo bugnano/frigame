@@ -99,6 +99,7 @@
 
 	// Extend a given object with all the properties of the source object
 	fg.extend = function (obj, source) {
+		/*jshint forin: false */
 		var
 			prop,
 			copy
@@ -129,6 +130,9 @@
 
 		BACKGROUND_TILED: 0,
 		BACKGROUND_STRETCHED: 1,
+
+		MASK_TILED: 0,
+		MASK_STRETCHED: 1,
 
 		REFRESH_RATE: 1000 / 60
 
@@ -184,6 +188,7 @@
 		},
 
 		isEmptyObject: function (obj) {
+			/*jshint forin: false */
 			var
 				name
 			;
@@ -196,6 +201,7 @@
 		},
 
 		each: function(obj, callback) {
+			/*jshint forin: false */
 			var
 				value,
 				i,
@@ -508,6 +514,14 @@
 				if (this.options.background === gradient) {
 					this.setBackground({background: null});
 				}
+
+				if (this.options.mask === gradient) {
+					this.setMask({mask: null});
+				}
+
+				if (this.options.borderColor === gradient) {
+					this.setBorder({borderColor: null});
+				}
 			});
 		}
 
@@ -674,6 +688,10 @@
 
 				if (this.options.background === animation) {
 					this.setBackground({background: null});
+				}
+
+				if (this.options.mask === animation) {
+					this.setMask({mask: null});
 				}
 			});
 
@@ -2115,6 +2133,8 @@
 				// Public options
 				background: null,
 				backgroundType: fg.BACKGROUND_TILED,
+				mask: null,
+				maskType: fg.MASK_TILED,
 				crop: false,
 				borderTopLeftRadius: 0,
 				borderTopRightRadius: 0,
@@ -2147,7 +2167,12 @@
 				new_options.background = null;
 			}
 
+			if (new_options.mask === undefined) {
+				new_options.mask = null;
+			}
+
 			this.setBackground(new_options);
+			this.setMask(new_options);
 			this.setBorder(new_options);
 		},
 
@@ -2258,6 +2283,28 @@
 
 			if (new_options.backgroundType !== undefined) {
 				my_options.backgroundType = new_options.backgroundType;
+			}
+
+			return this;
+		},
+
+		setMask: function (options) {
+			var
+				my_options = this.options,
+				new_options = options || {}
+			;
+
+			if (new_options.mask !== undefined) {
+				my_options.mask = fg.r[new_options.mask] || null;
+
+				if (window.console && new_options.mask && (!my_options.mask)) {
+					console.error('Mask with name ' + new_options.mask + ' does not exist');
+					console.trace();
+				}
+			}
+
+			if (new_options.maskType !== undefined) {
+				my_options.maskType = new_options.maskType;
 			}
 
 			return this;
