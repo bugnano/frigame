@@ -84,7 +84,7 @@
 
 				if (!gradients[dimension]) {
 					// Create a gradient for this dimension
-					gradient = ctx.createLinearGradient(0, 0, width, height);
+					gradient = fg.ctx.createLinearGradient(0, 0, width, height);
 					gradient.addColorStop(0, this.startColorStr);
 					gradient.addColorStop(1, this.endColorStr);
 
@@ -194,6 +194,21 @@
 	// ******************************************************************** //
 
 	fg.extend(fg.PAnimation, {
+		createCanvas: function (width, height) {
+			var
+				canvas
+			;
+
+			canvas = document.createElement('canvas');
+			canvas.width = width;
+			canvas.height = height;
+
+			this.canvas = canvas;
+			this.canvas_width = width;
+			this.canvas_height = height;
+			this.ctx = canvas.getContext('2d');
+		},
+
 		drawBackground: function (ctx, group) {
 			var
 				img = this.options.frameset[0].img,
@@ -217,13 +232,105 @@
 			} else {
 				// Tiled background
 				if (!style) {
-					style = ctx.createPattern(img, 'repeat');
+					style = fg.ctx.createPattern(img, 'repeat');
 					this.style = style;
 				}
 
 				ctx.fillStyle = style;
 				ctx.fill();
 			}
+		},
+
+		drawMask: function (ctx, group) {
+			var
+				group_options = group.options,
+				mask_type = group_options.maskType,
+				background_type = group_options.backgroundType,
+				background = group_options.background,
+				background_name = background.name,
+				img = this.options.frameset[0].img,
+				style = this.style,
+				width = group.width,
+				height = group.height,
+				canvas = this.canvas,
+				canvas_width = this.canvas_width,
+				canvas_height = this.canvas_height,
+				my_ctx = this.ctx
+			;
+
+			if (!canvas) {
+				this.createCanvas(width, height);
+				canvas = this.canvas;
+				canvas_width = this.canvas_width;
+				canvas_height = this.canvas_height;
+				my_ctx = this.ctx;
+			}
+
+			if ((width !== this.last_width) || (height !== this.last_height) || (mask_type !== this.last_mask_type) || (background_type !== this.last_background_type) || (background_name !== this.last_background)) {
+				if (canvas_width < width) {
+					canvas.width = width;
+					canvas_width = width;
+					this.canvas_width = width;
+				}
+
+				if (canvas_height < height) {
+					canvas.height = height;
+					canvas_height = height;
+					this.canvas_height = height;
+				}
+
+				// STEP 1: Draw the mask
+				my_ctx.globalCompositeOperation = 'copy';
+				my_ctx.rect(0, 0, width, height);
+				if (mask_type === fg.MASK_STRETCHED) {
+					// Stretched mask
+					fg.safeDrawImage(
+						my_ctx,
+						img,
+						0,
+						0,
+						img.width,
+						img.height,
+						0,
+						0,
+						width,
+						height
+					);
+				} else {
+					// Tiled mask
+					if (!style) {
+						style = fg.ctx.createPattern(img, 'repeat');
+						this.style = style;
+					}
+
+					my_ctx.fillStyle = style;
+					my_ctx.fill();
+				}
+
+				// STEP 2: Draw the background
+				my_ctx.globalCompositeOperation = 'source-in';
+				background.drawBackground(my_ctx, group);
+
+				this.last_width = width;
+				this.last_height = height;
+				this.last_mask_type = mask_type;
+				this.last_background_type = background_type;
+				this.last_background = background_name;
+			}
+
+			// Finally, draw the canvas inside the group
+			fg.safeDrawImage(
+				ctx,
+				canvas,
+				0,
+				0,
+				width,
+				height,
+				0,
+				0,
+				width,
+				height
+			);
 		}
 	});
 
@@ -469,6 +576,7 @@
 				insidePlayground,
 				background,
 				old_background = old_options.background,
+				mask = options.mask,
 				top_left_radius = options.borderTopLeftRadius,
 				top_right_radius = options.borderTopRightRadius,
 				bottom_right_radius = options.borderBottomRightRadius,
@@ -624,7 +732,11 @@
 				}
 
 				if (background) {
-					background.drawBackground(ctx, this);
+					if (mask) {
+						mask.drawMask(ctx, this);
+					} else {
+						background.drawBackground(ctx, this);
+					}
 				}
 
 				if (border_color) {

@@ -454,7 +454,8 @@
 		init: function (startColor, endColor, type) {
 			var
 				clamp = fg.clamp,
-				round = Math.round
+				round = Math.round,
+				startColorStr
 			;
 
 			this.startColor = {
@@ -466,12 +467,17 @@
 
 			if (startColor) {
 				startColor = fg.extend(this.startColor, fg.pick(startColor, ['r', 'g', 'b', 'a']));
-				startColor.r = clamp(round(startColor.r), 0, 255);
-				startColor.g = clamp(round(startColor.g), 0, 255);
-				startColor.b = clamp(round(startColor.b), 0, 255);
-				startColor.a = clamp(startColor.a, 0, 1);
-				this.startColorStr = 'rgba(' + String(startColor.r) + ',' + String(startColor.g) + ',' + String(startColor.b) + ',' + String(startColor.a) + ')';
+			} else {
+				startColor = this.startColor;
 			}
+
+			startColor.r = clamp(round(startColor.r), 0, 255);
+			startColor.g = clamp(round(startColor.g), 0, 255);
+			startColor.b = clamp(round(startColor.b), 0, 255);
+			startColor.a = clamp(startColor.a, 0, 1);
+			startColorStr = 'rgba(' + String(startColor.r) + ',' + String(startColor.g) + ',' + String(startColor.b) + ',' + String(startColor.a) + ')';
+			this.startColorStr = startColorStr;
+			this.name = startColorStr;
 
 			if (endColor) {
 				this.endColor = {
@@ -488,12 +494,14 @@
 				endColor.a = clamp(endColor.a, 0, 1);
 				this.endColorStr = 'rgba(' + String(endColor.r) + ',' + String(endColor.g) + ',' + String(endColor.b) + ',' + String(endColor.a) + ')';
 
-				if (this.startColorStr === this.endColorStr) {
-					this.endColor = this.startColor;
+				if (startColorStr === this.endColorStr) {
+					this.endColor = startColor;
+				} else {
+					this.name += this.endColorStr;
 				}
 			} else {
-				this.endColor = this.startColor;
-				this.endColorStr = this.startColorStr;
+				this.endColor = startColor;
+				this.endColorStr = startColorStr;
 			}
 
 			if (type !== undefined) {
@@ -511,15 +519,15 @@
 			;
 
 			fg.each(fg.s, function () {
-				if (this.options.background === gradient) {
+				var
+					options = this.options
+				;
+
+				if (options.background === gradient) {
 					this.setBackground({background: null});
 				}
 
-				if (this.options.mask === gradient) {
-					this.setMask({mask: null});
-				}
-
-				if (this.options.borderColor === gradient) {
+				if (options.borderColor === gradient) {
 					this.setBorder({borderColor: null});
 				}
 			});
@@ -682,15 +690,19 @@
 
 			// Step 1: Remove myself from all the sprites
 			fg.each(fg.s, function () {
-				if (this.options.animation === animation) {
+				var
+					options = this.options
+				;
+
+				if (options.animation === animation) {
 					this.setAnimation({animation: null});
 				}
 
-				if (this.options.background === animation) {
+				if (options.background === animation) {
 					this.setBackground({background: null});
 				}
 
-				if (this.options.mask === animation) {
+				if (options.mask === animation) {
 					this.setMask({mask: null});
 				}
 			});
@@ -1569,6 +1581,16 @@
 			return this;
 		},
 
+		blendMode: function (mode) {
+			if (mode === undefined) {
+				return this.options.blendMode;
+			}
+
+			this.options.blendMode = mode;
+
+			return this;
+		},
+
 		getAbsRect: function () {
 			var
 				left = this.left,
@@ -2269,14 +2291,23 @@
 		setBackground: function (options) {
 			var
 				my_options = this.options,
-				new_options = options || {}
+				new_options = options || {},
+				new_background = new_options.background
 			;
 
-			if (new_options.background !== undefined) {
-				my_options.background = fg.r[new_options.background] || null;
+			if (new_background !== undefined) {
+				if (new_background) {
+					if (typeof new_background === 'string') {
+						my_options.background = fg.r[new_background] || null;
+					} else {
+						my_options.background = new_background;
+					}
+				} else {
+					my_options.background = null;
+				}
 
-				if (window.console && new_options.background && (!my_options.background)) {
-					console.error('Background with name ' + new_options.background + ' does not exist');
+				if (window.console && new_background && (!my_options.background)) {
+					console.error('Background with name ' + new_background + ' does not exist');
 					console.trace();
 				}
 			}
@@ -2314,17 +2345,26 @@
 			var
 				my_options = this.options,
 				new_options = options || {},
+				new_border = new_options.borderColor,
 				borderRadius = new_options.borderRadius,
 				max = Math.max,
 				radius_length,
 				round = fg.truncate
 			;
 
-			if (new_options.borderColor !== undefined) {
-				my_options.borderColor = fg.r[new_options.borderColor] || null;
+			if (new_border !== undefined) {
+				if (new_border) {
+					if (typeof new_border === 'string') {
+						my_options.borderColor = fg.r[new_border] || null;
+					} else {
+						my_options.borderColor = new_border;
+					}
+				} else {
+					my_options.borderColor = null;
+				}
 
-				if (window.console && new_options.borderColor && (!my_options.borderColor)) {
-					console.error('Color with name ' + new_options.borderColor + ' does not exist');
+				if (window.console && new_border && (!my_options.borderColor)) {
+					console.error('Color with name ' + new_border + ' does not exist');
 					console.trace();
 				}
 			}
