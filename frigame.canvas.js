@@ -346,6 +346,8 @@
 				round = Math.round,
 				options = this.options,
 				animation = options.animation,
+				transformOriginx = options.transformOriginx,
+				transformOriginy = options.transformOriginy,
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
@@ -359,8 +361,6 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
-				halfWidth = this.halfWidth,
-				halfHeight = this.halfHeight,
 				prevLeft = this.prevLeft,
 				prevTop = this.prevTop,
 				frameCounter,
@@ -408,7 +408,15 @@
 				if (angle || (scaleh !== 1) || (scalev !== 1)) {
 					ctx.save();
 
-					ctx.translate(left + halfWidth, top + halfHeight);
+					if (typeof transformOriginx === 'string') {
+						transformOriginx = this[transformOriginx];
+					}
+
+					if (typeof transformOriginy === 'string') {
+						transformOriginy = this[transformOriginy];
+					}
+
+					ctx.translate(left + transformOriginx, top + transformOriginy);
 
 					if (angle) {
 						ctx.rotate(angle);
@@ -418,6 +426,8 @@
 						ctx.scale(scaleh, scalev);
 					}
 
+					ctx.translate(-transformOriginx, -transformOriginy);
+
 					fg.safeDrawImage(
 						ctx,
 						sprite_sheet.img,
@@ -425,8 +435,8 @@
 						sprite_sheet.offsety + options.multiy + (currentFrame * sprite_sheet.deltay),
 						width,
 						height,
-						-halfWidth,
-						-halfHeight,
+						0,
+						0,
 						width,
 						height
 					);
@@ -568,8 +578,6 @@
 				top = this.top,
 				width = this.width,
 				height = this.height,
-				halfWidth = this.halfWidth,
-				halfHeight = this.halfHeight,
 				prevLeft = this.prevLeft,
 				prevTop = this.prevTop,
 				frameCounter,
@@ -589,6 +597,8 @@
 				background_changed,
 				border_changed,
 				size_changed = (width !== old_options.width) || (height !== old_options.height),
+				transformOriginx = options.transformOriginx,
+				transformOriginy = options.transformOriginy,
 				angle = options.angle,
 				scaleh = options.scaleh,
 				scalev = options.scalev,
@@ -680,7 +690,15 @@
 					ctx.save();
 					context_saved = true;
 
-					ctx.translate(left + halfWidth, top + halfHeight);
+					if (typeof transformOriginx === 'string') {
+						transformOriginx = this[transformOriginx];
+					}
+
+					if (typeof transformOriginy === 'string') {
+						transformOriginy = this[transformOriginy];
+					}
+
+					ctx.translate(left + transformOriginx, top + transformOriginy);
 
 					if (angle) {
 						ctx.rotate(angle);
@@ -690,7 +708,7 @@
 						ctx.scale(scaleh, scalev);
 					}
 
-					ctx.translate(-halfWidth, -halfHeight);
+					ctx.translate(-transformOriginx, -transformOriginy);
 				} else if (left || top) {
 					ctx.save();
 					context_saved = true;

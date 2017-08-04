@@ -37,6 +37,7 @@ friGame.ready(function () {
 			.addGroup('group3', {left: 100, top: 370, width: 300, height: 100, background: 'grassblock', borderRadius: 20, borderColor: 'blue', borderWidth: 12, mask: 'catgirl', maskType: fg.MASK_STRETCHED})
 				.addSprite('catgirl3', {animation: 'catgirl', left: 32, top: 32})
 			.end()
+			.addSprite('sprite3', {animation: 'animation', centerx: 304, centery: 48})
 		;
 
 		fg.sprites.group1.move({left: 64, top: 128});
@@ -44,6 +45,9 @@ friGame.ready(function () {
 		fg.sprites.sprite1.rotate((45 * Math.PI) / 180);
 		fg.sprites.sprite2.scale(2);
 		fg.s.rect1.crop(true);
+
+		fg.sprites.sprite3.transformOrigin(12, 'height');
+		fg.sprites.sprite3.scale(3);
 
 		if (window.$) {
 			fg.playground().registerCallback(function () {

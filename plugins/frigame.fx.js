@@ -459,6 +459,54 @@
 					s.resize({radius: value});
 				}
 			},
+			transformOrigin: {
+				get: function (s) {
+					var
+						origin = s.transformOrigin()
+					;
+
+					if (typeof origin === 'string') {
+						origin = s[origin];
+					}
+
+					return origin;
+				},
+				set: function (s, value) {
+					s.transformOrigin(value);
+				}
+			},
+			transformOriginx: {
+				get: function (s) {
+					var
+						origin = s.transformOriginx()
+					;
+
+					if (typeof origin === 'string') {
+						origin = s[origin];
+					}
+
+					return origin;
+				},
+				set: function (s, value) {
+					s.transformOriginx(value);
+				}
+			},
+			transformOriginy: {
+				get: function (s) {
+					var
+						origin = s.transformOriginy()
+					;
+
+					if (typeof origin === 'string') {
+						origin = s[origin];
+					}
+
+					return origin;
+				},
+				set: function (s, value) {
+					s.transformOriginy(value);
+				}
+			},
 			rotate: {
 				get: function (s) {
 					return s.rotate();

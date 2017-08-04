@@ -1075,6 +1075,8 @@
 				// Public options
 
 				// Implementation details
+				transformOriginx: 'halfWidth',
+				transformOriginy: 'halfHeight',
 				angle: 0,
 				scalex: 1,
 				scaley: 1,
@@ -1462,6 +1464,105 @@
 			if (window.console && (!found)) {
 				console.error('Sprite with name ' + name + ' not found in the same sprite group');
 				console.trace();
+			}
+
+			return this;
+		},
+
+		transformOrigin: function (originx, originy) {
+			var
+				options = this.options
+			;
+
+			if (originx === undefined) {
+				return options.transformOriginx;
+			}
+
+			if (typeof originx === 'string') {
+				if (window.console) {
+					if (!((originx === 'halfWidth') || (originx === 'width'))) {
+						console.error('Invalid originx: ' + originx);
+						console.trace();
+					}
+				}
+			} else {
+				originx = fg.truncate(originx) || 0;
+			}
+
+			options.transformOriginx = originx;
+
+			if (originy === undefined) {
+				// If originy isn't specified, it is assumed to be equal to originx.
+				if (originx === 'halfWidth') {
+					options.transformOriginy = 'halfHeight';
+				} else if (originx === 'width') {
+					options.transformOriginy = 'height';
+				} else {
+					options.transformOriginy = originx;
+				}
+			} else {
+				if (typeof originy === 'string') {
+					options.transformOriginy = originy;
+
+					if (window.console) {
+						if (!((originy === 'halfHeight') || (originy === 'height'))) {
+							console.error('Invalid originy: ' + originy);
+							console.trace();
+						}
+					}
+				} else {
+					options.transformOriginy = fg.truncate(originy) || 0;
+				}
+			}
+
+			return this;
+		},
+
+		transformOriginx: function (originx) {
+			var
+				options = this.options
+			;
+
+			if (originx === undefined) {
+				return options.transformOriginx;
+			}
+
+			if (typeof originx === 'string') {
+				options.transformOriginx = originx;
+
+				if (window.console) {
+					if (!((originx === 'halfWidth') || (originx === 'width'))) {
+						console.error('Invalid originx: ' + originx);
+						console.trace();
+					}
+				}
+			} else {
+				options.transformOriginx = fg.truncate(originx) || 0;
+			}
+
+			return this;
+		},
+
+		transformOriginy: function (originy) {
+			var
+				options = this.options
+			;
+
+			if (originy === undefined) {
+				return options.transformOriginy;
+			}
+
+			if (typeof originy === 'string') {
+				options.transformOriginy = originy;
+
+				if (window.console) {
+					if (!((originy === 'halfHeight') || (originy === 'height'))) {
+						console.error('Invalid originy: ' + originy);
+						console.trace();
+					}
+				}
+			} else {
+				options.transformOriginy = fg.truncate(originy) || 0;
 			}
 
 			return this;
