@@ -315,10 +315,19 @@
 			return transform;
 		},
 
-		ieTransform: function (angle, scaleh, scalev) {
+		ieTransform: function (angle, scaleh, scalev, transformOriginx, transformOriginy) {
 			var
+				filters = this.ieFilters,
 				cos,
 				sin,
+				m11,
+				m12,
+				m21,
+				m22,
+				translated_centerx,
+				translated_centery,
+				transformed_centerx,
+				transformed_centery,
 				filter
 			;
 
@@ -326,15 +335,38 @@
 			if (angle || (scaleh !== 1) || (scalev !== 1)) {
 				cos = Math.cos(angle);
 				sin = Math.sin(angle);
+				m11 = cos * scaleh;
+				m12 = -sin * scalev;
+				m21 = sin * scaleh;
+				m22 = cos * scalev;
 				filter = '' +
-					'progid:DXImageTransform.Microsoft.Matrix(M11=' + String(cos * scaleh) +
-					',M12=' + String(-sin * scalev) +
-					',M21=' + String(sin * scaleh) +
-					',M22=' + String(cos * scalev) +
+					'progid:DXImageTransform.Microsoft.Matrix(M11=' + String(m11) +
+					',M12=' + String(m12) +
+					',M21=' + String(m21) +
+					',M22=' + String(m22) +
 					',SizingMethod="auto expand",FilterType="nearest neighbor")'
 				;
+
+				// Adjust the transform origin (STEP 1/2)
+				// Based on:
+				// http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
+
+				// Take the original center of the element and translate it by the negated transform origin
+				translated_centerx = this.halfWidth - transformOriginx;
+				translated_centery = this.halfHeight - transformOriginy;
+
+				// Apply the matrix transform to the result
+				transformed_centerx = (m11 * translated_centerx) + (m12 * translated_centery);
+				transformed_centery = (m21 * translated_centerx) + (m22 * translated_centery);
+
+				// Translate the result by the transform origin
+				filters.transformedCenterx = transformed_centerx + transformOriginx;
+				filters.transformedCentery = transformed_centery + transformOriginy;
 			} else {
 				filter = '';
+
+				filters.transformedCenterx = 0;
+				filters.transformedCentery = 0;
 			}
 
 			this.ieFilters.matrix = filter;
@@ -355,24 +387,35 @@
 			this.ieFilters.alpha = filter;
 		},
 
-		applyIeFilters: function (left, top, width, height) {
+		applyIeFilters: function (left, top) {
 			var
 				dom = this.dom,
 				options = this.options,
 				filters = this.ieFilters,
+				matrix = filters.matrix,
 				newWidth,
 				newHeight,
 				round = Math.round
 			;
 
 			// Step 1: Apply the filters
-			dom.css('filter', filters.matrix + filters.alpha + filters.gradient + filters.image);
+			dom.css('filter', matrix + filters.alpha + filters.gradient + filters.image);
 
 			// Step 2: Adjust the element position according to the new width and height
-			newWidth = dom.width();
-			newHeight = dom.height();
-			options.posOffsetX = round((newWidth - width) / 2);
-			options.posOffsetY = round((newHeight - height) / 2);
+			if (matrix) {
+				// Adjust the transform origin (STEP 2/2)
+				newWidth = dom.width();
+				newHeight = dom.height();
+
+				// Subtract from the x value of the result half the width of the bounding box,
+				// and from the y value of the result half the height of the bounding box
+				options.posOffsetX = -round(filters.transformedCenterx - (newWidth / 2));
+				options.posOffsetY = -round(filters.transformedCentery - (newHeight / 2));
+			} else {
+				options.posOffsetX = 0;
+				options.posOffsetY = 0;
+			}
+
 			dom.css({
 				'left': String(left - options.posOffsetX) + 'px',
 				'top': String(top - options.posOffsetY) + 'px'
@@ -587,44 +630,57 @@
 					transformOriginy = this[transformOriginy];
 				}
 
-				if ((transformOriginx !== old_options.transformOriginx) || (transformOriginy !== old_options.transformOriginy)) {
-					if (transformOrigin) {
-						css_options[transformOrigin] = transformOriginx + 'px ' + transformOriginy + 'px';
-						update_css = true;
-					} else if (ieFilter) {
-						// TO DO -- In theory it is possible to calculate posOffsetX and posOffsetY based on the transform origin
-						$.noop();
-					} else {
-						$.noop();	// Transforms not supported
-					}
+				if ((!transformFunction) && (ieFilter)) {
+					if	(
+							(transformOriginx !== old_options.transformOriginx)
+						||	(transformOriginy !== old_options.transformOriginy)
+						||	(angle !== old_options.angle)
+						||	(scaleh !== old_options.scaleh)
+						||	(scalev !== old_options.scalev)
+						) {
+						if ((!old_options.scaleh) || (!old_options.scalev)) {
+							dom.show();
+						}
 
-					old_options.transformOriginx = transformOriginx;
-					old_options.transformOriginy = transformOriginy;
-				}
-
-				if	(
-						(angle !== old_options.angle)
-					||	(scaleh !== old_options.scaleh)
-					||	(scalev !== old_options.scalev)
-					) {
-					if ((!old_options.scaleh) || (!old_options.scalev)) {
-						dom.show();
-					}
-
-					if (transformFunction) {
-						css_options[transformFunction] = this.transform(angle, scaleh, scalev);
-						update_css = true;
-					} else if (ieFilter) {
-						this.ieTransform(angle, scaleh, scalev);
+						this.ieTransform(angle, scaleh, scalev, transformOriginx, transformOriginy);
 						update_css = true;
 						apply_ie_filters = true;
-					} else {
-						$.noop();	// Transforms not supported
+
+						old_options.transformOriginx = transformOriginx;
+						old_options.transformOriginy = transformOriginy;
+						old_options.angle = angle;
+						old_options.scaleh = scaleh;
+						old_options.scalev = scalev;
+					}
+				} else {
+					if ((transformOriginx !== old_options.transformOriginx) || (transformOriginy !== old_options.transformOriginy)) {
+						if (transformOrigin) {
+							css_options[transformOrigin] = transformOriginx + 'px ' + transformOriginy + 'px';
+							update_css = true;
+						}
+
+						old_options.transformOriginx = transformOriginx;
+						old_options.transformOriginy = transformOriginy;
 					}
 
-					old_options.angle = angle;
-					old_options.scaleh = scaleh;
-					old_options.scalev = scalev;
+					if	(
+							(angle !== old_options.angle)
+						||	(scaleh !== old_options.scaleh)
+						||	(scalev !== old_options.scalev)
+						) {
+						if ((!old_options.scaleh) || (!old_options.scalev)) {
+							dom.show();
+						}
+
+						if (transformFunction) {
+							css_options[transformFunction] = this.transform(angle, scaleh, scalev);
+							update_css = true;
+						}
+
+						old_options.angle = angle;
+						old_options.scaleh = scaleh;
+						old_options.scalev = scalev;
+					}
 				}
 
 				if (alpha !== old_options.alpha) {
@@ -668,7 +724,7 @@
 				}
 
 				if (ieFilter && apply_ie_filters) {
-					this.applyIeFilters(left, top, width, height);
+					this.applyIeFilters(left, top);
 				}
 			} else {
 				if (dom) {
@@ -939,46 +995,57 @@
 					transformOriginy = this[transformOriginy];
 				}
 
-				if ((transformOriginx !== old_options.transformOriginx) || (transformOriginy !== old_options.transformOriginy)) {
-					if (transformOrigin) {
-						css_options[transformOrigin] = transformOriginx + 'px ' + transformOriginy + 'px';
-						update_css = true;
-					} else if (ieFilter) {
-						// TO DO
-						//this.ieTransform(angle, scaleh, scalev);
-						update_css = true;
-						apply_ie_filters = true;
-					} else {
-						$.noop();	// Transforms not supported
-					}
+				if ((!transformFunction) && (ieFilter)) {
+					if	(
+							(transformOriginx !== old_options.transformOriginx)
+						||	(transformOriginy !== old_options.transformOriginy)
+						||	(angle !== old_options.angle)
+						||	(scaleh !== old_options.scaleh)
+						||	(scalev !== old_options.scalev)
+						) {
+						if ((!old_options.scaleh) || (!old_options.scalev)) {
+							dom.show();
+						}
 
-					old_options.transformOriginx = transformOriginx;
-					old_options.transformOriginy = transformOriginy;
-				}
-
-				if	(
-						(angle !== old_options.angle)
-					||	(scaleh !== old_options.scaleh)
-					||	(scalev !== old_options.scalev)
-					) {
-					if ((!old_options.scaleh) || (!old_options.scalev)) {
-						dom.show();
-					}
-
-					if (transformFunction) {
-						css_options[transformFunction] = this.transform(angle, scaleh, scalev);
-						update_css = true;
-					} else if (ieFilter) {
-						this.ieTransform(angle, scaleh, scalev);
+						this.ieTransform(angle, scaleh, scalev, transformOriginx, transformOriginy);
 						update_css = true;
 						apply_ie_filters = true;
-					} else {
-						$.noop();	// Transforms not supported
+
+						old_options.transformOriginx = transformOriginx;
+						old_options.transformOriginy = transformOriginy;
+						old_options.angle = angle;
+						old_options.scaleh = scaleh;
+						old_options.scalev = scalev;
+					}
+				} else {
+					if ((transformOriginx !== old_options.transformOriginx) || (transformOriginy !== old_options.transformOriginy)) {
+						if (transformOrigin) {
+							css_options[transformOrigin] = transformOriginx + 'px ' + transformOriginy + 'px';
+							update_css = true;
+						}
+
+						old_options.transformOriginx = transformOriginx;
+						old_options.transformOriginy = transformOriginy;
 					}
 
-					old_options.angle = angle;
-					old_options.scaleh = scaleh;
-					old_options.scalev = scalev;
+					if	(
+							(angle !== old_options.angle)
+						||	(scaleh !== old_options.scaleh)
+						||	(scalev !== old_options.scalev)
+						) {
+						if ((!old_options.scaleh) || (!old_options.scalev)) {
+							dom.show();
+						}
+
+						if (transformFunction) {
+							css_options[transformFunction] = this.transform(angle, scaleh, scalev);
+							update_css = true;
+						}
+
+						old_options.angle = angle;
+						old_options.scaleh = scaleh;
+						old_options.scalev = scalev;
+					}
 				}
 
 				if (alpha !== old_options.alpha) {
@@ -1159,7 +1226,7 @@
 				}
 
 				if (ieFilter && apply_ie_filters) {
-					this.applyIeFilters(left, top, width, height);
+					this.applyIeFilters(left, top);
 				}
 
 				overrides.PSpriteGroup.draw.apply(this, arguments);

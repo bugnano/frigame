@@ -47,7 +47,8 @@ friGame.ready(function () {
 		fg.s.rect1.crop(true);
 
 		fg.sprites.sprite3.transformOrigin(12, 'height');
-		fg.sprites.sprite3.scale(3);
+		fg.sprites.sprite3.scale(3, 2);
+		fg.sprites.sprite3.rotate((27 * Math.PI) / 180);
 
 		if (window.$) {
 			fg.playground().registerCallback(function () {
