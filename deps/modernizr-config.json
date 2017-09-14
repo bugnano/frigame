@@ -1,0 +1,19 @@
+{
+  "minify": false,
+  "options": [
+    "prefixed",
+    "prefixedCSSValue",
+    "setClasses"
+  ],
+  "feature-detects": [
+    "test/svg",
+    "test/css/backgroundblendmode",
+    "test/css/backgroundsize",
+    "test/css/borderradius",
+    "test/css/gradients",
+    "test/css/mask",
+    "test/css/opacity",
+    "test/css/rgba",
+    "test/css/transforms"
+  ]
+}
