@@ -605,6 +605,8 @@
 				playground = fg.s.playground,
 				easing_list = fg.fx.easing,
 				duration = new_options.duration,
+				easing = new_options.easing,
+				easing_function = easing_list[easing],
 				speed,
 				property,
 				tween_obj,
@@ -623,13 +625,22 @@
 				speed = speeds._default;
 			}
 
+			if (!easing_function) {
+				if ((easing) && (window.console)) {
+					console.warn('Easing with name ' + easing + '  does not exist');
+					console.trace();
+				}
+
+				easing_function = easing_list.swing;
+			}
+
 			tween_obj = {
 				name: new_options.name,
 				target_obj: target_obj,
 				remove: false,
 				current_step: 0,
 				num_step: Math.max(Math.round(speed / fg.REFRESH_RATE), 1) || 1,
-				easing: easing_list[new_options.easing] || easing_list.swing,
+				easing: easing_function,
 				callback: new_options.callback,
 				property_list: []
 			};
