@@ -1009,15 +1009,6 @@
 			return this;
 		},
 
-		collidePointRect: function (x, y) {
-			return	(
-					(x >= this.left)
-				&&	(x < this.right)
-				&&	(y >= this.top)
-				&&	(y < this.bottom)
-			);
-		},
-
 		collideRect: function (otherRect) {
 			return	(!(
 					(this.bottom <= otherRect.top)
@@ -1027,11 +1018,25 @@
 			));
 		},
 
-		collidePointCircle: function (x, y) {
+		collideRectPoint: function (x, y) {
+			return	(
+					(x >= this.left)
+				&&	(x < this.right)
+				&&	(y >= this.top)
+				&&	(y < this.bottom)
+			);
+		},
+
+		collideRectCircle: function (otherRect) {
 			var
-				dx = x - this.centerx,
-				dy = y - this.centery,
-				radius = this.radius
+				clamp = fg.clamp,
+				centerx = otherRect.centerx,
+				centery = otherRect.centery,
+				radius = otherRect.radius,
+				nearest_x = clamp(centerx, this.left, this.right),
+				nearest_y = clamp(centery, this.top, this.bottom),
+				dx = centerx - nearest_x,
+				dy = centery - nearest_y
 			;
 
 			return (((dx * dx) + (dy * dy)) < (radius * radius));
@@ -1045,8 +1050,37 @@
 			;
 
 			return (((dx * dx) + (dy * dy)) < (radii * radii));
+		},
+
+		collideCirclePoint: function (x, y) {
+			var
+				dx = x - this.centerx,
+				dy = y - this.centery,
+				radius = this.radius
+			;
+
+			return (((dx * dx) + (dy * dy)) < (radius * radius));
+		},
+
+		collideCircleRect: function (otherRect) {
+			var
+				clamp = fg.clamp,
+				centerx = this.centerx,
+				centery = this.centery,
+				radius = this.radius,
+				nearest_x = clamp(centerx, otherRect.left, otherRect.right),
+				nearest_y = clamp(centery, otherRect.top, otherRect.bottom),
+				dx = centerx - nearest_x,
+				dy = centery - nearest_y
+			;
+
+			return (((dx * dx) + (dy * dy)) < (radius * radius));
 		}
 	};
+
+	// Deprecated
+	fg.PRect.collidePointRect = fg.PRect.collideRectPoint;
+	fg.PRect.collidePointCircle = fg.PRect.collideCirclePoint;
 
 	fg.Rect = fg.Maker(fg.PRect);
 
