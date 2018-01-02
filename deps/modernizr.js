@@ -1,6 +1,6 @@
 /*!
  * modernizr v3.5.0
- * Build https://modernizr.com/download?-backgroundblendmode-backgroundsize-borderradius-cssgradients-cssmask-csstransforms-opacity-rgba-svg-prefixed-prefixedcssvalue-setclasses-dontmin
+ * Build https://modernizr.com/download?-backgroundblendmode-backgroundsize-borderradius-canvas-cssgradients-cssmask-csstransforms-opacity-rgba-svg-prefixed-prefixedcssvalue-setclasses-dontmin
  *
  * Copyright (c)
  *  Faruk Ates
@@ -952,6 +952,27 @@
 
   ModernizrProto.prefixedCSSValue = prefixedCSSValue;
   
+/*!
+{
+  "name": "Canvas",
+  "property": "canvas",
+  "caniuse": "canvas",
+  "tags": ["canvas", "graphics"],
+  "polyfills": ["flashcanvas", "excanvas", "slcanvas", "fxcanvas"]
+}
+!*/
+/* DOC
+Detects support for the `<canvas>` element for 2D drawing.
+*/
+
+  // On the S60 and BB Storm, getContext exists, but always returns undefined
+  // so we actually have to call getContext() to verify
+  // github.com/Modernizr/Modernizr/issues/issue/97/
+  Modernizr.addTest('canvas', function() {
+    var elem = createElement('canvas');
+    return !!(elem.getContext && elem.getContext('2d'));
+  });
+
 /*!
 {
   "name": "SVG",

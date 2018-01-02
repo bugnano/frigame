@@ -6,6 +6,7 @@
     "setClasses"
   ],
   "feature-detects": [
+    "test/canvas",
     "test/svg",
     "test/css/backgroundblendmode",
     "test/css/backgroundsize",

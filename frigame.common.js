@@ -1,6 +1,6 @@
 /*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
-// Copyright (c) 2011-2017 Franco Bugnano
+// Copyright (c) 2011-2018 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -1505,7 +1505,8 @@
 
 		transformOrigin: function (originx, originy) {
 			var
-				options = this.options
+				options = this.options,
+				round = fg.truncate
 			;
 
 			if (originx === undefined) {
@@ -1520,7 +1521,7 @@
 					}
 				}
 			} else {
-				originx = fg.truncate(originx) || 0;
+				originx = round(originx) || 0;
 			}
 
 			options.transformOriginx = originx;
@@ -1545,7 +1546,7 @@
 						}
 					}
 				} else {
-					options.transformOriginy = fg.truncate(originy) || 0;
+					options.transformOriginy = round(originy) || 0;
 				}
 			}
 
