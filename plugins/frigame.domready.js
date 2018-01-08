@@ -29,11 +29,11 @@
 	'use strict';
 
 	var
-		fns = [],
+		fns,
 		fn,
-		testEl = document.documentElement,
-		hack = (!document.addEventListener) && testEl.doScroll,
-		loaded = document.readyState === 'complete'
+		testEl,
+		hack,
+		loaded
 	;
 
 	function flush() {
@@ -48,59 +48,74 @@
 		}
 	}
 
-	if (document.addEventListener) {
-		fn = function () {
-			document.removeEventListener('DOMContentLoaded', fn, false);
-			window.removeEventListener('load', fn, false);
-			flush();
-		};
+	if (typeof window !== 'undefined') {
+		// Browser
+		fns = [];
+		testEl = document.documentElement;
+		hack = (!document.addEventListener) && testEl.doScroll;
+		loaded = document.readyState === 'complete';
 
-		document.addEventListener('DOMContentLoaded', fn, false);
-
-		// A fallback to window.onload, that will always work
-		window.addEventListener('load', fn, false);
-	} else if (document.attachEvent) {
-		fn = function () {
-			if (document.readyState === 'complete') {
-				document.detachEvent('onreadystatechange', fn);
-				window.detachEvent('onload', fn);
+		if (document.addEventListener) {
+			fn = function () {
+				document.removeEventListener('DOMContentLoaded', fn, false);
+				window.removeEventListener('load', fn, false);
 				flush();
-			}
-		};
+			};
 
-		document.attachEvent('onreadystatechange', fn);
+			document.addEventListener('DOMContentLoaded', fn, false);
 
-		// A fallback to window.onload, that will always work
-		window.attachEvent('onload', fn);
-	}
-
-	fg.ready = function (callback) {
-		if (loaded) {
-			// Handle it asynchronously to allow scripts the opportunity to delay ready
-			setTimeout(function () { callback.call(fg, fg); }, 1);
-		} else {
-			if (hack) {
-				if (self !== top) {
-					fns.push(callback);
-				} else {
-					(function () {
-						try {
-							testEl.doScroll('left');
-						} catch (e) {
-							setTimeout(function () { fg.ready(callback); }, 50);
-							return fg;
-						}
-
-						loaded = 1;
-						setTimeout(function () { callback.call(fg, fg); }, 1);
-					}());
+			// A fallback to window.onload, that will always work
+			window.addEventListener('load', fn, false);
+		} else if (document.attachEvent) {
+			fn = function () {
+				if (document.readyState === 'complete') {
+					document.detachEvent('onreadystatechange', fn);
+					window.detachEvent('onload', fn);
+					flush();
 				}
-			} else {
-				fns.push(callback);
-			}
+			};
+
+			document.attachEvent('onreadystatechange', fn);
+
+			// A fallback to window.onload, that will always work
+			window.attachEvent('onload', fn);
 		}
 
-		return fg;
-	};
+		fg.ready = function (callback) {
+			if (loaded) {
+				// Handle it asynchronously to allow scripts the opportunity to delay ready
+				setTimeout(function () { callback.call(fg, fg); }, 1);
+			} else {
+				if (hack) {
+					if (self !== top) {
+						fns.push(callback);
+					} else {
+						(function () {
+							try {
+								testEl.doScroll('left');
+							} catch (e) {
+								setTimeout(function () { fg.ready(callback); }, 50);
+								return fg;
+							}
+
+							loaded = 1;
+							setTimeout(function () { callback.call(fg, fg); }, 1);
+						}());
+					}
+				} else {
+					fns.push(callback);
+				}
+			}
+
+			return fg;
+		};
+	} else {
+		// Node.js
+		fg.ready = function (callback) {
+			setTimeout(function () { callback.call(fg, fg); }, 1);
+
+			return fg;
+		};
+	}
 }(friGame));
 

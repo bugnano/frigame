@@ -1,4 +1,4 @@
-/*global friGame */
+/*global friGame, global */
 /*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
 // Copyright (c) 2011-2018 Franco Bugnano
@@ -29,6 +29,7 @@
 	'use strict';
 
 	var
+		root,
 		overrides = {},
 		speeds = {
 			slow: 600,
@@ -36,6 +37,14 @@
 			_default: 400
 		}
 	;
+
+	if (typeof window !== 'undefined') {
+		// Browser
+		root = window;
+	} else {
+		// Node.js
+		root = global;
+	}
 
 	function tweenStep() {
 		/*jshint validthis: true */
@@ -626,7 +635,7 @@
 			}
 
 			if (!easing_function) {
-				if ((easing) && (window.console)) {
+				if ((easing) && (root.console)) {
 					console.warn('Easing with name ' + easing + '  does not exist');
 					console.trace();
 				}
@@ -709,7 +718,7 @@
 				}
 			}
 
-			if (window.console && (!found) && (!new_options.suppressWarning)) {
+			if (root.console && (!found) && (!new_options.suppressWarning)) {
 				console.warn('Tween with name ' + name + ' does not exist');
 				console.trace();
 			}

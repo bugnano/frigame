@@ -1,3 +1,4 @@
+/*global define, module, self, global, require */
 /*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
 // Copyright (c) 2011-2018 Franco Bugnano
@@ -23,16 +24,61 @@
 // Uses ideas and APIs inspired by:
 // gameQuery Copyright (c) 2008 Selim Arsever (gamequery.onaluf.org), licensed under the MIT
 
-(function () {
+(function (root, factory) {
+	'use strict';
+
+	if ((typeof define === 'function') && define.amd) {
+		// AMD. Register as an anonymous module.
+		define([], factory);
+	} else if ((typeof module === 'object') && module.exports) {
+		// Node. Does not work with strict CommonJS, but
+		// only CommonJS-like environments that support module.exports,
+		// like Node.
+		module.exports = factory();
+	} else {
+		// Browser globals (root is window)
+		root.friGame = factory();
+	}
+}(typeof self !== 'undefined' ? self : this, function () {
 	'use strict';
 
 	var
+		root,
 		fg = {},
+		imageSize,
 		requestAnimFrame
 	;
 
-	// The friGame namespace
-	window.friGame = fg;
+	if (typeof window !== 'undefined') {
+		// Browser
+		root = window;
+	} else {
+		// Node.js
+		root = global;
+
+		// The friGame namespace
+		// !!! WARNING !!! Pollutes global namespace (but useful for plugins)
+		root.friGame = fg;
+
+		// performance.now()
+		// !!! WARNING !!! Pollutes global namespace (but coherent with browsers)
+		try {
+			root.performance = require('perf_hooks').performance;
+		} catch (e) {
+			if (root.console) {
+				console.warn('Cannot import "perf_hooks". Try updating nodejs.');
+			}
+		}
+
+		// Image
+		try {
+			imageSize = require('image-size');
+		} catch (e) {
+			if (root.console) {
+				console.warn('Cannot import "image-size". Try installing "image-size" with npm.');
+			}
+		}
+	}
 
 	// Date.now() by Mozilla
 	if (!Date.now) {
@@ -42,16 +88,16 @@
 	}
 
 	// performance.now by Tony Gentilcore
-	if (!window.performance) {
-		window.performance = {};
+	if (!root.performance) {
+		root.performance = {};
 	}
 
-	if (!window.performance.now) {
-		window.performance.now = (function () {
-			return	window.performance.mozNow ||
-					window.performance.msNow ||
-					window.performance.oNow ||
-					window.performance.webkitNow ||
+	if (!performance.now) {
+		performance.now = (function () {
+			return	performance.mozNow ||
+					performance.msNow ||
+					performance.oNow ||
+					performance.webkitNow ||
 					Date.now;
 		}());
 	}
@@ -61,12 +107,12 @@
 		var
 			lastTime = 0,
 			vendors = ['ms', 'moz', 'webkit', 'o'],
-			request = window.requestAnimationFrame,
+			request = root.requestAnimationFrame,
 			x
 		;
 
 		for (x = 0; (x < vendors.length) && (!request); x += 1) {
-			request = window[vendors[x] + 'RequestAnimationFrame'];
+			request = root[vendors[x] + 'RequestAnimationFrame'];
 		}
 
 		if (!request) {
@@ -74,7 +120,7 @@
 				var
 					currTime = performance.now(),
 					timeToCall = Math.max(0, 16 - (currTime - lastTime)),
-					id = window.setTimeout(function () {
+					id = setTimeout(function () {
 						callback(currTime + timeToCall);
 					}, timeToCall)
 				;
@@ -305,7 +351,7 @@
 		// Public functions
 
 		addResource: function (name, resource) {
-			if (window.console && fg.r[name]) {
+			if (root.console && fg.r[name]) {
 				console.error('Resource with name ' + name + ' already exists');
 				console.trace();
 			}
@@ -341,7 +387,7 @@
 				fg.r[name] = null;
 				delete fg.r[name];
 			} else {
-				if (window.console && (!new_options.suppressWarning)) {
+				if (root.console && (!new_options.suppressWarning)) {
 					console.warn('Resource with name ' + name + ' already removed');
 					console.trace();
 				}
@@ -818,8 +864,25 @@
 				img = PAnimation.images[imageURL].img;
 				PAnimation.images[imageURL].refCount += 1;
 			} else {
-				img = new Image();
-				img.src = imageURL;
+				if (typeof Image !== 'undefined') {
+					img = new Image();
+					img.src = imageURL;
+				} else if (imageSize) {
+					img = fg.extend({complete: true}, fg.pick(imageSize(imageURL), ['width', 'height']));
+				} else {
+					if (root.console) {
+						console.error('Cannot read image. Try installing "image-size" with npm.');
+						console.trace();
+					}
+
+					// Fallback to a 1x1px image
+					img = {
+						width: 1,
+						height: 1,
+						complete: true
+					};
+				}
+
 				PAnimation.images[imageURL] = {
 					img: img,
 					refCount: 1
@@ -1129,7 +1192,7 @@
 				posOffsetY: 0
 			});
 
-			if (window.console && fg.s[name]) {
+			if (root.console && fg.s[name]) {
 				console.error('Sprite with name ' + name + ' already exists');
 				console.trace();
 			}
@@ -1210,7 +1273,7 @@
 				fg.s[name] = null;
 				delete fg.s[name];
 			} else {
-				if (window.console) {
+				if (root.console) {
 					console.warn('Sprite with name ' + name + ' already removed');
 					console.trace();
 				}
@@ -1249,7 +1312,7 @@
 				}
 			}
 
-			if (window.console && (!found) && (!new_options.suppressWarning)) {
+			if (root.console && (!found) && (!new_options.suppressWarning)) {
 				console.warn('No callbacks removed');
 				console.trace();
 			}
@@ -1447,7 +1510,7 @@
 				}
 			}
 
-			if (window.console && (!found)) {
+			if (root.console && (!found)) {
 				console.error('Sprite with name ' + name + ' not found in the same sprite group');
 				console.trace();
 			}
@@ -1495,7 +1558,7 @@
 				}
 			}
 
-			if (window.console && (!found)) {
+			if (root.console && (!found)) {
 				console.error('Sprite with name ' + name + ' not found in the same sprite group');
 				console.trace();
 			}
@@ -1514,7 +1577,7 @@
 			}
 
 			if (typeof originx === 'string') {
-				if (window.console) {
+				if (root.console) {
 					if (!((originx === 'halfWidth') || (originx === 'width'))) {
 						console.error('Invalid originx: ' + originx);
 						console.trace();
@@ -1539,7 +1602,7 @@
 				if (typeof originy === 'string') {
 					options.transformOriginy = originy;
 
-					if (window.console) {
+					if (root.console) {
 						if (!((originy === 'halfHeight') || (originy === 'height'))) {
 							console.error('Invalid originy: ' + originy);
 							console.trace();
@@ -1565,7 +1628,7 @@
 			if (typeof originx === 'string') {
 				options.transformOriginx = originx;
 
-				if (window.console) {
+				if (root.console) {
 					if (!((originx === 'halfWidth') || (originx === 'width'))) {
 						console.error('Invalid originx: ' + originx);
 						console.trace();
@@ -1590,7 +1653,7 @@
 			if (typeof originy === 'string') {
 				options.transformOriginy = originy;
 
-				if (window.console) {
+				if (root.console) {
 					if (!((originy === 'halfHeight') || (originy === 'height'))) {
 						console.error('Invalid originy: ' + originy);
 						console.trace();
@@ -1833,7 +1896,9 @@
 
 				this.checkUpdate();
 			}
-		}
+		},
+
+		draw: fg.noop
 	});
 
 	// ******************************************************************** //
@@ -1918,7 +1983,7 @@
 					new_options.width = animation_options.frameWidth;
 					new_options.height = animation_options.frameHeight;
 				} else {
-					if (window.console && new_options.animation) {
+					if (root.console && new_options.animation) {
 						console.error('Animation with name ' + new_options.animation + ' does not exist');
 						console.trace();
 					}
@@ -2442,7 +2507,7 @@
 					my_options.background = null;
 				}
 
-				if (window.console && new_background && (!my_options.background)) {
+				if (root.console && new_background && (!my_options.background)) {
 					console.error('Background with name ' + new_background + ' does not exist');
 					console.trace();
 				}
@@ -2464,7 +2529,7 @@
 			if (new_options.mask !== undefined) {
 				my_options.mask = fg.r[new_options.mask] || null;
 
-				if (window.console && new_options.mask && (!my_options.mask)) {
+				if (root.console && new_options.mask && (!my_options.mask)) {
 					console.error('Mask with name ' + new_options.mask + ' does not exist');
 					console.trace();
 				}
@@ -2499,7 +2564,7 @@
 					my_options.borderColor = null;
 				}
 
-				if (window.console && new_border && (!my_options.borderColor)) {
+				if (root.console && new_border && (!my_options.borderColor)) {
 					console.error('Color with name ' + new_border + ' does not exist');
 					console.trace();
 				}
@@ -2717,18 +2782,34 @@
 			;
 
 			if (!playground) {
-				if (typeof dom === 'string') {
-					// Allow the ID to start with the '#' symbol
-					if (dom[0] === '#') {
-						dom = dom.split('#')[1];
+				if (typeof document !== 'undefined') {
+					// Browser
+					if (typeof dom === 'string') {
+						// Allow the ID to start with the '#' symbol
+						if (dom[0] === '#') {
+							dom = dom.split('#')[1];
+						}
+
+						dom = document.getElementById(dom);
+					} else if (!dom) {
+						// Default to the element with id of 'playground'
+						dom = document.getElementById('playground');
+					} else if (dom.jquery) {
+						dom = dom.get(0);
+					}
+				} else {
+					// Node.js
+					if ((!dom) || (typeof dom === 'string')) {
+						dom = {};
 					}
 
-					dom = document.getElementById(dom);
-				} else if (!dom) {
-					// Default to the element with id of 'playground'
-					dom = document.getElementById('playground');
-				} else if (dom.jquery) {
-					dom = dom.get(0);
+					if (!(dom.offsetWidth)) {
+						dom.offsetWidth = 300;
+					}
+
+					if (!(dom.offsetHeight)) {
+						dom.offsetHeight = 150;
+					}
 				}
 
 				playground = fg.SpriteGroup('playground', {width: dom.offsetWidth, height: dom.offsetHeight, parentDOM: dom}, '');
@@ -2762,8 +2843,8 @@
 			fg.running = true;
 
 			if (callback !== undefined) {
-				if (window.console && callback && resourceManager.completeCallback) {
-					if (window.console) {
+				if (root.console && callback && resourceManager.completeCallback) {
+					if (root.console) {
 						console.warn('Overriding the existing startGame callback');
 						console.trace();
 					}
@@ -2886,5 +2967,7 @@
 			));
 		}
 	});
-}());
+
+	return fg;
+}));
 
