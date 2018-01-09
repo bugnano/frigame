@@ -281,7 +281,9 @@
 
 				// STEP 1: Draw the mask
 				my_ctx.globalCompositeOperation = 'copy';
+				my_ctx.beginPath();
 				my_ctx.rect(0, 0, width, height);
+				my_ctx.closePath();
 				if (mask_type === fg.MASK_STRETCHED) {
 					// Stretched mask
 					fg.safeDrawImage(
