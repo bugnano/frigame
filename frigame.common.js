@@ -1211,15 +1211,14 @@
 			// Implementation details
 			this.callbacks = [];
 			this.needsUpdate = false;
-			this.frameCounterLastMove = fg.frameCounter;
 			this.prevLeft = 0;
 			this.prevTop = 0;
+			this.frameCounterLastMove = fg.frameCounter;
 
 			// Call fg.PRect.init after setting this.parent
 			fg.PRect.init.call(this, options);
 
-			this.prevLeft = this.left;
-			this.prevTop = this.top;
+			this.teleport();
 		},
 
 		// Public functions
@@ -1822,6 +1821,14 @@
 			fg.PRect.move.apply(this, arguments);
 		},
 
+		teleport: function (options) {
+			fg.PRect.move.apply(this, arguments);
+
+			this.prevLeft = this.left;
+			this.prevTop = this.top;
+			this.frameCounterLastMove = fg.frameCounter;
+		},
+
 		// Implementation details
 
 		checkUpdate: function () {
@@ -1954,8 +1961,7 @@
 
 			this.setAnimation(new_options);
 
-			this.prevLeft = this.left;
-			this.prevTop = this.top;
+			this.teleport();
 		},
 
 		// Public functions
@@ -2399,6 +2405,8 @@
 			this.setBackground(new_options);
 			this.setMask(new_options);
 			this.setBorder(new_options);
+
+			this.teleport();
 		},
 
 		// Public functions
@@ -2745,12 +2753,21 @@
 		draw: function (interp) {
 			var
 				round = Math.round,
-				left = round((this.left * interp) + (this.prevLeft * (1 - interp))),
-				top = round((this.top * interp) + (this.prevTop * (1 - interp))),
+				left = this.left,
+				top = this.top,
+				prevLeft = this.prevLeft,
+				prevTop = this.prevTop,
 				layers = this.layers,
 				len_layers = layers.length,
 				i
 			;
+
+			if ((left !== prevLeft) || (top !== prevTop)) {
+				if (this.frameCounterLastMove === (fg.frameCounter - 1)) {
+					left = round((left * interp) + (prevLeft * (1 - interp)));
+					top = round((top * interp) + (prevTop * (1 - interp)));
+				}
+			}
 
 			fg.absLeft += left;
 			fg.absTop += top;

@@ -502,8 +502,8 @@
 					this.prevTop = top;
 					this.frameCounterLastMove = frameCounter;
 				} else {
-					top = round((top * interp) + (prevTop * (1 - interp)));
 					left = round((left * interp) + (prevLeft * (1 - interp)));
+					top = round((top * interp) + (prevTop * (1 - interp)));
 				}
 			}
 
@@ -892,8 +892,8 @@
 					this.prevTop = top;
 					this.frameCounterLastMove = frameCounter;
 				} else {
-					top = round((top * interp) + (prevTop * (1 - interp)));
 					left = round((left * interp) + (prevLeft * (1 - interp)));
+					top = round((top * interp) + (prevTop * (1 - interp)));
 				}
 			}
 
