@@ -1807,6 +1807,26 @@
 			return fg.Rect({left: left, top: top, width: this.width, height: this.height});
 		},
 
+		resize: function (options) {
+			var
+				left = this.left,
+				top = this.top,
+				prevLeft = this.prevLeft,
+				prevTop = this.prevTop,
+				frameCounterLastMove = this.frameCounterLastMove
+			;
+
+			fg.PRect.resize.apply(this, arguments);
+
+			// Resizing the sprite does not mean that it should change its position.
+			// However, the new dimensions must be taken into consideration for the interpolation
+			this.prevLeft = prevLeft + (this.left - left);
+			this.prevTop = prevTop + (this.top - top);
+			this.frameCounterLastMove = frameCounterLastMove;
+
+			return this;
+		},
+
 		move: function (options) {
 			var
 				frameCounter = fg.frameCounter
@@ -1819,6 +1839,8 @@
 			}
 
 			fg.PRect.move.apply(this, arguments);
+
+			return this;
 		},
 
 		teleport: function (options) {
@@ -1827,6 +1849,8 @@
 			this.prevLeft = this.left;
 			this.prevTop = this.top;
 			this.frameCounterLastMove = fg.frameCounter;
+
+			return this;
 		},
 
 		// Implementation details
@@ -2836,6 +2860,7 @@
 				// The playground cannot be resized or moved
 				playground.resize = null;
 				playground.move = null;
+				playground.teleport = null;
 				playground.crop = null;
 
 				// Call the playgroundCallbacks only after the playground has been completely created
