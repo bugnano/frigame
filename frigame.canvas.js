@@ -365,22 +365,18 @@
 				height = this.height,
 				prevLeft = this.prevLeft,
 				prevTop = this.prevTop,
-				frameCounter,
 				insidePlayground,
 				currentFrame = options.currentFrame,
 				ctx = fg.ctx
 			;
 
 			if ((left !== prevLeft) || (top !== prevTop)) {
-				frameCounter = fg.frameCounter - 1;
-
-				if (frameCounter !== this.frameCounterLastMove) {
-					this.prevLeft = left;
-					this.prevTop = top;
-					this.frameCounterLastMove = frameCounter;
-				} else {
+				if (this.frameCounterLastMove === (fg.frameCounter - 1)) {
 					left = round((left * interp) + (prevLeft * (1 - interp)));
 					top = round((top * interp) + (prevTop * (1 - interp)));
+				} else {
+					this.prevLeft = left;
+					this.prevTop = top;
 				}
 			}
 
@@ -582,7 +578,6 @@
 				height = this.height,
 				prevLeft = this.prevLeft,
 				prevTop = this.prevTop,
-				frameCounter,
 				insidePlayground,
 				background,
 				old_background = old_options.background,
@@ -620,15 +615,12 @@
 			}
 
 			if ((left !== prevLeft) || (top !== prevTop)) {
-				frameCounter = fg.frameCounter - 1;
-
-				if (frameCounter !== this.frameCounterLastMove) {
-					this.prevLeft = left;
-					this.prevTop = top;
-					this.frameCounterLastMove = frameCounter;
-				} else {
+				if (this.frameCounterLastMove === (fg.frameCounter - 1)) {
 					left = round((left * interp) + (prevLeft * (1 - interp)));
 					top = round((top * interp) + (prevTop * (1 - interp)));
+				} else {
+					this.prevLeft = left;
+					this.prevTop = top;
 				}
 			}
 
