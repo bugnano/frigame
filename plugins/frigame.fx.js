@@ -31,11 +31,8 @@
 	var
 		root,
 		overrides = {},
-		speeds = {
-			slow: 600,
-			fast: 200,
-			_default: 400
-		}
+		tween_queue = [],
+		tweening = false
 	;
 
 	if (typeof window !== 'undefined') {
@@ -49,8 +46,7 @@
 	function tweenStep() {
 		/*jshint validthis: true */
 		var
-			queue = this.fx.queue,
-			len_queue = queue.length,
+			len_queue = tween_queue.length,
 			i_queue,
 			remove_queue = [],
 			len_remove_queue,
@@ -65,7 +61,7 @@
 
 		// Process all the tweens in the queue
 		for (i_queue = 0; i_queue < len_queue; i_queue += 1) {
-			tween_obj = queue[i_queue];
+			tween_obj = tween_queue[i_queue];
 			target_obj = tween_obj.target_obj;
 
 			property_list = tween_obj.property_list;
@@ -106,47 +102,25 @@
 		// Remove all the completed tweens
 		len_remove_queue = remove_queue.length;
 		for (i_queue = 0; i_queue < len_remove_queue; i_queue += 1) {
-			queue.splice(remove_queue[i_queue], 1);
+			tween_queue.splice(remove_queue[i_queue], 1);
 		}
 
 		// If there are no more tweens in the queue, this callback can be stopped
-		if (queue.length === 0) {
-			this.fx.inprogress = false;
+		if (tween_queue.length === 0) {
+			tweening = false;
 
 			// return true in order to stop the callback
 			return true;
 		}
 	}
 
-	fg.playgroundCallback(function () {
-		overrides.playground = fg.pick(this, [
-			'clearCallbacks'
-		]);
-
-		fg.extend(this, {
-			fx: {
-				queue: [],
-				inprogress: false
-			},
-
-			clearQueue: function () {
-				this.fx.queue.splice(0, this.fx.queue.length);
-
-				return this;
-			},
-
-			clearCallbacks: function () {
-				overrides.playground.clearCallbacks.apply(this, arguments);
-
-				this.clearQueue();
-				this.fx.inprogress = false;
-
-				return this;
-			}
-		});
-	});
-
 	fg.fx = {
+		speeds: {
+			slow: 600,
+			fast: 200,
+			_default: 400
+		},
+
 		easing: {
 			linear: function (t) {
 				return t;
@@ -611,7 +585,7 @@
 		tween: function (hooks, properties, options) {
 			var
 				new_options = options || {},
-				playground = fg.s.playground,
+				speeds = fg.fx.speeds,
 				easing_list = fg.fx.easing,
 				duration = new_options.duration,
 				easing = new_options.easing,
@@ -672,44 +646,44 @@
 				}
 			}
 
-			playground.fx.queue.push(tween_obj);
-			if (!(playground.fx.inprogress)) {
-				playground.fx.inprogress = true;
-				playground.registerCallback(tweenStep);
+			tween_queue.push(tween_obj);
+			if (!tweening) {
+				tweening = true;
+				fg.s.playground.registerCallback(tweenStep);
 			}
 
 			return this;
 		},
 
-		remove: function () {
+		clearTweens: function () {
 			var
-				queue = fg.s.playground.fx.queue,
-				len_queue = queue.length,
+				len_queue = tween_queue.length,
 				i_queue,
 				tween_obj
 			;
 
 			for (i_queue = 0; i_queue < len_queue; i_queue += 1) {
-				tween_obj = queue[i_queue];
+				tween_obj = tween_queue[i_queue];
 				if (tween_obj.target_obj === this) {
 					// Mark this object for removal
 					tween_obj.remove = true;
 				}
 			}
+
+			return this;
 		},
 
 		removeTween: function (name, options) {
 			var
 				new_options = options || {},
 				found = false,
-				queue = fg.s.playground.fx.queue,
-				len_queue = queue.length,
+				len_queue = tween_queue.length,
 				i_queue,
 				tween_obj
 			;
 
 			for (i_queue = 0; i_queue < len_queue; i_queue += 1) {
-				tween_obj = queue[i_queue];
+				tween_obj = tween_queue[i_queue];
 				if ((tween_obj.target_obj === this) && (tween_obj.name === name)) {
 					found = true;
 
@@ -727,6 +701,25 @@
 		}
 	};
 
+	fg.fx.remove = fg.fx.clearTweens;
+
+	fg.playgroundCallback(function () {
+		overrides.playground = fg.pick(this, [
+			'clearCallbacks'
+		]);
+
+		fg.extend(this, {
+			clearCallbacks: function () {
+				overrides.playground.clearCallbacks.apply(this, arguments);
+
+				tween_queue.splice(0, tween_queue.length);
+				tweening = false;
+
+				return this;
+			}
+		});
+	});
+
 	overrides.PBaseSprite = fg.pick(fg.PBaseSprite, [
 		'remove'
 	]);
@@ -736,15 +729,8 @@
 			return fg.fx.tween.call(this, fg.fx.hooks, properties, options);
 		},
 
-		clearTweens: function () {
-			fg.fx.remove.call(this);
-
-			return this;
-		},
-
-		removeTween: function (name) {
-			return fg.fx.removeTween.call(this, name);
-		},
+		clearTweens: fg.fx.clearTweens,
+		removeTween: fg.fx.removeTween,
 
 		remove: function () {
 			fg.fx.remove.call(this);
