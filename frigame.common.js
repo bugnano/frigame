@@ -1238,15 +1238,9 @@
 				i
 			;
 
-			// Set userData to null before calling its remove() method,
-			// in order to allow calling this.remove() inside userData.remove()
-			this.userData = null;
-
-			if (userData && userData.remove) {
-				userData.remove();
-			}
-
 			if (parent) {
+				this.parent = null;
+
 				parent_obj = fg.s[parent];
 				if (!parent_obj.clearing) {
 					parent_layers = parent_obj.layers;
@@ -1280,6 +1274,14 @@
 					console.warn('Sprite with name ' + name + ' already removed');
 					console.trace();
 				}
+			}
+
+			// Set userData to null before calling its remove() method,
+			// in order to allow calling this.remove() inside userData.remove()
+			this.userData = null;
+
+			if (userData && userData.remove) {
+				userData.remove();
 			}
 		},
 
@@ -2480,13 +2482,20 @@
 			var
 				layers = this.layers,
 				len_layers = layers.length,
+				layer,
 				i
 			;
 
 			this.clearing = true;
 
 			for (i = 0; i < len_layers; i += 1) {
-				layers[i].obj.remove();
+				layer = layers[i];
+
+				// This if is necessary, as the userData.remove() function may
+				// do anything, including removing another sprite from this group
+				if (fg.s[layer.name]) {
+					layer.obj.remove();
+				}
 			}
 
 			this.clearing = false;
