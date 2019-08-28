@@ -1,38 +1,44 @@
 # Breakouts -- friGame
 
-##About friGame
+## About friGame
+
 friGame is a game development library in JavaScript/jQuery. It allows to
 create 2D games that run in any modern web browser without having to rely
 on external plugins such as Flash.
 
 It started as a porting of the excellent gameQuery library by Selim Arsever
-in order to use the HTML5 <canvas> element, but it has developed since then
+in order to use the HTML5 &lt;canvas&gt; element, but it has developed since then
 its own set of unique features.
 
 Web: http://www.frigame.org/
-Documentation: http://www.frigame.org/docs.html
-Source: https://bitbucket.org/bugnano/frigame
 
-##Breakout Status
+Documentation: http://www.frigame.org/docs.html
+
+Source: https://github.com/bugnano/frigame
+
+## Breakout Status
+
 The game is pretty feature complete, but it does not currently implement tiled
 backgrounds
 
-##Notes:
-* Implements both a DOM version, with soundmanager2 support for sound, which means
+## Notes:
+
+- Implements both a DOM version, with soundmanager2 support for sound, which means
   that sound can be supported on older browser that do not support the Web Audio /
   HTML5 audio element, but support flash (tested and fully working on IE8), and a
   canvas version with only Web Audio / HTML5 audio support
-* Tested and working on all major desktop browsers (including older ones, like IE8)
-* Fully working, with sound, on mobile/table device (iOS 6+, Chrome for Android)
-* Show's off the container support by scaling in the Bricks on each level
-* Did not implement Tile support
-* friGame does not try to duplicate functionality already found in jQuery. This
+- Tested and working on all major desktop browsers (including older ones, like IE8)
+- Fully working, with sound, on mobile/table device (iOS 6+, Chrome for Android)
+- Show's off the container support by scaling in the Bricks on each level
+- Did not implement Tile support
+- friGame does not try to duplicate functionality already found in jQuery. This
   implies that the text rendering is not addressed by friGame, but instead is done
   by adding div elements with the appropriate text, and styled using css. For the
   same reason the input events are done using jQuery.
-* Implements a pause/unpause functionality by pressing the P key
+- Implements a pause/unpause functionality by pressing the P key
 
-##Running the game locally (as opposed to from a website)
+## Running the game locally (as opposed to from a website)
+
 Due to security restrictions, the soundmanager2 plugin will not work if the page is
 loaded locally. In order to have sound support via flash, the page must be loaded
 via a web server.

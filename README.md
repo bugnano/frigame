@@ -8,7 +8,7 @@ it has developed since then its own set of unique features.
 
 [gameQuery](http://gamequeryjs.com/) Copyright (c) 2008-2013 Selim Arsever, licensed under the MIT
 
-friGame Copyright (c) 2011-2019 Franco Bugnano, licensed under the MIT
+[friGame](http://www.frigame.org/) Copyright (c) 2011-2019 Franco Bugnano, licensed under the MIT
 
 ## Documentation
 
