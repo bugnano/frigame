@@ -1224,7 +1224,7 @@
 				overrides.PSpriteGroup.draw.apply(this, arguments);
 
 				// Update the last sprite after drawing all the children nodes
-				fg.last_sprite = name;
+				fg.last_sprite = this.name;
 			} else {
 				if (dom) {
 					fg.last_sprite = this.name;
