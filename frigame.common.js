@@ -331,6 +331,14 @@
 
 		clamp: function (n, minVal, maxVal) {
 			return Math.min(Math.max(n, minVal), maxVal);
+		},
+
+		framesFromMs: function (ms) {
+			return Math.max(Math.round(ms / fg.REFRESH_RATE), 1) || 1;
+		},
+
+		msFromFrames: function (frames) {
+			return (frames * fg.REFRESH_RATE) || 0;
 		}
 	});
 
@@ -663,7 +671,7 @@
 				'frameHeight'
 			]));
 
-			my_options.rate = Math.max(Math.round(new_options.rate / fg.REFRESH_RATE), 1) || 1;
+			my_options.rate = fg.framesFromMs(new_options.rate);
 
 			my_frameset = my_options.frameset;
 
@@ -1286,7 +1294,7 @@
 		},
 
 		registerCallback: function (callback, rate) {
-			rate = Math.max(Math.round(rate / fg.REFRESH_RATE), 1) || 1;
+			rate = fg.framesFromMs(rate);
 
 			this.callbacks.push({callback: callback, rate: rate, idleCounter: 0, remove: false});
 
@@ -2045,7 +2053,7 @@
 			animation_options = this.animation_options;
 
 			if (new_options.rate !== undefined) {
-				animation_options.rate = Math.max(Math.round(new_options.rate / fg.REFRESH_RATE), 1) || 1;
+				animation_options.rate = fg.framesFromMs(new_options.rate);
 			}
 
 			if (new_options.once !== undefined) {
