@@ -1,7 +1,7 @@
 /*global define, module, self, global, require */
 /*jshint bitwise: true, curly: true, eqeqeq: true, esversion: 3, forin: true, freeze: true, funcscope: true, futurehostile: true, iterator: true, latedef: true, noarg: true, nocomma: true, nonbsp: true, nonew: true, notypeof: false, shadow: outer, singleGroups: false, strict: true, undef: true, unused: true, varstmt: false, eqnull: false, plusplus: true, browser: true, laxbreak: true, laxcomma: true */
 
-// Copyright (c) 2011-2019 Franco Bugnano
+// Copyright (c) 2011-2021 Franco Bugnano
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -121,7 +121,7 @@
 			request = function (callback) {
 				var
 					currTime = performance.now(),
-					timeToCall = Math.max(0, 16 - (currTime - lastTime)),
+					timeToCall = Math.max(0, (1000 / 60) - (currTime - lastTime)),
 					id = setTimeout(function () {
 						callback(currTime + timeToCall);
 					}, timeToCall)
